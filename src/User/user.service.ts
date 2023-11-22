@@ -6,11 +6,31 @@ import { LoginUserDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as sgMail from '@sendgrid/mail'; 
 const TOKEN_KEY = "BADAMI";
 
 @Injectable()
 export class UserService {
-    constructor(private readonly prismaService: PrismaService) { }
+    constructor(private readonly prismaService: PrismaService) {
+        sgMail.setApiKey(process.env.API_KEY);
+    }
+
+    async sendEmail(to: string, subject: string, content: string): Promise<void> {
+        try {
+          const msg = {
+            to,
+            from: 'muhammadahsanty@gmail.com', 
+            subject,
+            text: content,
+            html: `<p>${content}</p>`,
+          };
+    
+          await sgMail.send(msg);
+        } catch (error) {
+          console.error('Error sending email:', error);
+          throw new Error('Failed to send emaiil');
+        }
+      }
 
     async createUser(createUserDto: CreateUserDto) {
         try {
@@ -99,4 +119,7 @@ var updatedUserDto = updateUserDto;
             };
         }
     }
+
+
+    
 }

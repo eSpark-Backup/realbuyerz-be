@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { EmailDto } from './dto/reset-email.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -37,5 +38,21 @@ export class UserController {
   @ApiTags('User Operations')
   async updateUser(@Param('id') userId: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(userId, updateUserDto);
+  }
+
+  @Post('send-email')
+  @ApiOperation({ summary: 'Send email' })
+  @ApiBody({ type: EmailDto }) // Define EmailDto with necessary fields (e.g., to, subject, content)
+  @ApiResponse({ status: 200, description: 'Email sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async sendEmail(@Body() emailDto: EmailDto) {
+    try {
+      // Assuming you have an EmailService with a sendEmail method
+      await this.userService.sendEmail(emailDto.to, emailDto.subject, emailDto.content);
+      return { message: 'Email sent successfully' };
+    } catch (error) {
+      // Handle errors appropriately
+      return { message: 'Failed to send email', error: error.message };
+    }
   }
 }
