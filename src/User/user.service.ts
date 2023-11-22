@@ -4,20 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
 const TOKEN_KEY = "BADAMI";
 
 @Injectable()
-@ApiTags('user')
 export class UserService {
     constructor(private readonly prismaService: PrismaService) { }
 
-    @ApiOperation({ summary: 'Create a new user' })
-    @ApiBody({ type: CreateUserDto })
-    @ApiResponse({ status: 201, description: 'User created successfully' })
-    @ApiResponse({ status: 400, description: 'Bad Request' })
     async createUser(createUserDto: CreateUserDto) {
         try {
             const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -35,10 +29,6 @@ export class UserService {
         }
     }
 
-    @ApiOperation({ summary: 'User login' })
-    @ApiBody({ description: 'User login credentials', type: LoginUserDto })
-    @ApiResponse({ status: 200, description: 'Login successful' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
     async loginUser(loginUserDto: LoginUserDto) {
         const user = await this.prismaService.user.findUnique({
             where: { email: loginUserDto.email },
