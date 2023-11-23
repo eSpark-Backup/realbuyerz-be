@@ -8,6 +8,8 @@ import { UserService } from './user.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EmailDto } from './dto/reset-email.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -55,4 +57,43 @@ export class UserController {
       return { message: 'Failed to send email', error: error.message };
     }
   }
+
+
+  @Post('send-otp')
+  @ApiOperation({ summary: 'Send OTP' })
+  @ApiBody({ type: SendOtpDto }) // Define SendOtpDto with necessary fields (e.g., phoneNumber)
+  @ApiResponse({ status: 200, description: 'OTP sent successfully' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  async sendOtp(@Body() sendOtpDto: SendOtpDto) {
+    try {
+      // Assuming you have a method in your UserService to send OTP
+      await this.userService.sendOtp(sendOtpDto.phoneNumber);
+      return { message: 'OTP sent successfully' };
+    } catch (error) {
+      // Handle errors appropriately
+      return { message: 'Failed to send OTP', error: error.message };
+    }
+  }
+
+@Post('verify-otp')
+@ApiOperation({ summary: 'Verify OTP' })
+@ApiBody({ type: VerifyOtpDto }) // Define VerifyOtpDto with necessary fields (e.g., phoneNumber, otp)
+@ApiResponse({ status: 200, description: 'OTP verified successfully' })
+@ApiResponse({ status: 400, description: 'Bad Request' })
+async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+  try {
+    // Call the verifyOtp method in UserService
+    const verificationResult = await this.userService.verifyOtp(
+      verifyOtpDto.phoneNumber,
+      verifyOtpDto.otp,
+      verifyOtpDto.hash,
+
+    );
+
+    return { message: verificationResult ? 'OTP verified successfully' : 'Invalid OTP' };
+  } catch (error) {
+    // Handle errors appropriately
+    return { message: 'Failed to verify OTP', error: error.message };
+  }
+}
 }
