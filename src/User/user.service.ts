@@ -146,7 +146,8 @@ export class UserService {
                 throw new Error(`Invalid fields: ${invalidFields.join(', ')}`);
             }
 // eslint-disable-next-line no-var
-var updatedUserDto = updateUserDto;
+let updatedUserDto: any = { ...updateUserDto };
+
             if (updateUserDto.oldPassword && updateUserDto.password) {
                 const passwordMatch = await bcrypt.compare(updateUserDto.oldPassword, existingUser.password);
 
@@ -158,7 +159,10 @@ var updatedUserDto = updateUserDto;
                 }
 
                 const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-                 updatedUserDto = { ...updateUserDto, password: hashedPassword };
+                   updatedUserDto = { ...updatedUserDto, password: hashedPassword };
+                   delete updatedUserDto.oldPassword;
+
+
                  
             }
 
