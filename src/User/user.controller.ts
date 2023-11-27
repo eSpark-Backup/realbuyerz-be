@@ -15,7 +15,7 @@ import { CreateUserDocs,LoginUserDocs, SendEmailDocs,SendOtpDocs,VerifyOtpDocs }
 @ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Post('create')
+  @Post('signup')
   @CreateUserDocs()
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);

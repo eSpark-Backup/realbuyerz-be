@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as sgMail from '@sendgrid/mail'; 
+import sgMail = require('@sendgrid/mail');
 
 import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
@@ -14,15 +14,15 @@ import * as Twilio from 'twilio';
 
 const TOKEN_KEY = "BADAMI";
 const key = 'OTP-KEY'; 
-const twilioAccountSid = 'ACyour-account-sid'; 
-const twilioAuthToken = 'your-auth-token'; 
-const twilioPhoneNumber = 'your-twilio-phone-number'; 
+const twilioAccountSid = 'AC4d0051d9f25af843b4f7fdfc9a18e6e6'; 
+const twilioAuthToken = 'fe8365b20b880d82b5989caa72b0debf'; 
+const twilioPhoneNumber = '+16063571913'; 
 
 @Injectable()
 export class UserService {
     private twilioClient: Twilio.Twilio;
     constructor(private readonly prismaService: PrismaService) {
-        sgMail.setApiKey(process.env.API_KEY);
+        sgMail.setApiKey('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');
         this.twilioClient =  Twilio(twilioAccountSid, twilioAuthToken);
 
     }
@@ -91,23 +91,59 @@ export class UserService {
           throw new Error('Failed to send emaiil');
         }
       }
-
-    async createUser(createUserDto: CreateUserDto) {
+      async createUser(createUserDto: CreateUserDto) {
         try {
-            const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-            const userData = { ...createUserDto, password: hashedPassword };
-
-            return await this.prismaService.user.create({
-                data: userData,
-            });
+          // Check if the email already exists
+          const existingUser = await this.prismaService.user.findUnique({
+            where: { email: createUserDto.email },
+          });
+    
+          if (existingUser) {
+            throw new ConflictException('Email is already in use');
+          }
+    
+          const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+          const userData = { ...createUserDto, password: hashedPassword };
+    
+          // Create the user
+          const newUser = await this.prismaService.user.create({
+            data: userData,
+          });
+    
+          // Generate token
+          const token = jwt.sign(
+            { userId: newUser.id, role: newUser.role },
+            TOKEN_KEY,
+            { expiresIn: '1h' }
+          );
+    
+          // Return the user and token in the response
+          return {
+            id: newUser.id,
+            first_name: newUser.first_name,
+            last_name: newUser.last_name,
+            email: newUser.email,
+            mobile_number: newUser.mobile_number,
+            // ... other fields you want to include in the response
+            token: token,
+          };
         } catch (error) {
+          // Handle specific exceptions
+          if (error instanceof ConflictException) {
             return {
-                success: false,
-                message: 'An error occurred while creating the user.',
+              success: false,
+              message: error.message,
             };
+          }
+    
+          // Handle other errors
+          console.error(error);
+          return {
+            success: false,
+            message: 'An error occurred while creating the user.',
+          };
         }
-    }
+      }
 
     async loginUser(loginUserDto: LoginUserDto) {
         const user = await this.prismaService.user.findUnique({
