@@ -11,17 +11,22 @@ datasource db {
 }
 
 model User {
-  id             Int     @id @default(autoincrement())
-  firstName      String
-  lastName       String
-  email          String  @unique
-  mobileNumber   String
-  landlineNumber String?
+  id             Int       @id @default(autoincrement())
+  first_name     String
+  last_name      String
+  email          String    @unique
+  mobile_number  String
+  landline_number String?
+  whatsapp       String?
   country        String?
-  Address        String?
+  address        String?
   password       String
+  isVerified     Boolean
+  social_id      String
   role           String
-  profileImage   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime? 
+  profile_image  String?
+  profile_visibility     Boolean
+  created_at     DateTime  @default(now())
+  updated_at     DateTime?
 }
+

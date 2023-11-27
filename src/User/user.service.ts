@@ -139,7 +139,7 @@ export class UserService {
                 throw new NotFoundException('User not found');
             }
 
-            const allowedFields = ['firstName', 'lastName', 'email', 'mobileNumber', 'landlineNumber', 'countryAddress', 'password', 'profileImage', 'role', 'oldPassword'];
+            const allowedFields = ['first_name', 'last_name', 'email', 'mobile_number', 'landline_number', 'country' ,'address', 'password', 'profile_image', 'role', 'oldPassword','whatsapp','social_id','isVerified','profile_visibility'];
             const invalidFields = Object.keys(updateUserDto).filter(field => !allowedFields.includes(field));
 
             if (invalidFields.length > 0) {
@@ -159,12 +159,13 @@ let updatedUserDto: any = { ...updateUserDto };
                 }
 
                 const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-                   updatedUserDto = { ...updatedUserDto, password: hashedPassword };
+                   updatedUserDto = { ...updatedUserDto, password: hashedPassword};
                    delete updatedUserDto.oldPassword;
 
 
                  
             }
+            updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
 
             return await this.prismaService.user.update({
                 where: { id: parseInt(userId, 10) },
