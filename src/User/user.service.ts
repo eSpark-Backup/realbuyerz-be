@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -28,6 +28,32 @@ export class UserService {
 
     }
 
+    async resetPasswordwithMail(userEmail: string, resetPasswordDto: ResetPasswordDto) {
+      try {
+        const {  password } = resetPasswordDto;
+    
+        const user = await this.prismaService.user.findUnique({
+          where: { email: userEmail },
+        });
+    
+        if (!user) {
+          return { success: false, message: 'User not found' };
+        }
+    
+       
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        await this.prismaService.user.update({
+          where: { email: userEmail },
+          data: { password: hashedPassword },
+        });
+    
+        return { success: true, message: 'Password reset successfully' };
+      } catch (error) {
+        console.error(error);
+        return { success: false, message: 'Failed to reset password. Please try again later.' };
+      }
+    }
 
     async verifyOtp(phone: string, otp: string, hash: string): Promise<string> {
         try {

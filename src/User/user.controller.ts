@@ -68,7 +68,21 @@ export class UserController {
       return { message: 'Failed to send OTP', error: error.message };
     }
   }
+//reset password through email
+@Put('reset-password/:email')
+async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPasswordDto: ResetPasswordDto) {
+  try {
+    const updatePassword = await this.userService.resetPasswordwithMail(userEmail, resetPasswordDto);
+    return updatePassword;
+  } catch (error) {
+    return { message: 'Failed to reset password', error: error.message };
+  }
+}
 
+
+
+
+  //reset password through user ID
   @Put('reset-password/:id')
   async resetPassword(@Param('id') userId: string,@Body() resetPasswordDto: ResetPasswordDto) {
     try {
@@ -78,9 +92,7 @@ export class UserController {
       return updatepassword;
      
     } catch (error) {
-      console.error('Error resetting password:', error.message);
-
-      throw new Error('Failed to reset password. Please try again later.');
+        return { message: 'Failed to reset password', error: error.message };
     }
   }
 

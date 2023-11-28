@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ResetPasswordDto {
@@ -9,7 +9,7 @@ export class ResetPasswordDto {
 
   @ApiProperty({ type: String })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   oldPassword: string;
 
  
