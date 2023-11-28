@@ -21,11 +21,11 @@ model User {
   country        String?
   address        String?
   password       String
-  isVerified     Boolean
+  isVerified     Boolean  @default(false)
   social_id      String
   role           String
   profile_image  String?
-  profile_visibility     Boolean
+  profile_visibility     Boolean @default(false)
   created_at     DateTime  @default(now())
   updated_at     DateTime?
 }

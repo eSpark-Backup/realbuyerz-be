@@ -12,17 +12,17 @@ import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
 import * as Twilio from 'twilio';
 
-const TOKEN_KEY = "BADAMI";
-const key = 'OTP-KEY'; 
-const twilioAccountSid = 'AC4d0051d9f25af843b4f7fdfc9a18e6e6'; 
-const twilioAuthToken = 'fe8365b20b880d82b5989caa72b0debf'; 
-const twilioPhoneNumber = '+16063571913'; 
+const TOKEN_KEY = process.env.TOKEN_KEY ;
+const key = process.env.OTP_KEY; 
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID; 
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN; 
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER; 
 
 @Injectable()
 export class UserService {
     private twilioClient: Twilio.Twilio;
     constructor(private readonly prismaService: PrismaService) {
-        sgMail.setApiKey('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');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
         this.twilioClient =  Twilio(twilioAccountSid, twilioAuthToken);
 
     }
@@ -93,7 +93,6 @@ export class UserService {
       }
       async createUser(createUserDto: CreateUserDto) {
         try {
-          // Check if the email already exists
           const existingUser = await this.prismaService.user.findUnique({
             where: { email: createUserDto.email },
           });
@@ -105,26 +104,22 @@ export class UserService {
           const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
           const userData = { ...createUserDto, password: hashedPassword };
     
-          // Create the user
           const newUser = await this.prismaService.user.create({
             data: userData,
           });
     
-          // Generate token
           const token = jwt.sign(
             { userId: newUser.id, role: newUser.role },
             TOKEN_KEY,
             { expiresIn: '1h' }
           );
     
-          // Return the user and token in the response
           return {
             id: newUser.id,
             first_name: newUser.first_name,
             last_name: newUser.last_name,
             email: newUser.email,
             mobile_number: newUser.mobile_number,
-            // ... other fields you want to include in the response
             token: token,
           };
         } catch (error) {
