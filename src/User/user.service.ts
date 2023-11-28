@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -11,6 +11,7 @@ import sgMail = require('@sendgrid/mail');
 import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
 import * as Twilio from 'twilio';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 const TOKEN_KEY = process.env.TOKEN_KEY ;
 const key = process.env.OTP_KEY; 
@@ -26,6 +27,7 @@ export class UserService {
         this.twilioClient =  Twilio(twilioAccountSid, twilioAuthToken);
 
     }
+
 
     async verifyOtp(phone: string, otp: string, hash: string): Promise<string> {
         try {
@@ -123,7 +125,6 @@ export class UserService {
             token: token,
           };
         } catch (error) {
-          // Handle specific exceptions
           if (error instanceof ConflictException) {
             return {
               success: false,
@@ -131,7 +132,6 @@ export class UserService {
             };
           }
     
-          // Handle other errors
           console.error(error);
           return {
             success: false,
@@ -160,6 +160,8 @@ export class UserService {
         return { success: true, message: 'Login successful', token };
     }
 
+
+      
     async updateUser(userId: string, updateUserDto: UpdateUserDto) {
         try {
             const existingUser = await this.prismaService.user.findUnique({
@@ -170,34 +172,15 @@ export class UserService {
                 throw new NotFoundException('User not found');
             }
 
-            const allowedFields = ['first_name', 'last_name', 'email', 'mobile_number', 'landline_number', 'country' ,'address', 'password', 'profile_image', 'role', 'oldPassword','whatsapp','social_id','isVerified','profile_visibility'];
+            const allowedFields = ['first_name', 'last_name', 'email', 'mobile_number', 'landline_number', 'country' ,'address', 'profile_image', 'role', ,'whatsapp','social_id','isVerified','profile_visibility'];
             const invalidFields = Object.keys(updateUserDto).filter(field => !allowedFields.includes(field));
 
             if (invalidFields.length > 0) {
                 throw new Error(`Invalid fields: ${invalidFields.join(', ')}`);
             }
-// eslint-disable-next-line no-var
 let updatedUserDto: any = { ...updateUserDto };
 
-            if (updateUserDto.oldPassword && updateUserDto.password) {
-                const passwordMatch = await bcrypt.compare(updateUserDto.oldPassword, existingUser.password);
-
-                if (!passwordMatch) {
-                    return {
-                        success: false,
-                        message: 'Invalid old password',
-                    };
-                }
-
-                const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-                   updatedUserDto = { ...updatedUserDto, password: hashedPassword};
-                   delete updatedUserDto.oldPassword;
-
-
-                 
-            }
             updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
-
             return await this.prismaService.user.update({
                 where: { id: parseInt(userId, 10) },
                 data: updatedUserDto,
@@ -213,5 +196,56 @@ let updatedUserDto: any = { ...updateUserDto };
     }
 
 
+    async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
+      try {
+            const existingUser = await this.prismaService.user.findUnique({
+                where: { id: parseInt(userId, 10) },
+            });
+
+            if (!existingUser) {
+                throw new NotFoundException('User not found');
+            }
+
+            let updatedUserDto: any = { ...resetPasswordDto };
+
+            if (resetPasswordDto.oldPassword && resetPasswordDto.password) {
+                const passwordMatch = await bcrypt.compare(resetPasswordDto.oldPassword, existingUser.password);
+
+                if (!passwordMatch) {
+                    return {
+                        success: false,
+                        message: 'Invalid old password',
+                    };
+                }
+
+                const hashedPassword = await bcrypt.hash(resetPasswordDto.password, 10);
+                   updatedUserDto = { ...resetPasswordDto, password: hashedPassword};
+                   delete updatedUserDto.oldPassword;
+
+
+                 
+            }
+            updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
+
+             await this.prismaService.user.update({
+                where: { id: parseInt(userId, 10) },
+                data: updatedUserDto,
+
+            });
+            return { success: true, message: 'Password updated successfully' };
+        } catch (error) {
+            console.error(error);
+
+            return {
+                success: false,
+                message: 'An error occurred while updating the user.',
+            };
+        }
     
-}
+    
+
+
+      }
+    
+    }
+

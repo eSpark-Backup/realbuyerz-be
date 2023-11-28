@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 // src/user/dto/update-user.dto.ts
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
@@ -74,27 +74,19 @@ export class UpdateUserDto {
 
     readonly social_id: string;
 
-    @ApiProperty({ type: Boolean })
+    @ApiProperty({ type: Boolean, default: false })
     @IsBoolean({ message: 'Verified must be a Bool' })
     @IsOptional()
 
     readonly isVerified: boolean;
 
-    @ApiProperty({ type: Boolean })
+    @ApiProperty({ type: Boolean, default: false })
     @IsBoolean({ message: 'profile visibility must be a Bool' })
     @IsOptional()
 
     readonly profile_visibility: boolean;
 
-    @ApiPropertyOptional({ type: String })
-    @IsOptional()
-    @IsString()
-    readonly oldPassword: string;
-
-    @ApiProperty({ type: String })
-    @IsString({ message: 'Password must be a string' })
-    @IsOptional()
-    readonly password: string;
+   
 
     readonly updated_at: Date;
 }

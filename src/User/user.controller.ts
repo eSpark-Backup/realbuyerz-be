@@ -11,6 +11,7 @@ import { EmailDto } from './dto/reset-email.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { CreateUserDocs,LoginUserDocs, SendEmailDocs,SendOtpDocs,VerifyOtpDocs } from '../utils/user.decorator';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -27,10 +28,18 @@ export class UserController {
     return this.userService.loginUser(loginUserDto);
   }
 
+
   @Put('update/:id')
-  @ApiTags('User Operations')
   async updateUser(@Param('id') userId: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(userId, updateUserDto);
+    try {
+      const updatedUser = await this.userService.updateUser(userId, updateUserDto);
+
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error.message);
+
+      throw new Error('Failed to update user. Please try again later.');
+    }
   }
 
   @Post('send-email')
@@ -57,6 +66,21 @@ export class UserController {
     } catch (error) {
      
       return { message: 'Failed to send OTP', error: error.message };
+    }
+  }
+
+  @Put('reset-password/:id')
+  async resetPassword(@Param('id') userId: string,@Body() resetPasswordDto: ResetPasswordDto) {
+    try {
+    
+
+    const updatepassword=   await this.userService.resetPassword( userId,resetPasswordDto);
+      return updatepassword;
+     
+    } catch (error) {
+      console.error('Error resetting password:', error.message);
+
+      throw new Error('Failed to reset password. Please try again later.');
     }
   }
 
