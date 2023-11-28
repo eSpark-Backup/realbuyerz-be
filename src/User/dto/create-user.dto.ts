@@ -68,15 +68,17 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Social id cannot be empty' })
   readonly social_id: string;
 
-  @ApiProperty({ type: Boolean })
+  @ApiProperty({ type: Boolean ,default:false })
   @IsBoolean({ message: 'Verified must be a Bool' })
   @IsNotEmpty({ message: 'Verified cannot be empty' })
-  readonly isVerified: boolean;
+  readonly isVerified: boolean = false;
 
-  @ApiProperty({ type: Boolean })
+//sett default value false
+
+  @ApiProperty({ type: Boolean ,default:false  })
   @IsBoolean({ message: 'profile visibility must be a Bool' })
   @IsNotEmpty({ message: 'profile visibility cannot be empty' })
-  readonly profile_visibility: boolean;
+  readonly profile_visibility: boolean ;
 
 
 
