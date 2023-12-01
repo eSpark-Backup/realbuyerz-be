@@ -55,6 +55,63 @@ export class UserService {
       }
     }
 
+    async sendpasswordResetEmail(to: string): Promise<void> {
+      const token = jwt.sign({ email: to }, TOKEN_KEY, { expiresIn: '1h' });
+      console.log(token);
+      const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    
+      try {
+        const msg = {
+          to,  
+          from: 'muhammadahsanty@gmail.com',
+          subject: 'Password Reset Link',
+          text: link,
+          html: `<p>Do not Share it with anyone</p>`,
+        };
+    
+        await sgMail.send(msg);
+      } catch (error) {
+        console.error('Error sending email:', error);
+        throw new Error('Failed to send email');
+      }
+    }
+    
+      async verifyToken(token: string): Promise<string> {
+        try {
+          const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
+      
+          if (!exp) {
+            throw new Error('Token does not contain expiration information');
+          }
+      
+          const expirationTime = new Date(exp * 1000);
+          const currentTime = new Date();
+      
+          if (currentTime >= expirationTime) {
+            throw new Error('Token has expired');
+          }
+      
+          const user = await this.prismaService.user.findUnique({
+            where: { email },
+          });
+      
+          if (!user) {
+            throw new Error('User not found with that Email');
+          }
+      
+          return user.email;
+        } catch (error) {
+          throw new Error(error.message);
+        }
+      }
+      
+        
+          
+          
+
+
+
+
     async verifyOtp(phone: string, otp: string, hash: string): Promise<string> {
         try {
           const [hashValue, expires] = hash.split('.');

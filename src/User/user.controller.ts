@@ -12,6 +12,8 @@ import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { CreateUserDocs,LoginUserDocs, SendEmailDocs,SendOtpDocs,VerifyOtpDocs } from '../utils/user.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
+import { LinkEmailDto } from './dto/reset-link.dto';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -68,7 +70,8 @@ export class UserController {
       return { message: 'Failed to send OTP', error: error.message };
     }
   }
-//reset password through email
+
+
 @Put('reset-password/:email')
 async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPasswordDto: ResetPasswordDto) {
   try {
@@ -79,6 +82,32 @@ async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPass
   }
 }
 
+@Post ('password-reset-email-link')
+async resetPasswordEmail(@Body() LinkEmailDto: LinkEmailDto) {
+try{
+   await this.userService.sendpasswordResetEmail(LinkEmailDto.to);
+
+  return { message: 'Email sent successfully' };
+}
+  catch (error) {
+    return { message: 'Failed to send password reset email', error: error.message };
+  }
+}
+
+@Post ('verify-password-reset-link')
+async verifyPasswordResetLink(@Body() verifyEmailDto: VerifyEmailLinkDto) {
+  try {
+    const verificationResult = await this.userService.verifyToken(
+      
+      verifyEmailDto.token,
+    );
+
+    return { message: verificationResult ? verificationResult : 'Link Expired' };
+  } catch (error) {
+    return { message: 'Failed to verify Link', error: error.message };
+  }
+
+}
 
 
 
@@ -95,6 +124,7 @@ async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPass
         return { message: 'Failed to reset password', error: error.message };
     }
   }
+
 
 @Post('verify-otp')
 @VerifyOtpDocs()
