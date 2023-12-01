@@ -76,6 +76,7 @@ export class UserService {
       }
     }
     
+    
       async verifyToken(token: string): Promise<string> {
         try {
           const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
