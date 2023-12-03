@@ -13,7 +13,6 @@ import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { CreateUserDocs,LoginUserDocs, SendEmailDocs,SendOtpDocs,VerifyOtpDocs } from '../utils/user.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { LinkEmailDto } from './dto/reset-link.dto';
 @Controller('user')
 @ApiTags('User')

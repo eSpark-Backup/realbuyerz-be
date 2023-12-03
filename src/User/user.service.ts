@@ -135,6 +135,7 @@ export class UserService {
         }
       }
 
+   
 
     async sendOtp(phone: string): Promise<string> {
         const otp = otpGenerator.generate(4, {

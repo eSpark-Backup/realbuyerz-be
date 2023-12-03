@@ -29,18 +29,18 @@ model User {
   created_at         DateTime  @default(now())
   updated_at         DateTime?
 
-  property Property[]
+ // property Property[]
 }
 
 model Porperty_data {
   id          Int       @id @default(autoincrement())
-  property_id Int
+  property_id String
   url   String
   type  String
   created_at  DateTime  @default(now())
   updated_at  DateTime?
 
-  Property Property @relation(fields: [property_id], references: [id])
+ // Property Property @relation(fields: [property_id], references: [id])
 }
 
 
@@ -51,7 +51,7 @@ model Cities {
   created_at DateTime  @default(now())
   updated_at DateTime?
 
-  Property Property?
+//  Property Property?
 }
 
 model Ameneties {
@@ -63,35 +63,36 @@ model Ameneties {
   created_at DateTime  @default(now())
   updated_at DateTime?
 
-  Property Property?
+//  Property Property?
 }
 
 model Property {
-  id                   Int    @id @default(autoincrement())
-  user_id              Int
+  id                   String    @id @default(cuid())
+ // user      User?            @relation(fields: [user_id], references: [id])
+ // user_id              Int? 
   property_name        String
-  property_type        String
-  sub_type             String
-  property_price       Int
-  property_area        String
-  purpose              String
-  property_address     String
-  property_city        Int   @unique
-  property_Image       String
-  property_video       String
-  property_zip         String
-  property_description String
-  property_ameneties   Int?    @unique
-  longitude            String
-  latitude             String
-  property_status      String
+  property_type        String?
+  sub_type             String?
+  property_price       Int?
+  property_area        String?
+  purpose              String?
+  property_address     String?
+ // property_city        Int   @unique
+  property_Image       String?
+  property_video       String?
+  property_zip         String?
+  property_description String?
+//  property_ameneties   Int?    @unique
+  longitude            String?
+  latitude             String?
+  property_status      Boolean? @default(false)
 
   created_at DateTime  @default(now())
   updated_at DateTime?
 
-  Property_data Porperty_data[]
+ // Property_data Porperty_data[]
 
-  user      User            @relation(fields: [user_id], references: [id])
-  amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
-  cities    Cities?         @relation(fields: [property_city], references: [id])
+  
+//  amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
+ // cities    Cities?         @relation(fields: [property_city], references: [id])
 }
