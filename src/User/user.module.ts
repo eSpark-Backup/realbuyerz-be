@@ -6,11 +6,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthMiddleware } from 'src/auth/jwt.auth-gaurd';
 
 @Module({
   imports: [PrismaModule], 
   controllers: [UserController], 
-  providers: [UserService,PrismaService], 
+  providers: [UserService,PrismaService,AuthMiddleware], 
   exports: [UserService], 
 })
 export class UserModule {}

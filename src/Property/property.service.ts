@@ -6,6 +6,8 @@ import * as path from 'path';
 import * as  Sharp from 'sharp';
 import { readFile } from 'fs/promises';
 import { promises as fsPromises } from 'fs';
+import { CreatePropertyDto } from './dto/create-property.dto';
+import { updatedPropertyDto } from './dto/update-property.dto';
 
 @Injectable()
 export class PropertyService {
@@ -51,7 +53,7 @@ export class PropertyService {
     }
 
     
-    async createProperty(user: any, files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; }, body: any) {
+    async createProperty( files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; }, createProperty:CreatePropertyDto) {
 
         
         if (files.image) {
@@ -80,13 +82,69 @@ export class PropertyService {
                 throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
             }
         }
+
+
         if (files.image) {
             const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
           
-                    const updatedbody = {...body,property_Image:JSON.stringify(processedImages.map(image => image.savedImagePath))}
+                    const updatedbody = {...createProperty,property_Image:JSON.stringify(processedImages.map(image => image.savedImagePath))}
                     return await this.prismaService.property.create({
                         data: updatedbody,
                     });
         }  
         }
+
+
+        async updateProperty(property_id:string , files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; },updateProperty:updatedPropertyDto) {
+        
+            if (files.image) {
+                const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
+                for (const file of files.image) {
+                    const ext = extname(file.originalname);
+                    if (!allowedImageTypes.includes(ext)) {
+                        throw new HttpException('Invalid image file type.', HttpStatus.BAD_REQUEST);
+                    }
+                }
+            }
+    
+            if (files.video) {
+                const allowedVideoTypes = ['.mp4', '.avi', '.mkv'];
+                for (const file of files.video) {
+                    const ext = extname(file.originalname);
+                    if (!allowedVideoTypes.includes(ext)) {
+                        throw new HttpException('Invalid video file type.', HttpStatus.BAD_REQUEST);
+                    }
+                }
+            }
+    
+            const maxFileSize = 4 * 1024 * 1024;
+            for (const file of [...(files.image || []), ...(files.video || [])]) {
+                if (file.size > maxFileSize) {
+                    throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
+                }
+            }
+    
+    
+            if (files.image) {
+                const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
+              try{
+                let updatedPropertyDto: any = { ...updateProperty };
+                updatedPropertyDto = {...updateProperty,property_Image:JSON.stringify(processedImages.map(image => image.savedImagePath))}
+                updatedPropertyDto = {...updateProperty,updated_at:new Date()}
+                        return await this.prismaService.property.update({
+                            where: { id: property_id },
+                            data: updatedPropertyDto,
+                        });
+                    }
+                    catch(error){
+                        return {
+                            success: false,
+                            message: 'An error occurred while updating the Property.',
+                        };
+                    }
+
+            }  
+            }
+
+
     }

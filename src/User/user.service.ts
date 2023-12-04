@@ -266,11 +266,42 @@ export class UserService {
 let updatedUserDto: any = { ...updateUserDto };
 
             updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
-            return await this.prismaService.user.update({
-                where: { id: parseInt(userId, 10) },
-                data: updatedUserDto,
+            const results = await this.prismaService.user.update({
+              where: { id: parseInt(userId, 10) },
+              data: updatedUserDto,
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                mobile_number: true,
+                landline_number: true,
+                whatsapp: true,
+                country: true,
+                address: true,
+                isVerified: true,
+                social_id: true,
+                role: true,
+                profile_image: true,
+                profile_visibility: true,
+                created_at: true,
+                updated_at: true,
+              },
             });
-        } catch (error) {
+
+
+            const response = {
+              timestamp_ms: Date.now(),
+              action: 'update',
+              Property :{
+                results
+              },
+
+            };
+            return { success: true, message: 'User updated successfully', response };
+            
+            }
+         catch (error) {
             console.error(error);
 
             return {

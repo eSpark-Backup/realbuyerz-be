@@ -1,26 +1,27 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { JwtService } from 'jsonwebtoken';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+export class AuthMiddleware implements NestMiddleware {
 
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split(' ')[1];
-
-    if (token) {
-      try {
-        const decodedToken = this.jwtService.verify(token);
-        if (decodedToken.role === 'user') {
-          return true;
-        }
-      } catch (error) {
-        return false;
-      }
+  use(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+  
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication token missing' });
     }
-
-    return false;
+  
+    try {
+      const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+      req['user'] = decoded;
+      next();
+    } catch (err) {
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
   }
 }

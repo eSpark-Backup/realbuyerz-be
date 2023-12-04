@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { MulterModule } from '@nestjs/platform-express';
 
+
 @Module({
   imports: [PrismaModule,
     MulterModule.register({
