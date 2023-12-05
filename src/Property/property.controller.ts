@@ -1,11 +1,12 @@
 /* eslint-disable prettier/prettier */
-import {  Body, Controller, HttpException, HttpStatus, Param, Post,Put,Req,UploadedFiles,UseInterceptors } from "@nestjs/common";
+import {  Body, Controller, HttpException, HttpStatus, Param, Post,Put,UploadedFiles,UseInterceptors } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PropertyService } from "./property.service";
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from "path";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { updatedPropertyDto } from "./dto/update-property.dto";
+import multer from "multer";
 
 @Controller('property')
 @ApiTags('property')
@@ -41,6 +42,7 @@ export class PropertyController {
             },
           },
         ),
+        
       )
     async createProperty(
         @UploadedFiles()
