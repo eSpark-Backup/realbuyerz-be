@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiProperty  } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, ValidateNested, IsArray  } from 'class-validator';
+import { IsString, IsNumber, IsOptional, ValidateNested, IsArray, IsNotEmpty  } from 'class-validator';
 
 
 
@@ -12,6 +12,7 @@ export class CreatePropertyDto {
   readonly property_name: string;
   
  @ApiProperty({ type:Array, example: 'User ID' })
+ @IsNotEmpty({ message: 'User ID cannot be empty' })
   readonly user_id: any;
 
   
