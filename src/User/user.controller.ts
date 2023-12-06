@@ -14,6 +14,7 @@ import { CreateUserDocs,LoginUserDocs, SendEmailDocs,SendOtpDocs,VerifyOtpDocs }
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
 import { LinkEmailDto } from './dto/reset-link.dto';
+import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -73,9 +74,9 @@ export class UserController {
 
 
 @Put('reset-password/:email')
-async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPasswordDto: ResetPasswordDto) {
+async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto) {
   try {
-    const updatePassword = await this.userService.resetPasswordwithMail(userEmail, resetPasswordDto);
+    const updatePassword = await this.userService.resetPasswordwithMail(userEmail, resetPasswordwithMailDto);
     return updatePassword;
   } catch (error) {
     return { message: 'Failed to reset password', error: error.message };

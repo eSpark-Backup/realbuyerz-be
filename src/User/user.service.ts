@@ -12,6 +12,7 @@ import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
 import * as Twilio from 'twilio';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 
 const TOKEN_KEY = process.env.TOKEN_KEY ;
 const key = process.env.OTP_KEY; 
@@ -28,9 +29,9 @@ export class UserService {
 
     }
 
-    async resetPasswordwithMail(userEmail: string, resetPasswordDto: ResetPasswordDto) {
+    async resetPasswordwithMail(userEmail: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
       try {
-        const {  password } = resetPasswordDto;
+        const {  password } = resetPasswordwithMailDto;
     
         const user = await this.prismaService.user.findUnique({
           where: { email: userEmail },
