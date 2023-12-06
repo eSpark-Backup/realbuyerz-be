@@ -237,4 +237,23 @@ export class PropertyService {
     }
 
 
+    async findAll(page = 1, pageSize = 10) {
+        const skip = (page - 1) * pageSize;
+    
+        const properties = await this.prismaService.property.findMany({
+          skip,
+          take: pageSize,
+        });
+    
+        const totalCount = await this.prismaService.property.count();
+    
+        return {
+          properties,
+          totalCount,
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / pageSize),
+        };
+      }
+
+
 }

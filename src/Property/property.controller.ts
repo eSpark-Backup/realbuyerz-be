@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import {  Body, Controller, HttpException, HttpStatus, Param, Post,Put,UploadedFiles,UseInterceptors } from "@nestjs/common";
+import {  Body, Controller, DefaultValuePipe, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post,Put,Query,UploadedFiles,UseInterceptors } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PropertyService } from "./property.service";
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -111,6 +111,15 @@ export class PropertyController {
           console.error('Error processing property updation:', error);
           throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
       }
+    }
+
+
+    @Get()
+    async findAll(
+      @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+      @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    ) {
+      return this.propertyService.findAll(page, pageSize);
     }
     
 
