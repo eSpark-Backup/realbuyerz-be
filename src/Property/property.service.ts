@@ -107,12 +107,13 @@ export class PropertyService {
         });
 
         try {
-            if(files.video && files.image){
+            // if(files.video && files.image){
 
 
 
-            }
-            else if (files.image && !files.video) {
+            // }
+            // else
+             if (files.image && files.video) {
                 processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
                
 
@@ -134,19 +135,19 @@ export class PropertyService {
 
 
             }
-            else if(files.video && !files.image){
-                files.video.map(file => this.processSingleImage(file));
-                const propertyData = processedImages.map(image => ({
-                    url: JSON.stringify(image.savedImagePath),
-                    type: 'video',
-                    property_id: result.id,
-                }));
+            // else if(files.video && !files.image){
+            //     // files.video.map(file => this.processSingleImage(file));
+            //     // const propertyData = processedImages.map(image => ({
+            //     //     url: JSON.stringify(image.savedImagePath),
+            //     //     type: 'video',
+            //     //     property_id: result.id,
+            //     // }));
 
-                const createdPropertyData = await this.prismaService.porperty_data.createMany({
-                    data: propertyData,
-                });
+            //     // const createdPropertyData = await this.prismaService.porperty_data.createMany({
+            //     //     data: propertyData,
+            //     // });
 
-            }
+            // }
             else{
                 return {
                     success: false,
@@ -237,7 +238,7 @@ export class PropertyService {
     }
 
 
-    async findAll(page = 1, pageSize = 10) {
+    async findAll(page = 1, pageSize = 50) {
         const skip = (page - 1) * pageSize;
     
         const properties = await this.prismaService.property.findMany({

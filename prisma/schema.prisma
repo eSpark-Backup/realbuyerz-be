@@ -10,6 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+model preferences {
+  id                   Int       @id @default(autoincrement())
+  user_id              Int?    @unique   
+  email_notification  Boolean
+  newsletter           Boolean
+  automated_report     Boolean
+  currency         String      
+  area_unit         String    
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?
+
+  user                 User?      @relation(fields: [user_id], references: [id])
+  
+}
 model User {
   id                 Int       @id @default(autoincrement())
   first_name         String
@@ -30,6 +45,7 @@ model User {
   updated_at         DateTime?
 
   property Property[]
+  preferences preferences?
 }
 
 model Porperty_data {
@@ -59,7 +75,16 @@ model Ameneties {
   created_at DateTime  @default(now())
   updated_at DateTime?
 
-  //  Property Property?
+    Property Property?
+}
+model Property_features{
+  id         Int       @id @default(autoincrement())
+  property_id String
+  feature_type  String
+  created_at DateTime  @default(now())
+  updated_at DateTime?
+
+  Property Property @relation(fields: [property_id], references: [id])
 }
 
 model Property {
@@ -78,7 +103,7 @@ model Property {
   property_video       String?
   property_zip         String?
   property_description String?
-  //  property_ameneties   Int?    @unique
+   property_ameneties   Int?    @unique
   longitude            String?
   latitude             String?
   property_status      Boolean? @default(false)
@@ -87,7 +112,8 @@ model Property {
   updated_at DateTime?
 
   Property_data Porperty_data[]
+  Property_features Property_features[]
 
-  //  amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
+ amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
   
 }
