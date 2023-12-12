@@ -19,6 +19,7 @@ const key = process.env.OTP_KEY;
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID; 
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN; 
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER; 
+const token_expiry= process.env.TOKEN_EXPIRY;
 
 @Injectable()
 export class UserService {
@@ -57,7 +58,7 @@ export class UserService {
     }
 
     async sendpasswordResetEmail(to: string): Promise<void> {
-      const token = jwt.sign({ email: to }, TOKEN_KEY, { expiresIn: '1h' });
+      const token = jwt.sign({ email: to }, TOKEN_KEY, { expiresIn: token_expiry });
       console.log(token);
       const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
     
@@ -199,7 +200,7 @@ export class UserService {
           const token = jwt.sign(
             { userId: newUser.id, role: newUser.role },
             TOKEN_KEY,
-            { expiresIn: '1h' }
+            { expiresIn:token_expiry }
           );
     
           return {
@@ -240,7 +241,7 @@ export class UserService {
         if (!passwordMatch) {
             return { success: false, message: 'Invalid password' };
         }
-        const token = jwt.sign({ userId: user.id, role: user.role }, TOKEN_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.id, role: user.role }, TOKEN_KEY, { expiresIn: token_expiry });
 
 
         return { success: true, message: 'Login successful', token };
