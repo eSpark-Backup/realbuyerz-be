@@ -9,6 +9,7 @@ import { promises as fsPromises } from 'fs';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { updatedPropertyDto } from './dto/update-property.dto';
 import { PropertyDataDTO } from './dto/create-propertyData.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PropertyService {
@@ -53,6 +54,33 @@ export class PropertyService {
         };
     }
 
+    async findbyuserId(user_id: string) {
+        try {
+
+
+            const userIdNumber = parseInt(user_id);
+
+            const totalCount = await this.prismaService.property.count({
+                where: {
+                    user_id: userIdNumber,
+                },
+            });
+
+            const properties = await this.prismaService.property.findMany({
+                where: {
+                    user_id: userIdNumber,
+                },
+
+
+            }
+
+            );
+            return { totalCount, properties };
+        } catch (error) {
+            console.error('Error finding properties by user ID:', error.message);
+            return { message: 'Failed to find properties by user ID', status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
+        }
+    }
     async createPropertyData(propertyData: PropertyDataDTO) {
         try {
             const result = await this.prismaService.porperty_data.create({
@@ -102,9 +130,50 @@ export class PropertyService {
         if (property.user_id) {
             property.user_id = parseInt(property.user_id);
         }
-        const result = await this.prismaService.property.create({
-            data: property,
-        });
+        if (property.property_price) {
+            property.property_price = parseInt(property.property_price);
+
+        }
+        if (property.property_amenities[0].count) {
+            property.property_amenities[0].count = parseInt(property.property_amenities[0].count);
+        }
+
+        let result = null;
+        try {
+            result = await this.prismaService.property.create({
+                data: {
+                    user: { connect: { id: property.user_id } },
+                    property_name: property.property_name,
+                    property_type: property.property_type,
+                    sub_type: property.sub_type,
+                    purpose: property.purpose,
+                    property_price: property.property_price,
+                    property_area: property.property_area,
+                    property_city: property.property_city,
+                    property_address: property.property_address,
+                    property_zip: property.property_zip,
+                    property_description: property.property_description,
+                    longitude: property.longitude,
+                    latitude: property.latitude,
+
+                    amenities: {
+                        create: {
+                            ameneties_name: JSON.stringify(property.property_amenities[0].amenities_name),
+                            count: property.property_amenities[0].count,
+                            other_features: JSON.stringify(property.property_amenities[0].other_features),
+                        },
+                    },
+                } as Prisma.PropertyCreateInput,
+            });
+        }
+        catch (error) {
+            return {
+                success: false,
+                message: 'Failed to create property.',
+                error: error.message,
+            };
+        }
+
 
         try {
             // if(files.video && files.image){
@@ -113,9 +182,9 @@ export class PropertyService {
 
             // }
             // else
-             if (files.image && files.video) {
+            if (files.image && !files.video) {
                 processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
-               
+
 
                 const propertyData = processedImages.map(image => ({
                     url: JSON.stringify(image.savedImagePath),
@@ -123,7 +192,7 @@ export class PropertyService {
                     property_id: result.id,
                 }));
 
-                const createdPropertyData = await this.prismaService.porperty_data.createMany({
+                await this.prismaService.porperty_data.createMany({
                     data: propertyData,
                 });
 
@@ -148,14 +217,14 @@ export class PropertyService {
             //     // });
 
             // }
-            else{
+            else {
                 return {
                     success: false,
                     message: 'No images/Videos provided for property creation.',
                 };
             }
 
-            
+
         }
         catch (error) {
             if (result && result.id) {
@@ -175,8 +244,8 @@ export class PropertyService {
 
 
 
-       
-      
+
+
 
 
 
@@ -219,13 +288,40 @@ export class PropertyService {
         if (files.image) {
             const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
             try {
-                let updatedPropertyDto: any = { ...updateProperty };
-                updatedPropertyDto = { ...updateProperty, property_Image: JSON.stringify(processedImages.map(image => image.savedImagePath)) }
-                updatedPropertyDto = { ...updateProperty, updated_at: new Date() }
-                return await this.prismaService.property.update({
+
+
+                const result = await this.prismaService.property.update({
                     where: { id: property_id },
-                    data: updatedPropertyDto,
+                    data: updateProperty,
                 });
+
+                await this.prismaService.porperty_data.deleteMany({
+                    where: {
+                        property_id: result.id,
+                        "type": "image"
+                    },
+                });
+
+
+                const propertyData = processedImages.map(image => ({
+                    url: JSON.stringify(image.savedImagePath),
+                    type: 'image',
+                    property_id: result.id,
+                }));
+
+                await this.prismaService.porperty_data.createMany({
+                    data: propertyData,
+                });
+
+                return {
+                    success: true,
+                    message: 'Property updated successfully.',
+                    data: result,
+                };
+
+
+
+
             }
             catch (error) {
                 return {
@@ -235,26 +331,62 @@ export class PropertyService {
             }
 
         }
+        else {
+
+        }
     }
 
 
-    async findAll(page = 1, pageSize = 50) {
+    async findAll(
+        page = 1,
+        pageSize = 50,
+        filters?: { purpose?: string; property_type?: string; sub_type?: string; property_city?: string }
+    ) {
         const skip = (page - 1) * pageSize;
-    
+
+        const where: any = {};
+
+        if (filters) {
+            if (filters.purpose) {
+                where.purpose = filters.purpose;
+            }
+
+            if (filters.property_type) {
+                where.property_type = filters.property_type;
+            }
+
+            if (filters.sub_type) {
+                where.sub_type = filters.sub_type;
+            }
+
+            if (filters.property_city) {
+                where.property_city = filters.property_city;
+            }
+        }
+
         const properties = await this.prismaService.property.findMany({
-          skip,
-          take: pageSize,
+            skip,
+            take: pageSize,
+            include: {
+                amenities: true,
+                Property_data: true,
+
+            },
+            where,
+
         });
-    
-        const totalCount = await this.prismaService.property.count();
-    
+
+
+        const totalCount = await this.prismaService.property.count({ where });
+
         return {
-          properties,
-          totalCount,
-          currentPage: page,
-          totalPages: Math.ceil(totalCount / pageSize),
+            properties,
+            totalCount,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / pageSize),
         };
-      }
+    }
+
 
 
 }

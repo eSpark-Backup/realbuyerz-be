@@ -68,24 +68,15 @@ model Cities {
 
 model Ameneties {
   id         Int       @id @default(autoincrement())
-  bed_room   Int?
-  bath_room  Int?
-  kitchen    Int?
-  parking    Int?
+  ameneties_name  String
+  count Int?
+  other_features String?
   created_at DateTime  @default(now())
   updated_at DateTime?
 
-    Property Property?
+  Property Property?
 }
-model Property_features{
-  id         Int       @id @default(autoincrement())
-  property_id String
-  feature_type  String
-  created_at DateTime  @default(now())
-  updated_at DateTime?
 
-  Property Property @relation(fields: [property_id], references: [id])
-}
 
 model Property {
   id                   String   @id @default(cuid())
@@ -99,11 +90,9 @@ model Property {
   purpose              String?
   property_address     String?
   property_city        String?
-  property_Image       String?
-  property_video       String?
   property_zip         String?
   property_description String?
-   property_ameneties   Int?    @unique
+  property_ameneties   Int?    @unique
   longitude            String?
   latitude             String?
   property_status      Boolean? @default(false)
@@ -112,7 +101,6 @@ model Property {
   updated_at DateTime?
 
   Property_data Porperty_data[]
-  Property_features Property_features[]
 
  amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
   
