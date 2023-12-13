@@ -196,12 +196,19 @@ export class PropertyService {
                     data: propertyData,
                 });
 
-                return {
-                    success: true,
-                    message: 'Property created successfully.',
-                    data: result,
-                };
+                const response = {
+                    timestamp_ms: Date.now(),
+                    action: 'Created Property Data',
+                    Property :{
+                      result
+                    },
+      
+                  };
+    
+                  return { success: true, message: 'Property Created successfully', response };
+    
 
+               
 
             }
             // else if(files.video && !files.image){
@@ -313,11 +320,21 @@ export class PropertyService {
                     data: propertyData,
                 });
 
-                return {
-                    success: true,
-                    message: 'Property updated successfully.',
-                    data: result,
-                };
+
+                
+
+              
+                const response = {
+                    timestamp_ms: Date.now(),
+                    action: 'Updated Property Data',
+                    Property :{
+                      result
+                    },
+      
+                  };
+    
+                  return { success: true, message: 'Property Updated successfully', response };
+    
 
 
 
