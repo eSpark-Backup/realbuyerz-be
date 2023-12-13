@@ -3,17 +3,31 @@ import { ApiProperty  } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsOptional, IsNotEmpty, ValidateNested  } from 'class-validator';
 
+class AmenityDto {
+  @IsString()
+  @IsOptional()
+  readonly amenities_name: string;
 
+  @IsString()
+  @IsOptional()
+  readonly count: any;
+
+  @IsString()
+  @IsOptional()
+  readonly other_features: string;
+}
 
 export class CreatePropertyDto {
   @ApiProperty({ type: String, example: 'Beautiful House' })
   @IsString({ message: 'Property name must be a string' })
   @IsNotEmpty({ message: 'Property name cannot be empty' })
+  
   readonly property_name: string;
   
  @ApiProperty({ type:Number, example: 'User ID' })
 //  @IsNotEmpty({ message: 'User ID cannot be empty' })
  @IsOptional()
+ 
   readonly user_id: any;
 
   
@@ -87,40 +101,55 @@ export class CreatePropertyDto {
   // @IsNotEmpty({ message: 'Latitude cannot be empty' })
   readonly latitude: string;
 
-  @ApiProperty({ type: Boolean, example: 'True ',default:false })
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    example: ['image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg'],
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmpty({ message: 'At least one image is required' })
+  readonly image: any[];
+  
+  
+
+  @ApiProperty({ type: Boolean, example: 'True ',default:false,required:false })
   @IsString({ message: 'Property status must be a string' })
   @IsOptional()
 
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
   readonly property_status: boolean;
 
-  @ApiProperty({ type: Object, example:  {
-    "amenities_name": "Swimming Pool",
-    "count": 1,
-    "other_features": "Waterfall"
-  } })
+  @ApiProperty({ type: String, example: 'Swimming Pool ' })
+  @IsString()
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => AmenityDto)
-  property_amenities?: AmenityDto[];
+  readonly amenities_name: string;
 
+  @ApiProperty({example: '1' })
+  @IsString()
+  @IsOptional()
+  readonly count: any;
 
+  @ApiProperty({ type: String, example: 'Waterfall ' })
+  @IsString()
+  @IsOptional()
+  readonly other_features: string;
+
+  // @ApiProperty({ type: Object, example: {
+  //   "amenities_name": "Swimming Pool",
+  //   "count": "1",
+  //   "other_features": "Waterfall"
+  // } })
+  // @IsOptional()
+  // @Type(() => AmenityDto)
+  // readonly property_amenities?: AmenityDto;
 }
 
-class AmenityDto {
-  @IsString()
-  @IsOptional()
-  amenities_name: string;
 
-  @IsString()
-  @IsOptional()
-
-  count: any;
-
-  @IsString()
-  @IsOptional()
-  other_features: string;
-}
 
 
 

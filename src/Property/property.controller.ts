@@ -1,18 +1,21 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, DefaultValuePipe, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { PropertyService } from "./property.service";
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from "path";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { updatedPropertyDto } from "./dto/update-property.dto";
+import { PropertyQueryDto } from "./dto/property_quey-dto";
 
 @Controller('property')
+@ApiBearerAuth()
 @ApiTags('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) { }
   @Post()
   @ApiTags('property')
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 5 },
@@ -108,27 +111,21 @@ export class PropertyController {
     return this.propertyService.findbyuserId(user_id);
   }
 
-
   @Get()
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-    @Query('purpose') purpose?: string,
-    @Query('property_type') propertyType?: string,
-    @Query('sub_type') subType?: string,
-    @Query('property_city') propertyCity?: string,
+    @Query() query: PropertyQueryDto,
   ) {
     const filters = {
-      purpose,
-      property_type: propertyType,
-      sub_type: subType,
-      property_city: propertyCity,
+      purpose: query.purpose,
+      property_type: query.property_type,
+      sub_type: query.sub_type,
+      property_city: query.property_city,
     };
 
     return this.propertyService.findAll(page, pageSize, filters);
   }
-
-
 
 
 }

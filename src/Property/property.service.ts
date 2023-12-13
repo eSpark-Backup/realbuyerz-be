@@ -70,6 +70,10 @@ export class PropertyService {
                 where: {
                     user_id: userIdNumber,
                 },
+                include: {
+                    amenities: true,
+                    Property_data: true,
+                }
 
 
             }
@@ -134,8 +138,8 @@ export class PropertyService {
             property.property_price = parseInt(property.property_price);
 
         }
-        if (property.property_amenities[0].count) {
-            property.property_amenities[0].count = parseInt(property.property_amenities[0].count);
+        if (property.count) {
+            property.count = parseInt(property.count);
         }
 
         let result = null;
@@ -158,9 +162,9 @@ export class PropertyService {
 
                     amenities: {
                         create: {
-                            ameneties_name: JSON.stringify(property.property_amenities[0].amenities_name),
-                            count: property.property_amenities[0].count,
-                            other_features: JSON.stringify(property.property_amenities[0].other_features),
+                            ameneties_name: JSON.stringify(property.amenities_name),
+                            count: property.count,
+                            other_features: JSON.stringify(property.other_features),
                         },
                     },
                 } as Prisma.PropertyCreateInput,
