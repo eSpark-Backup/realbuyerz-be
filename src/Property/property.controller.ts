@@ -62,6 +62,8 @@ export class PropertyController {
 
   @Put('/:id')
   @ApiTags('property')
+  @ApiConsumes('multipart/form-data')
+
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 5 },
@@ -111,6 +113,11 @@ export class PropertyController {
     return this.propertyService.findbyuserId(user_id);
   }
 
+  @Get(':id')
+  async findById(@Param('id') propertyId: string) {
+    return this.propertyService.findById(propertyId);
+  }
+
   @Get()
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -127,6 +134,7 @@ export class PropertyController {
     return this.propertyService.findAll(page, pageSize, filters);
   }
 
+  
 
 }
 

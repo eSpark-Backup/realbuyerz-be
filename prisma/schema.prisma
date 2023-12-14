@@ -50,7 +50,7 @@ model User {
 
 model Porperty_data {
   id          Int       @id @default(autoincrement())
-  property_id String
+  property_id Int
   url         String
   type        String
   created_at  DateTime  @default(now())
@@ -79,7 +79,7 @@ model Ameneties {
 
 
 model Property {
-  id                   String   @id @default(cuid())
+  id                    Int       @id @default(autoincrement())
   user                 User?    @relation(fields: [user_id], references: [id])
   user_id              Int?
   property_name        String

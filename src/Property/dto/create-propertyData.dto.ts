@@ -7,7 +7,7 @@ export class PropertyDataDTO{
 
 
     @ApiProperty({ type: Object, example: 1 })
-   readonly property_id: string;
+   readonly property_id: any;
 
     @ApiProperty({ type: String, example: 1 })
    readonly url: string;

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { extname, resolve } from 'path';
 import * as path from 'path';
@@ -10,14 +10,21 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { updatedPropertyDto } from './dto/update-property.dto';
 import { PropertyDataDTO } from './dto/create-propertyData.dto';
 import { Prisma } from '@prisma/client';
+import * as uuid from 'uuid';
 
 @Injectable()
 export class PropertyService {
     constructor(private readonly prismaService: PrismaService) { }
+    
 
     private async saveImageToDisk(buffer: Buffer, filename: string): Promise<string> {
-        const destinationFolder = 'src/upload';
-        const filePath = path.join(destinationFolder, filename);
+        function generateRandomUUID(): string {
+            return uuid.v4();
+          }
+          const randomUUID = generateRandomUUID();
+        const destinationFolder = 'upload';
+        const filePath = path.join(destinationFolder, `${randomUUID}_${filename}`);
+
         await fsPromises.writeFile(filePath, buffer);
         return filePath;
     }
@@ -191,7 +198,7 @@ export class PropertyService {
 
 
                 const propertyData = processedImages.map(image => ({
-                    url: JSON.stringify(image.savedImagePath),
+                    url: image.savedImagePath,
                     type: 'image',
                     property_id: result.id,
                 }));
@@ -203,16 +210,16 @@ export class PropertyService {
                 const response = {
                     timestamp_ms: Date.now(),
                     action: 'Created Property Data',
-                    Property :{
-                      result
+                    Property: {
+                        result
                     },
-      
-                  };
-    
-                  return { success: true, message: 'Property Created successfully', response };
-    
 
-               
+                };
+
+                return { success: true, message: 'Property Created successfully', response };
+
+
+
 
             }
             // else if(files.video && !files.image){
@@ -267,7 +274,22 @@ export class PropertyService {
 
 
     async updateProperty(property_id: string, files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; }, updateProperty: updatedPropertyDto) {
+        const property = { ...updateProperty }
+        const id = parseInt(property_id);
+        if (property.user_id) {
+            property.user_id = parseInt(property.user_id);
+        }
+        if (property.property_price) {
+            property.property_price = parseInt(property.property_price);
 
+        }
+        if (property.count) {
+            property.count = parseInt(property.count);
+        }
+
+        if (property.property_status) {
+            property.property_status = Boolean(property.property_status);
+        }
         if (files.image) {
             const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
             for (const file of files.image) {
@@ -299,60 +321,199 @@ export class PropertyService {
         if (files.image) {
             const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
             try {
-
-
-                const result = await this.prismaService.property.update({
-                    where: { id: property_id },
-                    data: updateProperty,
+                const propert = await this.prismaService.property.findUnique({
+                    where: { id: parseInt(property_id, 10) },
+                    include: { amenities: true },
                 });
+                if (propert) {
 
-                await this.prismaService.porperty_data.deleteMany({
-                    where: {
+
+                    const result = await this.prismaService.property.update({
+                        where: { id: parseInt(property_id, 10) },
+                        data: {
+
+                            property_name: property.property_name,
+                            property_type: property.property_type,
+                            sub_type: property.sub_type,
+                            purpose: property.purpose,
+                            property_price: property.property_price,
+                            property_area: property.property_area,
+                            property_city: property.property_city,
+                            property_address: property.property_address,
+                            property_zip: property.property_zip,
+                            property_status: property.property_status,
+                            property_description: property.property_description,
+                            longitude: property.longitude,
+                            latitude: property.latitude,
+                            updated_at: new Date(),
+
+                            amenities: {
+                                update: {
+                                    where: {
+                                        id: propert.amenities.id, // Replace with the actual ID of amenities
+                                    },
+                                    data: {
+                                        ameneties_name: JSON.stringify(property.amenities_name),
+                                        count: property.count,
+                                        other_features: JSON.stringify(property.other_features),
+                                        updated_at: new Date(),
+                                        // Add any other fields you want to update in amenities
+                                    },
+                                },
+                            },
+                        } as Prisma.PropertyUpdateInput,
+                        select: {
+                            id: true,
+                            property_name: true,
+                            property_type: true,
+                            sub_type: true,
+                            purpose: true,
+                            property_price: true,
+                            property_area: true,
+                            property_city: true,
+                            property_address: true,
+                            property_zip: true,
+                            property_status: true,
+                            property_description: true,
+                            longitude: true,
+                            latitude: true,
+                            amenities: true,
+                            created_at: true,
+                            updated_at: true,
+                        },
+                    });
+
+                    await this.prismaService.porperty_data.deleteMany({
+                        where: {
+                            property_id: result.id,
+                            "type": "image"
+                        },
+                    });
+
+
+                    const propertyData = processedImages.map(image => ({
+                        url: image.savedImagePath,
+                        type: 'image',
                         property_id: result.id,
-                        "type": "image"
-                    },
-                });
+                        updated_at: new Date(),
+                    }));
+
+                    await this.prismaService.porperty_data.createMany({
+                        data: propertyData,
+                    });
 
 
-                const propertyData = processedImages.map(image => ({
-                    url: JSON.stringify(image.savedImagePath),
-                    type: 'image',
-                    property_id: result.id,
-                }));
-
-                await this.prismaService.porperty_data.createMany({
-                    data: propertyData,
-                });
 
 
-                
 
-              
-                const response = {
-                    timestamp_ms: Date.now(),
-                    action: 'Updated Property Data',
-                    Property :{
-                      result
-                    },
-      
-                  };
-    
-                  return { success: true, message: 'Property Updated successfully', response };
-    
+                    const response = {
+                        timestamp_ms: Date.now(),
+                        action: 'Updated Property Data',
+                        Property: {
+                            result
+                        },
 
+                    };
+
+                    return { success: true, message: 'Property Updated successfully', response };
+
+                }
 
 
 
             }
             catch (error) {
                 return {
+                    console: error,
                     success: false,
                     message: 'An error occurred while updating the Property.',
                 };
             }
 
         }
-        else {
+        else if (!files.image) {
+            try {
+                const propert = await this.prismaService.property.findUnique({
+                    where: { id: parseInt(property_id, 10) },
+                    include: { amenities: true },
+                });
+                if (propert) {
+
+
+                    const result = await this.prismaService.property.update({
+                        where: { id: parseInt(property_id, 10) },
+                        data: {
+
+                            property_name: property.property_name,
+                            property_type: property.property_type,
+                            sub_type: property.sub_type,
+                            purpose: property.purpose,
+                            property_price: property.property_price,
+                            property_area: property.property_area,
+                            property_city: property.property_city,
+                            property_address: property.property_address,
+                            property_status: property.property_status,
+                            property_zip: property.property_zip,
+                            property_description: property.property_description,
+                            longitude: property.longitude,
+                            latitude: property.latitude,
+                            updated_at: new Date(),
+
+                            amenities: {
+                                update: {
+                                    where: {
+                                        id: propert.amenities.id, 
+                                    },
+                                    data: {
+                                        ameneties_name: JSON.stringify(property.amenities_name),
+                                        count: property.count,
+                                        other_features: JSON.stringify(property.other_features),
+                                        updated_at: new Date(),
+                                    },
+                                },
+                            },
+                        } as Prisma.PropertyUpdateInput,
+                        select: {
+                            id: true,
+                            property_name: true,
+                            property_type: true,
+                            sub_type: true,
+                            purpose: true,
+                            property_price: true,
+                            property_area: true,
+                            property_city: true,
+                            property_address: true,
+                            property_zip: true,
+                            property_description: true,
+                            property_status: true,
+                            longitude: true,
+                            latitude: true,
+                            amenities: true,
+                            created_at: true,
+                            updated_at: true,
+                        },
+                    });
+
+                    const response = {
+                        timestamp_ms: Date.now(),
+                        action: 'Updated Property Data',
+                        Property: {
+                            result
+                        },
+
+                    };
+
+                    return { success: true, message: 'Property Updated successfully', response };
+
+
+                }
+
+            }
+            catch (error) {
+
+                return { success: true, message: 'Property Not Updated successfully', error: error.message };
+            }
+
 
         }
     }
@@ -408,6 +569,29 @@ export class PropertyService {
         };
     }
 
+    async findById(propertyId: string) {
+        try {
+            const property = await this.prismaService.property.findUnique({
+                where: { id: parseInt(propertyId, 10) },
+                include: {
+                    amenities: true,
+                    Property_data: true
+                },
+            });
 
+            if (!property) {
+                throw new NotFoundException('Property not found');
+            }
+
+            return { success: true, property };
+        } catch (error) {
+            console.error(error);
+
+            return {
+                success: false,
+                message: 'An error occurred while fetching the property.',
+            };
+        }
+    }
 
 }
