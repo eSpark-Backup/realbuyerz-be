@@ -112,19 +112,7 @@ async verifyPasswordResetLink(@Body() verifyEmailDto: VerifyEmailLinkDto) {
 
 
 
-  //reset password through user ID
-  @Put('reset-password/:id')
-  async resetPassword(@Param('id') userId: string,@Body() resetPasswordDto: ResetPasswordDto) {
-    try {
-    
 
-    const updatepassword=   await this.userService.resetPassword( userId,resetPasswordDto);
-      return updatepassword;
-     
-    } catch (error) {
-        return { message: 'Failed to reset password', error: error.message };
-    }
-  }
 
 
 @Post('verify-otp')
@@ -144,4 +132,20 @@ async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     return { message: 'Failed to verify OTP', error: error.message };
   }
 }
+
+  //reset password through user ID
+  @Put('reset-password/:id')
+  async resetPassword(@Param('id') userId: string,@Body() resetPasswordDto: ResetPasswordDto) {
+    try {
+      console.log(userId);
+    
+
+    const updatepassword=   await this.userService.resetPassword( userId,resetPasswordDto);
+      return updatepassword;
+     
+    } catch (error) {
+        return { message: 'Failed to reset password', error: error.message };
+    }
+  }
+
 }

@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
 import sgMail = require('@sendgrid/mail');
+import  * as CryptoJS from 'crypto-js';
+import { SHA256 } from 'crypto-js';
 
 import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
@@ -29,7 +31,15 @@ export class UserService {
         this.twilioClient =  Twilio(twilioAccountSid, twilioAuthToken);
 
     }
+    async hashPassword(password: string): Promise<string> {
+      const hashedPassword = SHA256(password).toString(CryptoJS.enc.Hex);
+      return hashedPassword;
+    }
 
+    async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
+      const enteredPasswordHash = SHA256(plainPassword).toString(CryptoJS.enc.Hex);
+      return enteredPasswordHash === hashedPassword;
+    }
     async resetPasswordwithMail(userEmail: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
       try {
         const {  password } = resetPasswordwithMailDto;
@@ -43,7 +53,7 @@ export class UserService {
         }
     
        
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await this.hashPassword(password);
     
         await this.prismaService.user.update({
           where: { email: userEmail },
@@ -190,7 +200,7 @@ export class UserService {
             throw new ConflictException('Email is already in use');
           }
     
-          const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+          const hashedPassword = await this.hashPassword(createUserDto.password);
           const userData = { ...createUserDto, password: hashedPassword };
     
           const newUser = await this.prismaService.user.create({
@@ -236,7 +246,7 @@ export class UserService {
             return { success: false, message: 'User not found' };
         }
 
-        const passwordMatch = await bcrypt.compare(loginUserDto.password, user.password);
+        const passwordMatch = await this.comparePasswords(loginUserDto.password, user.password);
 
         if (!passwordMatch) {
             return { success: false, message: 'Invalid password' };
@@ -316,6 +326,7 @@ let updatedUserDto: any = { ...updateUserDto };
 
     async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
       try {
+        console.log(userId);
             const existingUser = await this.prismaService.user.findUnique({
                 where: { id: parseInt(userId, 10) },
             });
@@ -327,7 +338,8 @@ let updatedUserDto: any = { ...updateUserDto };
             let updatedUserDto: any = { ...resetPasswordDto };
 
             if (resetPasswordDto.oldPassword && resetPasswordDto.password) {
-                const passwordMatch = await bcrypt.compare(resetPasswordDto.oldPassword, existingUser.password);
+              const passwordMatch = await this.comparePasswords(resetPasswordDto.oldPassword, existingUser.password);
+
 
                 if (!passwordMatch) {
                     return {
@@ -336,7 +348,7 @@ let updatedUserDto: any = { ...updateUserDto };
                     };
                 }
 
-                const hashedPassword = await bcrypt.hash(resetPasswordDto.password, 10);
+                const hashedPassword = await this.hashPassword(resetPasswordDto.password);
                    updatedUserDto = { ...resetPasswordDto, password: hashedPassword};
                    delete updatedUserDto.oldPassword;
 
