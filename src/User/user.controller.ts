@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 // src/user/controller/user.controller.ts
 
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
-import { ApiTags  } from '@nestjs/swagger';
+import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { ApiConsumes, ApiTags  } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -15,6 +15,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
 import { LinkEmailDto } from './dto/reset-link.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
 @Controller('user')
 @ApiTags('User')
 export class UserController {
@@ -33,9 +35,44 @@ export class UserController {
 
 
   @Put('update/:id')
-  async updateUser(@Param('id') userId: string, @Body() updateUserDto: UpdateUserDto) {
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 5 },
+    ],
+      {
+        fileFilter: (req, file, cb) => {
+          const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
+
+          const ext = extname(file.originalname);
+
+          if (file.fieldname === 'image' && allowedImageTypes.includes(ext)) {
+            cb(null, true);
+          } 
+          else {
+            cb(
+              new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
+              false,
+            );
+          }
+        },
+        limits: {
+          fileSize: 4 * 1024 * 1024,
+        },
+      },
+    ),
+
+  )
+  async updateUser(@Param('id') userId: string,
+  @UploadedFiles()
+  files: {
+    image?: Express.Multer.File[];
+  },
+  
+  
+  @Body() updateUserDto: UpdateUserDto) {
     try {
-      const updatedUser = await this.userService.updateUser(userId, updateUserDto);
+      const updatedUser = await this.userService.updateUser(userId,files, updateUserDto);
 
       return updatedUser;
     } catch (error) {
