@@ -44,6 +44,19 @@ export class UserController {
       throw new Error('Failed to update user. Please try again later.');
     }
   }
+  @Put('reset-password/:id')
+  async resetPassword(@Param('id') userId: string, @Body() resetPassword: ResetPasswordDto) {
+    try {
+      const updatedUser = await this.userService.resetPassword(userId, resetPassword);
+
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating Password:', error.message);
+
+      throw new Error('Failed to update Password. Please try again later.');
+    }
+  }
+
 
   @Post('send-email')
   @SendEmailDocs()
@@ -133,19 +146,5 @@ async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
   }
 }
 
-  //reset password through user ID
-  @Put('reset-password/:id')
-  async resetPassword(@Param('id') userId: string,@Body() resetPasswordDto: ResetPasswordDto) {
-    try {
-      console.log(userId);
-    
-
-    const updatepassword=   await this.userService.resetPassword( userId,resetPasswordDto);
-      return updatepassword;
-     
-    } catch (error) {
-        return { message: 'Failed to reset password', error: error.message };
-    }
-  }
 
 }
