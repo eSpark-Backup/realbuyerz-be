@@ -66,12 +66,10 @@ export class UpdateUserDto {
     readonly social_id: string;
 
     @ApiProperty({ type: Boolean, default: false,required:false })
-    @IsBoolean({ message: 'Verified must be a Bool' })
     @IsOptional()
     readonly isVerified: boolean;
 
     @ApiProperty({ type: Boolean, default: false,required:false })
-    @IsBoolean({ message: 'profile visibility must be a Bool' })
     @IsOptional()
 
     readonly profile_visibility: boolean;
