@@ -196,6 +196,47 @@ export class UserService {
   }
   async createUser(createUserDto: CreateUserDto) {
     try {
+      const emailSubject = 'Welcome to YourApp';
+        const emailContent = 'Thank you for signing up!';
+
+      if(!createUserDto.password && createUserDto.profile_image ){
+        const existingUser = await this.prismaService.user.findUnique({
+          where: { email: createUserDto.email },
+        });
+
+  
+        if (existingUser) {
+          throw new ConflictException('Email is already in use');
+        }
+  
+        const userData = { ...createUserDto };
+  
+        const newUser = await this.prismaService.user.create({
+          data: userData,
+        });
+        
+    
+        await this.sendEmail(newUser.email, emailSubject, emailContent);
+  
+        const token = jwt.sign(
+          { userId: newUser.id, role: newUser.role },
+          TOKEN_KEY,
+          { expiresIn: token_expiry }
+        );
+  
+        return {
+          id: newUser.id,
+          first_name: newUser.first_name,
+          last_name: newUser.last_name,
+          email: newUser.email,
+          mobile_number: newUser.mobile_number,
+          profile_image: newUser.profile_image,
+          token: token,
+        };
+
+
+      }
+      else{
       const existingUser = await this.prismaService.user.findUnique({
         where: { email: createUserDto.email },
       });
@@ -210,6 +251,8 @@ export class UserService {
       const newUser = await this.prismaService.user.create({
         data: userData,
       });
+  
+      await this.sendEmail(newUser.email, emailSubject, emailContent);
 
       const token = jwt.sign(
         { userId: newUser.id, role: newUser.role },
@@ -225,6 +268,7 @@ export class UserService {
         mobile_number: newUser.mobile_number,
         token: token,
       };
+    }
     } catch (error) {
       if (error instanceof ConflictException) {
         return {

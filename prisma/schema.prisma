@@ -35,9 +35,9 @@ model User {
   whatsapp           String?
   country            String?
   address            String?
-  password           String
+  password           String?
   isVerified         Boolean   @default(false)
-  social_id          String
+  social_id          String?
   role               String
   profile_image      String?
   profile_visibility Boolean   @default(false)

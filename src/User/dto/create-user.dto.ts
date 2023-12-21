@@ -2,7 +2,7 @@
 // src/user/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEmail } from 'class-validator';
+import { IsNotEmpty, IsString, IsEmail, IsOptional } from 'class-validator';
 
 
 export class CreateUserDto {
@@ -31,9 +31,13 @@ export class CreateUserDto {
  
   @ApiProperty({ type: String })
   @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password cannot be empty' })
-  readonly password: string;
+  @IsOptional()
+  readonly password?: string;
 
+  @ApiProperty({ type: String })
+  @IsString({ message: 'Profile Image must be a string' })
+  @IsOptional()
+  readonly profile_image?: string;
  
   @ApiProperty({ type: String })
   @IsString({ message: 'Role must be a string' })
@@ -42,7 +46,7 @@ export class CreateUserDto {
 
   @ApiProperty({ type: String })
   @IsString({ message: 'Social id must be a string' })
-  @IsNotEmpty({ message: 'Social id cannot be empty' })
+  @IsOptional()
   readonly social_id: string;
 
 
