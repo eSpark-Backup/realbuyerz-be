@@ -11,7 +11,7 @@ import { SHA256 } from 'crypto-js';
 import * as uuid from 'uuid';
 import * as path from 'path';
 import { promises as fsPromises } from 'fs';
-
+import axios from 'axios';
 import * as  Sharp from 'sharp';
 import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
@@ -77,20 +77,48 @@ export class UserService {
     const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
     try {
-      const msg = {
-        to,
-        from: 'muhammadahsanty@gmail.com',
-        subject: 'Password Reset Link',
-        text: link,
-        html: `<p>Do not Share it with anyone</p>`,
-      };
-
-      await sgMail.send(msg);
+    await this.sendEmail(to, 'Password Reset Link', link);
+      
     } catch (error) {
       console.error('Error sending email:', error);
       throw new Error('Failed to send email');
     }
   }
+
+  async googleLogin(accessToken: string): Promise<{ token: string }> {
+    const userInfo = await this.getUserInfoFromGoogle(accessToken);
+
+    const user = await this.prismaService.user.findUnique({ where: { email: userInfo.email } });
+
+    if (user) {
+      const token = jwt.sign(
+        { userId: user.id, role: user.role },
+        TOKEN_KEY,
+        { expiresIn: token_expiry }
+      );
+      return { token };
+    } else {
+      throw new Error('User not found');
+    }
+  }
+  private async getUserInfoFromGoogle(accessToken: string): Promise<{ email: string }> {
+    try {
+       const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+      
+      const userInfo = response.data;
+  
+      return { email: userInfo.email };
+    } catch (error) {
+      console.error('Error getting user information from Google:', error);
+      throw new Error('Failed to get user information from Google');
+    }
+  }
+
+
 
 
   async verifyToken(token: string): Promise<string> {
@@ -182,7 +210,7 @@ export class UserService {
     try {
       const msg = {
         to,
-        from: 'muhammadahsanty@gmail.com',
+        from: 'ahsansaleem@esparkconsultants.com',
         subject,
         text: content,
         html: `<p>${content}</p>`,
@@ -467,6 +495,7 @@ export class UserService {
 
 
 
+
       }
       updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
 
@@ -475,6 +504,8 @@ export class UserService {
         data: updatedUserDto,
 
       });
+      const emailContent = `Dear ${existingUser.first_name} ${existingUser.last_name},\n\nYour password has been successfully updated. If you did not perform this action, please contact us immediately.`;
+      await this.sendEmail(existingUser.email, 'Password Update Notification', emailContent);
       return { success: true, message: 'Password updated successfully' };
     } catch (error) {
       console.error(error);

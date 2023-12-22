@@ -32,7 +32,10 @@ export class UserController {
   async loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.userService.loginUser(loginUserDto);
   }
-
+  @Post('google-login')
+  async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
+    return this.userService.googleLogin(accessToken);
+  }
 
   @Put('update/:id')
   @ApiConsumes('multipart/form-data')
@@ -95,18 +98,18 @@ export class UserController {
   }
 
 
-  @Post('send-email')
-  @SendEmailDocs()
-  async sendEmail(@Body() emailDto: EmailDto) {
-    try {
+  // @Post('send-email')
+  // @SendEmailDocs()
+  // async sendEmail(@Body() emailDto: EmailDto) {
+  //   try {
       
-      await this.userService.sendEmail(emailDto.to, emailDto.subject, emailDto.content);
-      return { message: 'Email sent successfully' };
-    } catch (error) {
+  //     await this.userService.sendEmail(emailDto.to, emailDto.subject, emailDto.content);
+  //     return { message: 'Email sent successfully' };
+  //   } catch (error) {
       
-      return { message: 'Failed to send email', error: error.message };
-    }
-  }
+  //     return { message: 'Failed to send email', error: error.message };
+  //   }
+  // }
 
 
   @Post('send-otp')

@@ -2,49 +2,51 @@
 // src/user/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEmail, IsOptional } from 'class-validator';
-
+import { IsNotEmpty, IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
+enum UserRole {
+  User = 'user',
+  Agent = 'agent',
+}
 
 export class CreateUserDto {
 
   
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String ,default:'Ahsan'})
   @IsString({ message: 'First name must be a string' })
   @IsNotEmpty({ message: 'First name cannot be empty' })
   readonly first_name: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String,default:'Badami' })
   @IsString({ message: 'Last name must be a string' })
   @IsNotEmpty({ message: 'Last name cannot be empty' })
   readonly last_name: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String})
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email cannot be empty' })
   readonly email: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String,required:false })
   @IsString({ message: 'Mobile number must be a string' })
   @IsNotEmpty({ message: 'Mobile number cannot be empty' })
   readonly mobile_number: string;
 
  
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String ,required:false })
   @IsString({ message: 'Password must be a string' })
   @IsOptional()
   readonly password?: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String  ,required:false})
   @IsString({ message: 'Profile Image must be a string' })
   @IsOptional()
   readonly profile_image?: string;
  
-  @ApiProperty({ type: String })
-  @IsString({ message: 'Role must be a string' })
-  @IsNotEmpty({ message: 'Role cannot be empty' })
+  @ApiProperty({ enum: UserRole, default: UserRole.User })
+  @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" or "agent".' })
   readonly role: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({ type: String ,required:false })
   @IsString({ message: 'Social id must be a string' })
   @IsOptional()
   readonly social_id: string;
