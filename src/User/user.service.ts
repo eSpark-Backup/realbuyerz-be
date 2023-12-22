@@ -62,7 +62,7 @@ export class UserService {
       const currentTime = new Date();
 
       if (currentTime >= expirationTime) {
-        throw new Error('Token has expired');
+        return { error: 'Token has Expired' };
       }
    
 
