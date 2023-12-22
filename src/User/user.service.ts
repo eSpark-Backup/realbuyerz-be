@@ -19,6 +19,7 @@ import * as Twilio from 'twilio';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
+import { OAuth2Client, VerifyIdTokenOptions  } from 'google-auth-library';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -29,8 +30,13 @@ const token_expiry = process.env.TOKEN_EXPIRY;
 
 @Injectable()
 export class UserService {
+  private readonly client: OAuth2Client;
+
   private twilioClient: Twilio.Twilio;
+ 
   constructor(private readonly prismaService: PrismaService) {
+    this.client = new OAuth2Client('717074050294-r9ini4ci8mm95v6io9lmjpnv6g41i7dn.apps.googleusercontent.com');
+
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     this.twilioClient = Twilio(twilioAccountSid, twilioAuthToken);
 
@@ -86,7 +92,7 @@ export class UserService {
   }
 
   async googleLogin(accessToken: string): Promise<{ token: string }> {
-    const userInfo = await this.getUserInfoFromGoogle(accessToken);
+    const userInfo = await this.verifyGoogleAccessToken(accessToken);
 
     const user = await this.prismaService.user.findUnique({ where: { email: userInfo.email } });
 
@@ -101,22 +107,21 @@ export class UserService {
       throw new Error('User not found');
     }
   }
-  private async getUserInfoFromGoogle(accessToken: string): Promise<{ email: string }> {
+
+  async verifyGoogleAccessToken(accessToken: string): Promise<any> {
     try {
-       const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-      
-      const userInfo = response.data;
-  
-      return { email: userInfo.email };
+      const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
+      const tokenInfo = response.data;
+
+     
+
+      return tokenInfo;
     } catch (error) {
-      console.error('Error getting user information from Google:', error);
-      throw new Error('Failed to get user information from Google');
+      console.error('Error verifying Google access token:', error.message);
+      throw new Error('Failed to verify Google access token');
     }
   }
+  
 
 
 

@@ -17,6 +17,9 @@ import { LinkEmailDto } from './dto/reset-link.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
+import { Injectable } from '@nestjs/common';
+
+
 @Controller('user')
 @ApiTags('User')
 export class UserController {
