@@ -35,7 +35,7 @@ export class UserService {
   private twilioClient: Twilio.Twilio;
  
   constructor(private readonly prismaService: PrismaService) {
-    this.client = new OAuth2Client('717074050294-r9ini4ci8mm95v6io9lmjpnv6g41i7dn.apps.googleusercontent.com');
+    this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     this.twilioClient = Twilio(twilioAccountSid, twilioAuthToken);
@@ -84,10 +84,19 @@ export class UserService {
         where: { email: email },
         data: { password: hashedPassword },
       });
+      const response ={
+        timestamp_ms: Date.now(),
+        action: 'Password Reset',
+      
+      };
+      
 
-      return { success: true, message: 'Password reset successfully' };
+      return { success: true, message: 'Password reset successfully',response };
+
     } catch (error) {
       console.error(error);
+
+      
       return { success: false, message: 'Failed to reset password. Please try again later.',error };
     }
   }
@@ -276,16 +285,15 @@ export class UserService {
           { expiresIn: token_expiry }
         );
   
-        return {
-          id: newUser.id,
-          first_name: newUser.first_name,
-          last_name: newUser.last_name,
-          email: newUser.email,
-          mobile_number: newUser.mobile_number,
-          profile_image: newUser.profile_image,
-          social_id: newUser.social_id,
-          token: token,
+        const response = {
+          timestamp_ms: Date.now(),
+          action: 'Sign Up',
+          User: {
+            token
+          },
+  
         };
+        return { success: true, message: 'User Created successfully', response };
 
 
       }
@@ -312,15 +320,18 @@ export class UserService {
         TOKEN_KEY,
         { expiresIn: token_expiry }
       );
+      const response = {
+        timestamp_ms: Date.now(),
+        action: 'Sign Up',
+        User: {
+          token
+        },
 
-      return {
-        id: newUser.id,
-        first_name: newUser.first_name,
-        last_name: newUser.last_name,
-        email: newUser.email,
-        mobile_number: newUser.mobile_number,
-        token: token,
       };
+      return { success: true, message: 'User Created successfully', response };
+
+
+     
     }
     } catch (error) {
       if (error instanceof ConflictException) {
@@ -355,7 +366,19 @@ export class UserService {
     const token = jwt.sign({ userId: user.id, role: user.role }, TOKEN_KEY, { expiresIn: token_expiry });
 
 
-    return { success: true, message: 'Login successful', token };
+    const response = {
+      timestamp_ms: Date.now(),
+      action: 'Logged In',
+      User: {
+        token
+      },
+
+    };
+    return { success: true, message: 'User Logged In successfully', response };
+
+
+
+
   }
 
 
@@ -531,7 +554,16 @@ export class UserService {
       });
       const emailContent = `Dear ${existingUser.first_name} ${existingUser.last_name},\n\nYour password has been successfully updated. If you did not perform this action, please contact us immediately.`;
       await this.sendEmail(existingUser.email, 'Password Update Notification', emailContent);
-      return { success: true, message: 'Password updated successfully' };
+
+
+      const response = {
+        timestamp_ms: Date.now(),
+        action: 'Password Update',
+      
+      };
+      return { success: true, message: 'Password updated successfully', response };
+
+      
     } catch (error) {
       console.error(error);
 
