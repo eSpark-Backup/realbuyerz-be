@@ -50,12 +50,27 @@ export class UserService {
     const enteredPasswordHash = SHA256(plainPassword).toString(CryptoJS.enc.Hex);
     return enteredPasswordHash === hashedPassword;
   }
-  async resetPasswordwithMail(userEmail: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
+  async resetPasswordwithMail(token: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
     try {
+      const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
+
+      if (!exp) {
+        return { error: 'Invalid access token' };
+      }
+
+      const expirationTime = new Date(exp * 1000);
+      const currentTime = new Date();
+
+      if (currentTime >= expirationTime) {
+        throw new Error('Token has expired');
+      }
+   
+
+      
       const { password } = resetPasswordwithMailDto;
 
       const user = await this.prismaService.user.findUnique({
-        where: { email: userEmail },
+        where: { email: email },
       });
 
       if (!user) {
@@ -66,14 +81,14 @@ export class UserService {
       const hashedPassword = await this.hashPassword(password);
 
       await this.prismaService.user.update({
-        where: { email: userEmail },
+        where: { email: email },
         data: { password: hashedPassword },
       });
 
       return { success: true, message: 'Password reset successfully' };
     } catch (error) {
       console.error(error);
-      return { success: false, message: 'Failed to reset password. Please try again later.' };
+      return { success: false, message: 'Failed to reset password. Please try again later.',error };
     }
   }
 
@@ -232,6 +247,10 @@ export class UserService {
       const emailSubject = 'Welcome to YourApp';
         const emailContent = 'Thank you for signing up!';
 
+        if(!createUserDto.password && !createUserDto.profile_image ){
+          return{ success: false, message: 'Password or Profile Image is required'}
+        }
+
       if(!createUserDto.password && createUserDto.profile_image ){
         const existingUser = await this.prismaService.user.findUnique({
           where: { email: createUserDto.email },
@@ -264,6 +283,7 @@ export class UserService {
           email: newUser.email,
           mobile_number: newUser.mobile_number,
           profile_image: newUser.profile_image,
+          social_id: newUser.social_id,
           token: token,
         };
 

@@ -114,7 +114,17 @@ export class UserController {
   //   }
   // }
 
+  @Put('password/:token')
+  async resetPasswordwithMail(@Param('token') token: string, @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto) {
+    try {
+      const updatePassword = await this.userService.resetPasswordwithMail(token, resetPasswordwithMailDto);
+      return updatePassword;
+    } catch (error) {
+      return { message: 'Failed to reset password', error: error.message };
+    }
+  }
 
+ 
   @Post('send-otp')
   @SendOtpDocs()
   async sendOtp(@Body() sendOtpDto: SendOtpDto) {
@@ -129,15 +139,8 @@ export class UserController {
   }
 
 
-@Put('reset-password/:email')
-async resetPasswordwithMail(@Param('email') userEmail: string, @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto) {
-  try {
-    const updatePassword = await this.userService.resetPasswordwithMail(userEmail, resetPasswordwithMailDto);
-    return updatePassword;
-  } catch (error) {
-    return { message: 'Failed to reset password', error: error.message };
-  }
-}
+
+
 
 @Post ('password-reset-email-link')
 async resetPasswordEmail(@Body() LinkEmailDto: LinkEmailDto) {
@@ -150,25 +153,6 @@ try{
     return { message: 'Failed to send password reset email', error: error.message };
   }
 }
-
-@Post ('verify-password-reset-link')
-async verifyPasswordResetLink(@Body() verifyEmailDto: VerifyEmailLinkDto) {
-  try {
-    const verificationResult = await this.userService.verifyToken(
-      
-      verifyEmailDto.token,
-    );
-
-    return { message: verificationResult ? verificationResult : 'Link Expired' };
-  } catch (error) {
-    return { message: 'Failed to verify Link', error: error.message };
-  }
-
-}
-
-
-
-
 
 
 @Post('verify-otp')
