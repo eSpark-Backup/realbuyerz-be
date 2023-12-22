@@ -2,7 +2,7 @@
 // src/user/controller/user.controller.ts
 
 import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { ApiConsumes, ApiTags  } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags  } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -36,6 +36,7 @@ export class UserController {
     return this.userService.loginUser(loginUserDto);
   }
   @Post('google-login')
+  @ApiBody({ required: true, schema: { example: { access_token: 'string' } } })
   async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
     return this.userService.googleLogin(accessToken);
   }
