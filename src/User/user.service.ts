@@ -247,7 +247,7 @@ export class UserService {
     try {
       const msg = {
         to,
-        from: 'ahsansaleem@esparkconsultants.com',
+        from: 'Real Buyerz <ahsansaleem@esparkconsultants.com>',
         subject,
         text: content,
         html: `<p>${content}</p>`,
