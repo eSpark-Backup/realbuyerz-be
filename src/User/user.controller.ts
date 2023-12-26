@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 // src/user/controller/user.controller.ts
 
-import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UploadedFiles, UseInterceptors, UsePipes } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiTags  } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -41,7 +41,7 @@ export class UserController {
     return this.userService.googleLogin(accessToken);
   }
 
-  @Put('update/:id')
+  @Put('update/:token')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -70,7 +70,7 @@ export class UserController {
     ),
 
   )
-  async updateUser(@Param('id') userId: string,
+  async updateUser(@Param('token') token: string,
   @UploadedFiles()
   files: {
     image?: Express.Multer.File[];
@@ -79,7 +79,9 @@ export class UserController {
   
   @Body() updateUserDto: UpdateUserDto) {
     try {
-      const updatedUser = await this.userService.updateUser(userId,files, updateUserDto);
+      console.log('Received DTO:', updateUserDto.isVerified);
+
+      const updatedUser = await this.userService.updateUser(token,files, updateUserDto);
 
       return updatedUser;
     } catch (error) {
@@ -88,10 +90,10 @@ export class UserController {
       throw new Error('Failed to update user. Please try again later.');
     }
   }
-  @Put('reset-password/:id')
-  async resetPassword(@Param('id') userId: string, @Body() resetPassword: ResetPasswordDto) {
+  @Put('reset-password/:token')
+  async resetPassword(@Param('token') token: string, @Body() resetPassword: ResetPasswordDto) {
     try {
-      const updatedUser = await this.userService.resetPassword(userId, resetPassword);
+      const updatedUser = await this.userService.resetPassword(token, resetPassword);
 
       return updatedUser;
     } catch (error) {

@@ -19,7 +19,7 @@ import * as Twilio from 'twilio';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
-import { OAuth2Client, VerifyIdTokenOptions } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -389,8 +389,25 @@ export class UserService {
 
 
 
-  async updateUser(userId: string, files: { image?: Express.Multer.File[]; }, updateUserDto: UpdateUserDto) {
+  async updateUser(token: string, files: { image?: Express.Multer.File[]; }, updateUserDto: UpdateUserDto) {
     try {
+      let parsedIsVerified: boolean;
+      let parsedProfileVisibility: boolean;
+
+      if (typeof updateUserDto.profile_visibility === 'string') {
+        const stringValue: string = updateUserDto.profile_visibility;
+        parsedProfileVisibility = stringValue.toLowerCase() === 'true';
+      } else {
+        parsedProfileVisibility = updateUserDto.profile_visibility;
+      }
+
+
+      if (typeof updateUserDto.isVerified === 'string') {
+        const stringValue: string = updateUserDto.isVerified;
+        parsedIsVerified = stringValue.toLowerCase() === 'true';
+      } else {
+        parsedIsVerified = updateUserDto.isVerified;
+      }
 
       if (files.image) {
         const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
@@ -400,13 +417,23 @@ export class UserService {
             throw new HttpException('Invalid image file type.', HttpStatus.BAD_REQUEST);
           }
         }
-      }
-      const maxFileSize = 4 * 1024 * 1024;
-      for (const file of [...(files.image || [])]) {
-        if (file.size > maxFileSize) {
-          throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
+
+
+        const maxFileSize = 4 * 1024 * 1024;
+        for (const file of [...(files.image || [])]) {
+          if (file.size > maxFileSize) {
+            throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
+          }
         }
       }
+
+      const verificationResult = this.verifyTokenAndGetUserId(token);
+      if (!(await verificationResult).success) {
+        return { success: false, message: 'Invalid access token' };
+      }
+      const userId = (await verificationResult).userId;
+
+
 
 
 
@@ -435,6 +462,8 @@ export class UserService {
         const imagePathsString = processedImages.map(image => image.savedImagePath).join(', ');
 
         updatedUserDto = { ...updatedUserDto, profile_image: imagePathsString };
+        updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
+        updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
         updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: parseInt(userId, 10) },
@@ -471,7 +500,10 @@ export class UserService {
         return { success: true, message: 'User updated successfully', response };
 
       }
+      
       else {
+        updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
+        updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
         updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: parseInt(userId, 10) },
@@ -500,7 +532,7 @@ export class UserService {
         const response = {
           timestamp_ms: Date.now(),
           action: 'update',
-          Property: {
+          User: {
             results
           },
 
@@ -512,14 +544,40 @@ export class UserService {
 
       return {
         success: false,
-        message: 'An error occurred while updating the user.',
+        message: 'An error occurred while updating the user.'+error.message,
       };
+    }
+  }
+  async verifyTokenAndGetUserId(token: string): Promise<{ success: boolean; userId?: string; }> {
+    try {
+      const decodedToken = jwt.verify(token, TOKEN_KEY);
+
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      if (decodedToken.exp && decodedToken.exp < currentTimestamp) {
+        return { success: false, userId: undefined };
+      }
+
+      const userId = decodedToken.userId;
+
+      return { success: true, userId: userId };
+    } catch (error) {
+      console.error('Error verifying token:', error.message);
+      return { success: false, userId: undefined };
     }
   }
 
 
-  async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
+  async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
     try {
+      const verificationResult = this.verifyTokenAndGetUserId(token);
+      if (!(await verificationResult).success) {
+        return { success: false, message: 'Invalid access token' };
+      }
+      const userId = (await verificationResult).userId;
+
+
+
+
       const existingUser = await this.prismaService.user.findUnique({
         where: { id: parseInt(userId, 10) },
       });
