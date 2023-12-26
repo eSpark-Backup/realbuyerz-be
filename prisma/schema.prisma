@@ -41,6 +41,7 @@ model User {
   role               String
   profile_image      String?
   profile_visibility Boolean   @default(false)
+  password_reset_token String?
   created_at         DateTime  @default(now())
   updated_at         DateTime?
 

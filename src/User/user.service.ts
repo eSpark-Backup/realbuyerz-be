@@ -19,7 +19,7 @@ import * as Twilio from 'twilio';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
-import { OAuth2Client, VerifyIdTokenOptions  } from 'google-auth-library';
+import { OAuth2Client, VerifyIdTokenOptions } from 'google-auth-library';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -33,7 +33,7 @@ export class UserService {
   private readonly client: OAuth2Client;
 
   private twilioClient: Twilio.Twilio;
- 
+
   constructor(private readonly prismaService: PrismaService) {
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -64,9 +64,9 @@ export class UserService {
       if (currentTime >= expirationTime) {
         return { error: 'Token has Expired' };
       }
-   
 
-      
+
+
       const { password } = resetPasswordwithMailDto;
 
       const user = await this.prismaService.user.findUnique({
@@ -76,28 +76,34 @@ export class UserService {
       if (!user) {
         return { success: false, message: 'User not found' };
       }
+      if (!user.password_reset_token || user.password_reset_token !== token) {
+        return { success: false, message: 'Password reset link is expired or invalid' };
+      }
 
 
       const hashedPassword = await this.hashPassword(password);
 
       await this.prismaService.user.update({
         where: { email: email },
-        data: { password: hashedPassword },
+        data: {
+          password: hashedPassword,
+          password_reset_token: null,
+        },
       });
-      const response ={
+      const response = {
         timestamp_ms: Date.now(),
         action: 'Password Reset',
-      
-      };
-      
 
-      return { success: true, message: 'Password reset successfully',response };
+      };
+
+
+      return { success: true, message: 'Password reset successfully', response };
 
     } catch (error) {
       console.error(error);
 
-      
-      return { success: false, message: 'Failed to reset password. Please try again later.',error };
+
+      return { success: false, message: 'Failed to reset password. Please try again later.', error };
     }
   }
 
@@ -106,9 +112,15 @@ export class UserService {
     console.log(token);
     const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
+
     try {
-    await this.sendEmail(to, 'Password Reset Link', link);
-      
+      await this.prismaService.user.update({
+        where: { email: to },
+        data: { password_reset_token: token },
+      });
+
+      await this.sendEmail(to, 'Password Reset Link', link);
+
     } catch (error) {
       console.error('Error sending email:', error);
       throw new Error('Failed to send email');
@@ -137,7 +149,7 @@ export class UserService {
       const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
       const tokenInfo = response.data;
 
-     
+
 
       return tokenInfo;
     } catch (error) {
@@ -145,7 +157,7 @@ export class UserService {
       throw new Error('Failed to verify Google access token');
     }
   }
-  
+
 
 
 
@@ -254,85 +266,85 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto) {
     try {
       const emailSubject = 'Welcome to YourApp';
-        const emailContent = 'Thank you for signing up!';
+      const emailContent = 'Thank you for signing up!';
 
-        if(!createUserDto.password && !createUserDto.profile_image ){
-          return{ success: false, message: 'Password or Profile Image is required'}
-        }
+      if (!createUserDto.password && !createUserDto.profile_image) {
+        return { success: false, message: 'Password or Profile Image is required' }
+      }
 
-      if(!createUserDto.password && createUserDto.profile_image ){
+      if (!createUserDto.password && createUserDto.profile_image) {
         const existingUser = await this.prismaService.user.findUnique({
           where: { email: createUserDto.email },
         });
 
-  
+
         if (existingUser) {
           throw new ConflictException('Email is already in use');
         }
-  
+
         const userData = { ...createUserDto };
-  
+
         const newUser = await this.prismaService.user.create({
           data: userData,
         });
-        
-    
+
+
         await this.sendEmail(newUser.email, emailSubject, emailContent);
-  
+
         const token = jwt.sign(
           { userId: newUser.id, role: newUser.role },
           TOKEN_KEY,
           { expiresIn: token_expiry }
         );
-  
+
         const response = {
           timestamp_ms: Date.now(),
           action: 'Sign Up',
           User: {
             token
           },
-  
+
         };
         return { success: true, message: 'User Created successfully', response };
 
 
       }
-      else{
-      const existingUser = await this.prismaService.user.findUnique({
-        where: { email: createUserDto.email },
-      });
+      else {
+        const existingUser = await this.prismaService.user.findUnique({
+          where: { email: createUserDto.email },
+        });
 
-      if (existingUser) {
-        throw new ConflictException('Email is already in use');
+        if (existingUser) {
+          throw new ConflictException('Email is already in use');
+        }
+
+        const hashedPassword = await this.hashPassword(createUserDto.password);
+        const userData = { ...createUserDto, password: hashedPassword };
+
+        const newUser = await this.prismaService.user.create({
+          data: userData,
+        });
+
+        await this.sendEmail(newUser.email, emailSubject, emailContent);
+
+        const token = jwt.sign(
+          { userId: newUser.id, role: newUser.role },
+          TOKEN_KEY,
+          { expiresIn: token_expiry }
+        );
+        const response = {
+          timestamp_ms: Date.now(),
+          action: 'Sign Up',
+          User: {
+            token
+          },
+
+        };
+        return { success: true, message: 'User Created successfully', response };
+
+
+
       }
-
-      const hashedPassword = await this.hashPassword(createUserDto.password);
-      const userData = { ...createUserDto, password: hashedPassword };
-
-      const newUser = await this.prismaService.user.create({
-        data: userData,
-      });
-  
-      await this.sendEmail(newUser.email, emailSubject, emailContent);
-
-      const token = jwt.sign(
-        { userId: newUser.id, role: newUser.role },
-        TOKEN_KEY,
-        { expiresIn: token_expiry }
-      );
-      const response = {
-        timestamp_ms: Date.now(),
-        action: 'Sign Up',
-        User: {
-          token
-        },
-
-      };
-      return { success: true, message: 'User Created successfully', response };
-
-
-     
-    }
     } catch (error) {
       if (error instanceof ConflictException) {
         return {
@@ -559,11 +571,11 @@ export class UserService {
       const response = {
         timestamp_ms: Date.now(),
         action: 'Password Update',
-      
+
       };
       return { success: true, message: 'Password updated successfully', response };
 
-      
+
     } catch (error) {
       console.error(error);
 
