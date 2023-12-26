@@ -7,6 +7,7 @@ import { extname } from "path";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { updatedPropertyDto } from "./dto/update-property.dto";
 import { PropertyQueryDto } from "./dto/property_quey-dto";
+import { propertyImageFileInterceptor } from "src/utils/propertyfile.interceptor";
 
 @Controller('property')
 @ApiBearerAuth()
@@ -16,41 +17,11 @@ export class PropertyController {
   @Post()
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'image', maxCount: 5 },
-      { name: 'video', maxCount: 5 },
-    ],
-      {
-        fileFilter: (req, file, cb) => {
-          const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
-          const allowedVideoTypes = ['.mp4', '.avi', '.mkv'];
-
-          const ext = extname(file.originalname);
-
-          if (file.fieldname === 'image' && allowedImageTypes.includes(ext)) {
-            cb(null, true);
-          } else if (file.fieldname === 'video' && allowedVideoTypes.includes(ext)) {
-            cb(null, true);
-          } else {
-            cb(
-              new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
-              false,
-            );
-          }
-        },
-        limits: {
-          fileSize: 4 * 1024 * 1024,
-        },
-      },
-    ),
-
-  )
+  @UseInterceptors(propertyImageFileInterceptor)
   async createProperty(
     @UploadedFiles()
     files: {
       image?: Express.Multer.File[];
-      video?: Express.Multer.File[];
     },
     @Body() createProperty: CreatePropertyDto,
   ) {
@@ -63,42 +34,11 @@ export class PropertyController {
   @Put('/:id')
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
-
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'image', maxCount: 5 },
-      { name: 'video', maxCount: 5 },
-    ],
-      {
-        fileFilter: (req, file, cb) => {
-          const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
-          const allowedVideoTypes = ['.mp4', '.avi', '.mkv'];
-
-          const ext = extname(file.originalname);
-
-          if (file.fieldname === 'image' && allowedImageTypes.includes(ext)) {
-            cb(null, true);
-          } else if (file.fieldname === 'video' && allowedVideoTypes.includes(ext)) {
-            cb(null, true);
-          } else {
-            cb(
-              new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
-              false,
-            );
-          }
-        },
-        limits: {
-          fileSize: 4 * 1024 * 1024,
-        },
-      },
-    ),
-  )
-
+  @UseInterceptors(propertyImageFileInterceptor)
   async updateProperty(@Param('id') property_id: string,
     @UploadedFiles()
     files: {
       image?: Express.Multer.File[];
-      video?: Express.Multer.File[];
     },
     @Body() updateProperty: updatedPropertyDto,
   ) {

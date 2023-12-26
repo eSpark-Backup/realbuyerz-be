@@ -18,6 +18,7 @@ import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { Injectable } from '@nestjs/common';
+import { imageFileInterceptor } from 'src/utils/userfile.interceptor';
 
 
 @Controller('user')
@@ -43,33 +44,7 @@ export class UserController {
 
   @Put('update/:token')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'image', maxCount: 5 },
-    ],
-      {
-        fileFilter: (req, file, cb) => {
-          const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
-
-          const ext = extname(file.originalname);
-
-          if (file.fieldname === 'image' && allowedImageTypes.includes(ext)) {
-            cb(null, true);
-          } 
-          else {
-            cb(
-              new HttpException('Invalid file type.', HttpStatus.BAD_REQUEST),
-              false,
-            );
-          }
-        },
-        limits: {
-          fileSize: 4 * 1024 * 1024,
-        },
-      },
-    ),
-
-  )
+  @UseInterceptors(imageFileInterceptor)
   async updateUser(@Param('token') token: string,
   @UploadedFiles()
   files: {

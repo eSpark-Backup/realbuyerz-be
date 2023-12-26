@@ -106,7 +106,7 @@ export class PropertyService {
 
 
     }
-    async createProperty(files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; }, createProperty: CreatePropertyDto) {
+    async createProperty(files: { image?: Express.Multer.File[] }, createProperty: CreatePropertyDto) {
 
 
         if (files.image) {
@@ -119,18 +119,8 @@ export class PropertyService {
             }
         }
 
-        if (files.video) {
-            const allowedVideoTypes = ['.mp4', '.avi', '.mkv'];
-            for (const file of files.video) {
-                const ext = extname(file.originalname);
-                if (!allowedVideoTypes.includes(ext)) {
-                    throw new HttpException('Invalid video file type.', HttpStatus.BAD_REQUEST);
-                }
-            }
-        }
-
         const maxFileSize = 4 * 1024 * 1024;
-        for (const file of [...(files.image || []), ...(files.video || [])]) {
+        for (const file of [...(files.image || [])]) {
             if (file.size > maxFileSize) {
                 throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
             }
@@ -193,7 +183,7 @@ export class PropertyService {
 
             // }
             // else
-            if (files.image && !files.video) {
+            if (files.image) {
                 processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
 
 
@@ -273,9 +263,8 @@ export class PropertyService {
     }
 
 
-    async updateProperty(property_id: string, files: { image?: Express.Multer.File[]; video?: Express.Multer.File[]; }, updateProperty: updatedPropertyDto) {
+    async updateProperty(property_id: string, files: { image?: Express.Multer.File[]}, updateProperty: updatedPropertyDto) {
         const property = { ...updateProperty }
-        const id = parseInt(property_id);
         if (property.user_id) {
             property.user_id = parseInt(property.user_id);
         }
@@ -300,18 +289,10 @@ export class PropertyService {
             }
         }
 
-        if (files.video) {
-            const allowedVideoTypes = ['.mp4', '.avi', '.mkv'];
-            for (const file of files.video) {
-                const ext = extname(file.originalname);
-                if (!allowedVideoTypes.includes(ext)) {
-                    throw new HttpException('Invalid video file type.', HttpStatus.BAD_REQUEST);
-                }
-            }
-        }
+        
 
         const maxFileSize = 4 * 1024 * 1024;
-        for (const file of [...(files.image || []), ...(files.video || [])]) {
+        for (const file of [...(files.image || [])]) {
             if (file.size > maxFileSize) {
                 throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
             }
