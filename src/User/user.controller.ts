@@ -79,7 +79,6 @@ export class UserController {
   
   @Body() updateUserDto: UpdateUserDto) {
     try {
-      console.log('Received DTO:', updateUserDto.isVerified);
 
       const updatedUser = await this.userService.updateUser(token,files, updateUserDto);
 
