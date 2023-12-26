@@ -100,7 +100,6 @@ export class UserService {
       return { success: true, message: 'Password reset successfully', response };
 
     } catch (error) {
-      console.error(error);
 
 
       return { success: false, message: 'Failed to reset password. Please try again later.', error };
@@ -109,7 +108,6 @@ export class UserService {
 
   async sendpasswordResetEmail(to: string): Promise<void> {
     const token = jwt.sign({ email: to }, TOKEN_KEY, { expiresIn: token_expiry });
-    console.log(token);
     const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
 
@@ -122,7 +120,6 @@ export class UserService {
       await this.sendEmail(to, 'Password Reset Link', link);
 
     } catch (error) {
-      console.error('Error sending email:', error);
       throw new Error('Failed to send email');
     }
   }
@@ -153,7 +150,6 @@ export class UserService {
 
       return tokenInfo;
     } catch (error) {
-      console.error('Error verifying Google access token:', error.message);
       throw new Error('Failed to verify Google access token');
     }
   }
@@ -259,7 +255,6 @@ export class UserService {
 
       await sgMail.send(msg);
     } catch (error) {
-      console.error('Error sending email:', error);
       throw new Error('Failed to send emaiil');
     }
   }
@@ -353,7 +348,6 @@ export class UserService {
         };
       }
 
-      console.error(error);
       return {
         success: false,
         message: 'An error occurred while creating the user.',
@@ -515,7 +509,6 @@ export class UserService {
       }
     }
     catch (error) {
-      console.error(error);
 
       return {
         success: false,
@@ -527,7 +520,6 @@ export class UserService {
 
   async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
     try {
-      console.log(userId);
       const existingUser = await this.prismaService.user.findUnique({
         where: { id: parseInt(userId, 10) },
       });
@@ -577,7 +569,6 @@ export class UserService {
 
 
     } catch (error) {
-      console.error(error);
 
       return {
         success: false,
@@ -593,7 +584,6 @@ export class UserService {
 
 
   private async processSingleImage(file: Express.Multer.File): Promise<any> {
-    console.log('File:', file);
     const buffer = await Sharp(file.buffer)
       .resize({ width: 600, height: 500, fit: 'cover' })
       .toBuffer();
