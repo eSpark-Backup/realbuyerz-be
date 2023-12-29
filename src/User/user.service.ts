@@ -127,6 +127,11 @@ export class UserService {
   async googleLogin(accessToken: string): Promise<{ token: string }> {
     const userInfo = await this.verifyGoogleAccessToken(accessToken);
 
+    if (!userInfo || userInfo.success === false) {
+      throw new HttpException('Failed to Verify Google Access Token', HttpStatus.UNAUTHORIZED);
+
+    }
+
     const user = await this.prismaService.user.findUnique({ where: { email: userInfo.email } });
 
     if (user) {
@@ -150,7 +155,8 @@ export class UserService {
 
       return tokenInfo;
     } catch (error) {
-      throw new Error('Failed to verify Google access token');
+      return false;
+
     }
   }
 
