@@ -20,6 +20,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
 import { OAuth2Client } from 'google-auth-library';
+import { saveImageToDisk } from '../utils/saveImage';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -651,7 +652,8 @@ export class UserService {
     const buffer = await Sharp(file.buffer)
       .resize({ width: 600, height: 500, fit: 'cover' })
       .toBuffer();
-    const savedImagePath = await this.saveImageToDisk(buffer, file.originalname);
+      const savedImagePath = await saveImageToDisk(buffer, file.originalname);
+
 
     return {
       ...file,
@@ -659,17 +661,7 @@ export class UserService {
     };
   }
 
-  private async saveImageToDisk(buffer: Buffer, filename: string): Promise<string> {
-    function generateRandomUUID(): string {
-      return uuid.v4();
-    }
-    const randomUUID = generateRandomUUID();
-    const destinationFolder = 'upload';
-    const filePath = path.join(destinationFolder, `${randomUUID}_${filename}`);
 
-    await fsPromises.writeFile(filePath, buffer);
-    return filePath;
-  }
 
 }
 

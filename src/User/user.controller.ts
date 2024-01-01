@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 // src/user/controller/user.controller.ts
 
-import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UploadedFiles, UseInterceptors, UsePipes } from '@nestjs/common';
+import { Body, Controller,  Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiTags  } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';

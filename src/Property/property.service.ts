@@ -11,49 +11,40 @@ import { updatedPropertyDto } from './dto/update-property.dto';
 import { PropertyDataDTO } from './dto/create-propertyData.dto';
 import { Prisma } from '@prisma/client';
 import * as uuid from 'uuid';
+import { saveImageToDisk } from '../utils/saveImage';
+
 
 @Injectable()
 export class PropertyService {
     constructor(private readonly prismaService: PrismaService) { }
     
 
-    private async saveImageToDisk(buffer: Buffer, filename: string): Promise<string> {
-        function generateRandomUUID(): string {
-            return uuid.v4();
-          }
-          const randomUUID = generateRandomUUID();
-        const destinationFolder = 'upload';
-        const filePath = path.join(destinationFolder, `${randomUUID}_${filename}`);
-
-        await fsPromises.writeFile(filePath, buffer);
-        return filePath;
-    }
+ 
 
 
     private async processSingleImage(file: Express.Multer.File): Promise<any> {
         console.log('File:', file);
 
-        const originalMetadata = await Sharp(file.path).metadata();
-        const watermarkPath = 'src/Property/Quote.png';
+        const watermarkPath = 'src/utils/watermark/Quote.png';
 
-        const buffer = await Sharp(file.path)
+        const buffer = await Sharp(file.buffer)
             .resize({ width: 600, height: 500, fit: 'cover' })
             .composite([{ input: await readFile(resolve(watermarkPath)), gravity: 'center' }])
             .png()
             .toBuffer();
 
-        const resizedMetadata = await Sharp(buffer).metadata();
+        // const resizedMetadata = await Sharp(buffer).metadata();
 
-        console.log('Original Dimensions:', originalMetadata.width, 'x', originalMetadata.height);
-        console.log('Resized Dimensions:', resizedMetadata.width, 'x', resizedMetadata.height);
+        // console.log('Original Dimensions:', originalMetadata.width, 'x', originalMetadata.height);
+        // console.log('Resized Dimensions:', resizedMetadata.width, 'x', resizedMetadata.height);
 
-        const dimensionsChanged =
-            originalMetadata.width !== resizedMetadata.width ||
-            originalMetadata.height !== resizedMetadata.height;
+        // const dimensionsChanged =
+        //     originalMetadata.width !== resizedMetadata.width ||
+        //     originalMetadata.height !== resizedMetadata.height;
 
-        console.log('Dimensions Changed:', dimensionsChanged);
+        // console.log('Dimensions Changed:', dimensionsChanged);
 
-        const savedImagePath = await this.saveImageToDisk(buffer, file.originalname);
+        const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
         return {
             ...file,
