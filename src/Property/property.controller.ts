@@ -10,6 +10,7 @@ import { CreatePropertyDto } from "./dto/create-property.dto";
 import { updatedPropertyDto } from "./dto/update-property.dto";
 import { PropertyQueryDto } from "./dto/property_quey-dto";
 import { propertyImageFileInterceptor } from "src/utils/propertyfile.interceptor";
+import { CreateApiDocs, FindAllApiDocs, UpdateApiDocs } from "src/utils/property.decorator";
 
 @Controller('property')
 @ApiBearerAuth()
@@ -20,6 +21,7 @@ export class PropertyController {
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(propertyImageFileInterceptor)
+  @CreateApiDocs()
   async createProperty(
     @UploadedFiles()
     files: {
@@ -37,6 +39,7 @@ export class PropertyController {
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(propertyImageFileInterceptor)
+  @UpdateApiDocs()
   async updateProperty(@Param('id') property_id: string,
     @UploadedFiles()
     files: {
@@ -61,6 +64,7 @@ export class PropertyController {
   }
 
   @Get()
+  @FindAllApiDocs()
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
