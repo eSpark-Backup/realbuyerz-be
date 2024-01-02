@@ -5,7 +5,6 @@ import { PropertyController } from './property.controller';
 import { PropertyService } from './property.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { MulterModule } from '@nestjs/platform-express';
 
 
 @Module({

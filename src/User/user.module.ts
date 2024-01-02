@@ -7,7 +7,6 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthMiddleware } from 'src/auth/jwt.auth-gaurd';
-import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [PrismaModule], 

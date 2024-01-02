@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 // src/user/dto/update-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
