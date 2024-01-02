@@ -121,7 +121,7 @@ export class UserService {
       await this.sendEmail(to, 'Password Reset Link', link);
 
     } catch (error) {
-      throw new Error('Failed to send email');
+      throw new Error('Failed to send password reset email');
     }
   }
 
@@ -470,7 +470,7 @@ export class UserService {
 
         updatedUserDto = { ...updatedUserDto, profile_image: imagePathsString };
         updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
-        updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
+        updatedUserDto = { ...updatedUserDto, isVerified: parsedIsVerified };
         updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: parseInt(userId, 10) },

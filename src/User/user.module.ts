@@ -10,8 +10,7 @@ import { AuthMiddleware } from 'src/auth/jwt.auth-gaurd';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
-  imports: [PrismaModule,
-    MulterModule.register()], 
+  imports: [PrismaModule], 
   controllers: [UserController], 
   providers: [UserService,PrismaService,AuthMiddleware], 
   exports: [UserService], 

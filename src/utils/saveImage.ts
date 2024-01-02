@@ -12,7 +12,7 @@ export function generateRandomUUID(): string {
 export async function saveImageToDisk(buffer: Buffer, filename: string): Promise<string> {
   const randomUUID = generateRandomUUID();
   const destinationFolder = 'upload';
-  const filePath = path.join(destinationFolder, `${randomUUID}_${filename}`);
+  const filePath = path.join(destinationFolder, `${randomUUID}_${filename}`).replace(/\\/g, '/');  
 
   await fsPromises.writeFile(filePath, buffer);
   return filePath;

@@ -23,7 +23,6 @@ export class PropertyService {
 
 
     private async processSingleImage(file: Express.Multer.File): Promise<any> {
-        console.log('File:', file);
 
         const watermarkPath = 'src/utils/watermark/Quote.png';
 

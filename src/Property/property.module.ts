@@ -9,8 +9,7 @@ import { MulterModule } from '@nestjs/platform-express';
 
 
 @Module({
-  imports: [PrismaModule,
-    MulterModule.register()], 
+  imports: [PrismaModule], 
   controllers: [PropertyController],
   providers: [PropertyService,PrismaService],
   exports: [PropertyService],
