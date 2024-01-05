@@ -3,6 +3,7 @@
 /node_modules
 /env
 /prisma/migrations
+/upload
 
 # Logs
 logs
