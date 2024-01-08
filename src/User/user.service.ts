@@ -311,12 +311,7 @@ export class UserService {
 
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
-
-
-
         const token = await this.generateJwtToken(newUser);
-
-
         const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
 
         return signUpResponse;
