@@ -53,6 +53,27 @@ export class UserService {
     const enteredPasswordHash = SHA256(plainPassword).toString(CryptoJS.enc.Hex);
     return enteredPasswordHash === hashedPassword;
   }
+
+  async generateJwtToken(user) {
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      TOKEN_KEY,
+      { expiresIn: token_expiry }
+    );
+    return token;
+  }
+
+  async generateResponse(action, token, message) {
+    const response = {
+      timestamp_ms: Date.now(),
+      action: action,
+      User: {
+        token: token
+      },
+    };
+    return { success: true, message: message, response };
+  }
+
   async resetPasswordwithMail(token: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
     try {
       const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
@@ -93,14 +114,9 @@ export class UserService {
           password_reset_token: null,
         },
       });
-      const response = {
-        timestamp_ms: Date.now(),
-        action: 'Password Reset',
+      const passwordResetResponse = this.generateResponse('Password Reset', null, 'Password reset successfully');
 
-      };
-
-
-      return { success: true, message: 'Password reset successfully', response };
+      return passwordResetResponse;
 
     } catch (error) {
 
@@ -127,41 +143,39 @@ export class UserService {
     }
   }
 
-  async googleLogin(accessToken: string): Promise<{ token: string }> {
-    const userInfo = await this.verifyGoogleAccessToken(accessToken);
+  // async googleLogin(accessToken: string): Promise<{ token: any }> {
+  //   const userInfo = await this.verifyGoogleAccessToken(accessToken);
 
-    if (!userInfo || userInfo.success === false) {
-      throw new HttpException('Failed to Verify Google Access Token', HttpStatus.UNAUTHORIZED);
+  //   if (!userInfo || userInfo.success === false) {
+  //     throw new HttpException('Failed to Verify Google Access Token', HttpStatus.UNAUTHORIZED);
 
-    }
+  //   }
 
-    const user = await this.prismaService.user.findUnique({ where: { email: userInfo.email } });
+  //   const user = await this.prismaService.user.findUnique({ where: { email: userInfo.email } });
 
-    if (user) {
-      const token = jwt.sign(
-        { userId: user.id, role: user.role },
-        TOKEN_KEY,
-        { expiresIn: token_expiry }
-      );
-      return { token };
-    } else {
-      throw new Error('User not found');
-    }
-  }
+  //   if (user) {
+  //     const token = this.generateJwtToken(user);
 
-  async verifyGoogleAccessToken(accessToken: string): Promise<any> {
-    try {
-      const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
-      const tokenInfo = response.data;
+  //     return { token };
+
+  //   } else {
+  //     throw new Error('User not found');
+  //   }
+  // }
+
+  // async verifyGoogleAccessToken(accessToken: string): Promise<any> {
+  //   try {
+  //     const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
+  //     const tokenInfo = response.data;
 
 
 
-      return tokenInfo;
-    } catch (error) {
-      return false;
+  //     return tokenInfo;
+  //   } catch (error) {
+  //     return false;
 
-    }
-  }
+  //   }
+  // }
 
 
 
@@ -283,7 +297,10 @@ export class UserService {
 
 
         if (existingUser) {
-          throw new ConflictException('Email is already in use');
+          const token = await this.generateJwtToken(existingUser);
+          const signUpResponse = this.generateResponse('Sign Up', token, 'User Logged in successfully');
+
+          return signUpResponse;
         }
 
         const userData = { ...createUserDto };
@@ -295,21 +312,14 @@ export class UserService {
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
 
-        const token = jwt.sign(
-          { userId: newUser.id, role: newUser.role },
-          TOKEN_KEY,
-          { expiresIn: token_expiry }
-        );
 
-        const response = {
-          timestamp_ms: Date.now(),
-          action: 'Sign Up',
-          User: {
-            token
-          },
 
-        };
-        return { success: true, message: 'User Created successfully', response };
+        const token = await this.generateJwtToken(newUser);
+
+
+        const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
+
+        return signUpResponse;
 
 
       }
@@ -331,21 +341,12 @@ export class UserService {
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
 
-        const token = jwt.sign(
-          { userId: newUser.id, role: newUser.role },
-          TOKEN_KEY,
-          { expiresIn: token_expiry }
-        );
-        const response = {
-          timestamp_ms: Date.now(),
-          action: 'Sign Up',
-          User: {
-            token
-          },
+        const token = await this.generateJwtToken(newUser);
 
-        };
-        return { success: true, message: 'User Created successfully', response };
 
+        const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
+
+        return signUpResponse;
 
 
       }
@@ -378,19 +379,11 @@ export class UserService {
     if (!passwordMatch) {
       return { success: false, message: 'Invalid password' };
     }
-    const token = jwt.sign({ userId: user.id, role: user.role }, TOKEN_KEY, { expiresIn: token_expiry });
+    const token = await this.generateJwtToken(user);
 
+    const loginResponse = this.generateResponse('Logged In', token, 'User Logged In successfully');
 
-    const response = {
-      timestamp_ms: Date.now(),
-      action: 'Logged In',
-      User: {
-        token
-      },
-
-    };
-    return { success: true, message: 'User Logged In successfully', response };
-
+    return loginResponse;
 
 
 
@@ -498,18 +491,12 @@ export class UserService {
         });
 
 
-        const response = {
-          timestamp_ms: Date.now(),
-          action: 'update',
-          Property: {
-            results
-          },
+        const updateResponse = this.generateResponse('update', results, 'User updated successfully');
 
-        };
-        return { success: true, message: 'User updated successfully', response };
+        return updateResponse;
 
       }
-      
+
       else {
         updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
         updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
@@ -538,22 +525,16 @@ export class UserService {
         });
 
 
-        const response = {
-          timestamp_ms: Date.now(),
-          action: 'update',
-          User: {
-            results
-          },
+        const updateResponse = this.generateResponse('Update', results, 'User updated successfully');
 
-        };
-        return { success: true, message: 'User updated successfully', response };
+        return updateResponse;
       }
     }
     catch (error) {
 
       return {
         success: false,
-        message: 'An error occurred while updating the user.'+error.message,
+        message: 'An error occurred while updating the user.' + error.message,
       };
     }
   }
@@ -627,12 +608,9 @@ export class UserService {
       await this.sendEmail(existingUser.email, 'Password Update Notification', emailContent);
 
 
-      const response = {
-        timestamp_ms: Date.now(),
-        action: 'Password Update',
+      const passwordUpdateResponse = this.generateResponse('Password Update', null, 'Password updated successfully');
 
-      };
-      return { success: true, message: 'Password updated successfully', response };
+      return passwordUpdateResponse;
 
 
     } catch (error) {
@@ -654,7 +632,7 @@ export class UserService {
     const buffer = await Sharp(file.buffer)
       .resize({ width: 600, height: 500, fit: 'cover' })
       .toBuffer();
-      const savedImagePath = await saveImageToDisk(buffer, file.originalname);
+    const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
 
     return {

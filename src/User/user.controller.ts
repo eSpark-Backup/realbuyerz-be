@@ -36,11 +36,11 @@ export class UserController {
   async loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.userService.loginUser(loginUserDto);
   }
-  @Post('google-login')
-  @ApiBody({ required: true, schema: { example: { access_token: 'string' } } })
-  async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
-    return this.userService.googleLogin(accessToken);
-  }
+  // @Post('google-login')
+  // @ApiBody({ required: true, schema: { example: { access_token: 'string' } } })
+  // async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
+  //   return this.userService.googleLogin(accessToken);
+  // }
 
   @Put('update/:token')
   @ApiConsumes('multipart/form-data')

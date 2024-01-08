@@ -14,16 +14,12 @@ import { PropertyDataDTO } from './dto/create-propertyData.dto';
 import { Prisma } from '@prisma/client';
 import * as uuid from 'uuid';
 import { saveImageToDisk } from '../utils/saveImage';
+import { generateResponse } from 'src/utils/response';
 
 
 @Injectable()
 export class PropertyService {
     constructor(private readonly prismaService: PrismaService) { }
-    
-
- 
-
-
     private async processSingleImage(file: Express.Multer.File): Promise<any> {
 
         const watermarkPath = 'src/utils/watermark/Quote.png';
@@ -189,16 +185,11 @@ export class PropertyService {
                     data: propertyData,
                 });
 
-                const response = {
-                    timestamp_ms: Date.now(),
-                    action: 'Created Property Data',
-                    Property: {
-                        result
-                    },
+                
+                const propertyResponse = generateResponse("Created Property Data", "Property Created successfully", { result },"Property");
 
-                };
 
-                return { success: true, message: 'Property Created successfully', response };
+                return propertyResponse;
 
 
 
@@ -240,17 +231,6 @@ export class PropertyService {
                 };
             }
         }
-
-
-
-
-
-
-
-
-
-
-
 
     }
 
@@ -375,20 +355,10 @@ export class PropertyService {
                         data: propertyData,
                     });
 
+                    const propertyResponse = generateResponse('Updated Property Data', 'Property Updated successfully', { result }, "Property");
 
 
-
-
-                    const response = {
-                        timestamp_ms: Date.now(),
-                        action: 'Updated Property Data',
-                        Property: {
-                            result
-                        },
-
-                    };
-
-                    return { success: true, message: 'Property Updated successfully', response };
+                    return propertyResponse;
 
                 }
 
@@ -467,16 +437,14 @@ export class PropertyService {
                         },
                     });
 
-                    const response = {
-                        timestamp_ms: Date.now(),
-                        action: 'Updated Property Data',
-                        Property: {
-                            result
-                        },
+                    const propertyResponse = generateResponse(
+                        'Updated Property Data',
+                        'Property Updated successfully',
+                        { result },
+                        'Property'
+                    );
+                    return propertyResponse;
 
-                    };
-
-                    return { success: true, message: 'Property Updated successfully', response };
 
 
                 }
