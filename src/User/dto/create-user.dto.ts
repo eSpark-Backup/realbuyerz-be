@@ -23,7 +23,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Last name cannot be empty' })
   readonly last_name: string;
 
-  @ApiProperty({ type: String})
+  @ApiProperty({ type: String,default:'ahsan@mail.com'})
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email cannot be empty' })
   readonly email: string;

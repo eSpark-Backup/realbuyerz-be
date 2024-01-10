@@ -22,7 +22,7 @@ export class UpdateUserDto {
     @IsOptional()
     readonly last_name: string;
 
-    @ApiProperty({ type: String, required: false })
+    @ApiProperty({ type: String,default:'ahsan@mail.com'})
     @IsEmail({}, { message: 'Invalid email format' })
     @IsOptional()
 
@@ -68,7 +68,6 @@ export class UpdateUserDto {
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Social id must be a string' })
     @IsOptional()
-
     readonly social_id: string;
 
     @ApiProperty({ type: Boolean, default: false, required: false })

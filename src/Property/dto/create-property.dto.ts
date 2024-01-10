@@ -24,7 +24,7 @@ export class CreatePropertyDto {
   
   readonly property_name: string;
   
- @ApiProperty({ type:Number, example: 'User ID' })
+ @ApiProperty({ type:Number, example: 1 })
 //  @IsNotEmpty({ message: 'User ID cannot be empty' })
  @IsOptional()
  
