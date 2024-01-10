@@ -5,11 +5,11 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsBooleanString, IsEmail, IsEnum, IsOptional, IsString, isBoolean } from 'class-validator';
-enum UserRole {
-    agent = 'agent',
-    user = 'user',
-    // Add other roles as needed
-}
+// enum UserRole {
+//     agent = 'agent',
+//     user = 'user',
+//     // Add other roles as needed
+// }
 
 export class UpdateUserDto {
     @ApiProperty({ type: String, required: false })
@@ -55,15 +55,15 @@ export class UpdateUserDto {
     readonly address?: string;
 
 
-    @ApiProperty({ type: String, required: false })
-    @IsString({ message: 'Profile image must be a string' })
-    @IsOptional()
+    // @ApiProperty({ type: String, required: false })
+    // @IsString({ message: 'Profile image must be a string' })
+    // @IsOptional()
     readonly profile_image: string;
 
-    @ApiProperty({ enum: UserRole, required: false })
-    @IsEnum(UserRole, { message: 'Invalid role' })
-    @IsOptional()
-    readonly role: UserRole;
+    // @ApiProperty({ enum: UserRole, required: false })
+    // @IsEnum(UserRole, { message: 'Invalid role' })
+    // @IsOptional()
+    // readonly role: UserRole;
 
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Social id must be a string' })
