@@ -38,7 +38,8 @@ model User {
   password           String?
   isVerified         Boolean   @default(false)
   social_id          String?
-  role               String
+  social_login       Boolean   @default(false)
+  role               String?  @default("user")
   profile_image      String?
   profile_visibility Boolean   @default(false)
   password_reset_token String?

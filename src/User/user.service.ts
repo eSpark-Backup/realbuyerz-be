@@ -304,7 +304,8 @@ export class UserService {
         }
 
         const userData = { ...createUserDto };
-
+        userData.social_login= true;
+    
         const newUser = await this.prismaService.user.create({
           data: userData,
         });

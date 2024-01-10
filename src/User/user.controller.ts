@@ -36,11 +36,7 @@ export class UserController {
   async loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.userService.loginUser(loginUserDto);
   }
-  // @Post('google-login')
-  // @ApiBody({ required: true, schema: { example: { access_token: 'string' } } })
-  // async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
-  //   return this.userService.googleLogin(accessToken);
-  // }
+
 
   @Put('update/:token')
   @ApiConsumes('multipart/form-data')
@@ -64,19 +60,7 @@ export class UserController {
   }
 
 
-  // @Post('send-email')
-  // @SendEmailDocs()
-  // async sendEmail(@Body() emailDto: EmailDto) {
-  //   try {
-
-  //     await this.userService.sendEmail(emailDto.to, emailDto.subject, emailDto.content);
-  //     return { message: 'Email sent successfully' };
-  //   } catch (error) {
-
-  //     return { message: 'Failed to send email', error: error.message };
-  //   }
-  // }
-
+ 
   @Put('password/:token')
   async resetPasswordwithMail(@Param('token') token: string, @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto) {
     const updatePassword = await this.userService.resetPasswordwithMail(token, resetPasswordwithMailDto);
@@ -114,6 +98,23 @@ export class UserController {
       );
       return { message: verificationResult ? 'OTP verified successfully' : 'Invalid OTP' };
   }
+   // @Post('send-email')
+  // @SendEmailDocs()
+  // async sendEmail(@Body() emailDto: EmailDto) {
+  //   try {
+
+  //     await this.userService.sendEmail(emailDto.to, emailDto.subject, emailDto.content);
+  //     return { message: 'Email sent successfully' };
+  //   } catch (error) {
+
+  //     return { message: 'Failed to send email', error: error.message };
+  //   }
+  // }
+  // @Post('google-login')
+  // @ApiBody({ required: true, schema: { example: { access_token: 'string' } } })
+  // async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
+  //   return this.userService.googleLogin(accessToken);
+  // }
 
 
 }
