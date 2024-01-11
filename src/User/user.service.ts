@@ -290,7 +290,7 @@ export class UserService {
         return { success: false, message: 'Password or Profile Image is required' }
       }
 
-      if (!createUserDto.password && createUserDto.profile_image) {
+      if (!createUserDto.password && createUserDto.profile_image && createUserDto.social_id) {
         const existingUser = await this.prismaService.user.findUnique({
           where: { email: createUserDto.email },
         });

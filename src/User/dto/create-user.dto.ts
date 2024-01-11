@@ -5,10 +5,10 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
-// enum UserRole {
-//   User = 'user',
-//   Agent = 'agent',
-// }
+enum UserRole {
+  User = 'user',
+  Agent = 'agent',
+}
 
 export class CreateUserDto {
 
@@ -44,9 +44,10 @@ export class CreateUserDto {
   @IsOptional()
   readonly profile_image?: string;
  
-  // @ApiProperty({ enum: UserRole, default: UserRole.User })
-  // @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" or "agent".' })
-  // readonly role: string;
+  @ApiProperty({ enum: UserRole, default: UserRole.User })
+  @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" or "agent".' })
+  @IsOptional()
+  readonly role: string;
 
   readonly social_login?:boolean;
 
