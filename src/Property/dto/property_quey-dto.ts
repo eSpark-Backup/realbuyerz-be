@@ -23,6 +23,12 @@ export class PropertyQueryDto {
   @IsNotEmpty({ message: 'Property type cannot be empty' })
   readonly property_type?: string;
 
+  @ApiProperty({ required: false, description: 'The Type of Person who owns the Property', example: 'agent' })
+  @IsOptional()
+  @IsString({ message: 'Property_by type must be a string' })
+  @IsNotEmpty({ message: 'Property_by type cannot be empty' })
+  readonly property_by?: string;
+
   @ApiProperty({ required: false, description: 'The sub-type of the property', example: 'Flat' })
   @IsOptional()
   @IsString({ message: 'Property sub-type must be a string' })

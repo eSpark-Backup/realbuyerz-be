@@ -75,6 +75,7 @@ export class PropertyController {
       property_type: query.property_type,
       sub_type: query.sub_type,
       property_city: query.property_city,
+      property_by: query.property_by,
     };
 
     return this.propertyService.findAll(page, pageSize, filters);
