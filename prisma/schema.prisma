@@ -97,6 +97,7 @@ model Property {
   property_ameneties   Int?    @unique
   longitude            String?
   latitude             String?
+  property_by         String?
   property_status      Boolean? @default(false)
   isFeatured           Boolean? @default(false)
   created_at DateTime  @default(now())

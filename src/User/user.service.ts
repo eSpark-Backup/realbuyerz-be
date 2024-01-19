@@ -9,7 +9,7 @@ import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
 import sgMail = require('@sendgrid/mail');
 import * as CryptoJS from 'crypto-js';
-import { SHA256 } from 'crypto-js';
+import { PBKDF2,SHA256 } from 'crypto-js';
 import * as uuid from 'uuid';
 import * as path from 'path';
 import { promises as fsPromises } from 'fs';
@@ -45,18 +45,22 @@ export class UserService {
 
   }
   async hashPassword(password: string): Promise<string> {
-    const hashedPassword = SHA256(password).toString(CryptoJS.enc.Hex);
+    const iterations = 10000; 
+    const derivedKey = PBKDF2(password, process.env.PW_KEY, { keySize: 256 / 32, iterations });
+    const hashedPassword = derivedKey.toString();
     return hashedPassword;
   }
 
   async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    const enteredPasswordHash = SHA256(plainPassword).toString(CryptoJS.enc.Hex);
+    const iterations = 10000; 
+    const derivedKey = PBKDF2(plainPassword, process.env.PW_KEY, { keySize: 256 / 32, iterations });
+    const enteredPasswordHash = derivedKey.toString();
     return enteredPasswordHash === hashedPassword;
   }
 
   async generateJwtToken(user) {
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role,email:user.email },
       TOKEN_KEY,
       { expiresIn: token_expiry }
     );

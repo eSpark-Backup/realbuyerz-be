@@ -18,11 +18,7 @@ export class AuthMiddleware implements NestMiddleware {
   
     try {
       const decoded = jwt.verify(token, process.env.TOKEN_KEY);
-      if(decoded.role == 'user'){
-      req['user'] = decoded;
-      next();
-      }
-      else if(decoded.role === 'agent'){
+     if(decoded.role === 'agent'){
         req['agent'] = decoded;
         next();
       }
