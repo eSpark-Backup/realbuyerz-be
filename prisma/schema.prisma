@@ -10,43 +10,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model preferences {
-  id                   Int       @id @default(autoincrement())
-  user_id              Int?    @unique   
-  email_notification  Boolean
-  newsletter           Boolean
-  automated_report     Boolean
-  currency         String      
-  area_unit         String    
-  created_at           DateTime  @default(now())
-  updated_at           DateTime?
-
-  user                 User?      @relation(fields: [user_id], references: [id])
-  
-}
-model User {
   id                 Int       @id @default(autoincrement())
-  first_name         String
-  last_name          String
-  email              String    @unique
-  mobile_number      String
-  landline_number    String?
-  whatsapp           String?
-  country            String?
-  address            String?
-  password           String?
-  isVerified         Boolean   @default(false)
-  social_id          String?
-  social_login       Boolean   @default(false)
-  role               String?  @default("user")
-  profile_image      String?
-  profile_visibility Boolean   @default(false)
-  password_reset_token String?
+  user_id            Int?      @unique
+  email_notification Boolean
+  newsletter         Boolean
+  automated_report   Boolean
+  currency           String
+  area_unit          String
   created_at         DateTime  @default(now())
   updated_at         DateTime?
 
-  property Property[]
+  user User? @relation(fields: [user_id], references: [id])
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  first_name           String
+  last_name            String
+  email                String    @unique
+  mobile_number        String
+  landline_number      String?
+  whatsapp             String?
+  country              String?
+  address              String?
+  password             String?
+  isVerified           Boolean   @default(false)
+  social_id            String?
+  social_login         Boolean   @default(false)
+  role                 String?   @default("user")
+  profile_image        String?
+  profile_visibility   Boolean   @default(false)
+  password_reset_token String?
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?
+
+  property    Property[]
   preferences preferences?
 }
 
@@ -58,7 +57,7 @@ model Porperty_data {
   created_at  DateTime  @default(now())
   updated_at  DateTime?
 
- Property Property @relation(fields: [property_id], references: [id])
+  Property Property @relation(fields: [property_id], references: [id])
 }
 
 model Cities {
@@ -69,20 +68,19 @@ model Cities {
 }
 
 model Ameneties {
-  id         Int       @id @default(autoincrement())
-  ameneties_name  String
-  count Int?
+  id             Int       @id @default(autoincrement())
+  ameneties_name String
+  count          Int?
   other_features String?
-  created_at DateTime  @default(now())
-  updated_at DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime?
 
   Property Property?
 }
 
-
 model Property {
-  id                    Int       @id @default(autoincrement())
-  user                 User?    @relation(fields: [user_id], references: [id])
+  id                   Int       @id @default(autoincrement())
+  user                 User?     @relation(fields: [user_id], references: [id])
   user_id              Int?
   property_name        String
   property_type        String?
@@ -94,17 +92,48 @@ model Property {
   property_city        String?
   property_zip         String?
   property_description String?
-  property_ameneties   Int?    @unique
+  property_ameneties   Int?      @unique
   longitude            String?
   latitude             String?
-  property_by         String?
-  property_status      Boolean? @default(false)
-  isFeatured           Boolean? @default(false)
-  created_at DateTime  @default(now())
-  updated_at DateTime?
+  property_by          String?
+  property_status      Boolean?  @default(false)
+  isFeatured           Boolean?  @default(false)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?
 
   Property_data Porperty_data[]
 
- amenities Ameneties?       @relation(fields: [property_ameneties], references: [id])
+  amenities     Ameneties?      @relation(fields: [property_ameneties], references: [id])
+  bidding       Bidding?
+  agentProperty AgentProperty[]
+}
+
+model Bidding {
+  id               Int       @id @default(autoincrement())
+  user_property_id Int       @unique
+  status           String
+  proposal_count   Int
+  created_at       DateTime  @default(now())
+  updated_at       DateTime?
+
+  // Reference to Property table
+  property Property? @relation(fields: [user_property_id], references: [id])
+
+  // Reference to AgentProperty table
+  agentProperty AgentProperty[]
+}
+
+model AgentProperty {
+  id          Int       @id @default(autoincrement())
+  bidding_id  Int
+  property_id Int
+  status      String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime?
+
+  // Reference to Property table
+  property Property? @relation(fields: [property_id], references: [id])
   
+  // Reference to Bidding table
+  bidding Bidding? @relation(fields: [bidding_id], references: [id])
 }

@@ -10,9 +10,10 @@ import { UserModule } from './User/user.module';
 import { PropertyModule } from './Property/property.module';
 import { UserPropertyModule } from './userProperty/userProperty.module';
 import { UserAuthMiddleware } from './auth/jwt-user-auth-guard';
+import { BiddingModule } from './bidding/bidding.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, PropertyModule,UserPropertyModule],
+  imports: [PrismaModule, UserModule, PropertyModule,UserPropertyModule, BiddingModule],
   controllers: [AppController],
   providers: [AppService],
 })
