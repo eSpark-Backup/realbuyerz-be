@@ -33,6 +33,8 @@ export class CreateUserPropertyDto {
   // @IsNotEmpty({ message: 'Property price cannot be empty' })
   readonly property_price: any;
 
+  readonly property_by: string;
+
   @ApiProperty({ type: String, example: 2000 })
   @IsString( { message: 'Property area must be a string' })
   @IsOptional()

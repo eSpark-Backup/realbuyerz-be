@@ -133,7 +133,7 @@ model AgentProperty {
 
   // Reference to Property table
   property Property? @relation(fields: [property_id], references: [id])
-  
+
   // Reference to Bidding table
   bidding Bidding? @relation(fields: [bidding_id], references: [id])
 }

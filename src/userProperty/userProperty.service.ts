@@ -13,6 +13,7 @@ export class UserPropertyService {
     async createProperty(createProperty: CreateUserPropertyDto) {
 
         const property = { ...createProperty }
+        property.property_by = "user";
         if (property.user_id) {
             property.user_id = parseInt(property.user_id);
         }
@@ -25,7 +26,7 @@ export class UserPropertyService {
         }
 
         try {
-        const     result = await this.prismaService.userPropertyRequest.create({
+        const     result = await this.prismaService.property.create({
                 data: {
                     user: { connect: { id: property.user_id } },
                     property_name: property.property_name,
@@ -35,6 +36,7 @@ export class UserPropertyService {
                     property_price: property.property_price,
                     property_area: property.property_area,
                     property_city: property.property_city,
+                    property_by: property.property_by,
                     property_address: property.property_address,
                     property_zip: property.property_zip,
                     property_description: property.property_description,
@@ -48,12 +50,44 @@ export class UserPropertyService {
                             other_features: JSON.stringify(property.other_features),
                         },
                     },
-                } as Prisma.UserPropertyRequestCreateInput,
+                   
+
+                } as Prisma.PropertyCreateInput,
             });
+            if (result) {
+                // Create a new entry in the Bidding table
+                const biddingResult = await this.prismaService.bidding.create({
+                    data: {
+                        user_property_id: result.id, // Assuming result.id is the property id
+                        status: 'pending', // You can set an initial status
+                        proposal_count: 0, // Set an initial count
+                    },
+                });
+                
+                // Check if bidding creation was successful
+                if (biddingResult) {
+                    const propertyResponse = generateResponse("Created User Property Request Data", "Property Request for User Created successfully", { result },"Property");
 
-            const propertyResponse = generateResponse("Created User Property Request Data", "Property Request for User Created successfully", { result },"Property");
+                    return propertyResponse;
+                } else {
+                    return {
+                        success: false,
+                        message: 'Failed to create bidding.',
+                        error: 'Bidding creation failed.',
+                    }
+                   
+                }
+            } else {
+                return {
+                    success: false,
+                    message: 'Failed to create property.',
+                    error: 'Property creation failed.',
+                }
+                // Handle the error accordingly
+            }
 
-                return propertyResponse;
+
+            
         }
         catch (error) {
             return {

@@ -67,7 +67,6 @@ export class UserController {
     return updatePassword;
   }
 
-
   @Post('send-otp')
   @SendOtpDocs()
   async sendOtp(@Body() sendOtpDto: SendOtpDto) {

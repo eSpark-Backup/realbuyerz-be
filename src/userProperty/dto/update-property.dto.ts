@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 import { ApiProperty  } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsNumber, IsOptional, ValidateNested, IsNotEmpty   } from 'class-validator';

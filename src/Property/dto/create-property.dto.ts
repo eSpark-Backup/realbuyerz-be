@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 import { ApiProperty  } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsOptional, IsNotEmpty, ValidateNested  } from 'class-validator';
@@ -35,6 +37,8 @@ export class CreatePropertyDto {
   @IsString({ message: 'Property type must be a string' })
   @IsNotEmpty({ message: 'Property type cannot be empty' })
   readonly property_type: string;
+
+  readonly property_by: string;
   
   @ApiProperty({ type: String, example: 'Flat' })
   @IsString({ message: 'Property  Sub type must be a string' })

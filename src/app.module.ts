@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 // app.module.ts
 
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
@@ -19,7 +21,7 @@ import { BiddingModule } from './bidding/bidding.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('property');
+    consumer.apply(AuthMiddleware).forRoutes('user');
     // consumer.apply(UserAuthMiddleware).forRoutes('userProperty');
   }
 }

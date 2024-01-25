@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { BiddingController } from './bidding.controller';
@@ -9,7 +10,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Module({
   imports: [PrismaModule], 
   controllers: [BiddingController],
-  providers: [BiddingService,PrismaService],
+  providers: [BiddingService,PrismaService,PropertyService],
   exports: [PropertyService],
 })
 export class BiddingModule {}
+
+

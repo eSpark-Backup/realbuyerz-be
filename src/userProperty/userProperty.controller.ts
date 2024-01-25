@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 import { Body, Controller, Post } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { UserPropertyService } from "./userProperty.service";

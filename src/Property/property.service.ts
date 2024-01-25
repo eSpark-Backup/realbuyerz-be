@@ -115,6 +115,7 @@ export class PropertyService {
         }
 
         const property = { ...createProperty }
+        property.property_by = "agent";
         let processedImages: any = [];
         if (property.user_id) {
             property.user_id = parseInt(property.user_id);
@@ -141,6 +142,7 @@ export class PropertyService {
                     property_city: property.property_city,
                     property_address: property.property_address,
                     property_zip: property.property_zip,
+                    property_by: property.property_by,
                     property_description: property.property_description,
                     longitude: property.longitude,
                     latitude: property.latitude,
@@ -496,6 +498,8 @@ export class PropertyService {
             include: {
                 amenities: true,
                 Property_data: true,
+                bidding: true,
+                agentProperty: true,
 
             },
             where,
