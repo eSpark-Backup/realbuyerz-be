@@ -21,7 +21,7 @@ import { BiddingModule } from './bidding/bidding.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('user');
+    consumer.apply(AuthMiddleware).forRoutes('userrrr');
     // consumer.apply(UserAuthMiddleware).forRoutes('userProperty');
   }
 }

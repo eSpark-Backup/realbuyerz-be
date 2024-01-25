@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from "@nestjs/common";
-import {  CreateUserPropertyDto } from "./dto/create-property.dto";
+import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import { generateResponse } from "src/utils/response";
 
 
-@Injectable ()
+@Injectable()
 export class UserPropertyService {
     constructor(private readonly prismaService: PrismaService) { }
 
@@ -26,7 +26,7 @@ export class UserPropertyService {
         }
 
         try {
-        const     result = await this.prismaService.property.create({
+            const result = await this.prismaService.property.create({
                 data: {
                     user: { connect: { id: property.user_id } },
                     property_name: property.property_name,
@@ -50,44 +50,28 @@ export class UserPropertyService {
                             other_features: JSON.stringify(property.other_features),
                         },
                     },
-                   
+
 
                 } as Prisma.PropertyCreateInput,
             });
-            if (result) {
-                // Create a new entry in the Bidding table
-                const biddingResult = await this.prismaService.bidding.create({
-                    data: {
-                        user_property_id: result.id, // Assuming result.id is the property id
-                        status: 'pending', // You can set an initial status
-                        proposal_count: 0, // Set an initial count
-                    },
-                });
-                
-                // Check if bidding creation was successful
-                if (biddingResult) {
-                    const propertyResponse = generateResponse("Created User Property Request Data", "Property Request for User Created successfully", { result },"Property");
 
-                    return propertyResponse;
-                } else {
-                    return {
-                        success: false,
-                        message: 'Failed to create bidding.',
-                        error: 'Bidding creation failed.',
-                    }
-                   
-                }
-            } else {
+            if (result) {
+                const propertyResponse = generateResponse("Created User Property Request Data", "Property Request for User Created successfully", { result }, "Property");
+
+                return propertyResponse;
+
+
+            } 
+            else {
                 return {
                     success: false,
                     message: 'Failed to create property.',
                     error: 'Property creation failed.',
                 }
-                // Handle the error accordingly
             }
 
 
-            
+
         }
         catch (error) {
             return {

@@ -104,36 +104,23 @@ model Property {
   Property_data Porperty_data[]
 
   amenities     Ameneties?      @relation(fields: [property_ameneties], references: [id])
-  bidding       Bidding?
-  agentProperty AgentProperty[]
+   userPropertyBidding  Bidding[] @relation("UserProperty")
+  agentPropertyBidding Bidding[] @relation("AgentProperty")
 }
 
 model Bidding {
   id               Int       @id @default(autoincrement())
-  user_property_id Int       @unique
+  user_property_id Int      
+  agent_property_id Int      
   status           String
   proposal_count   Int
   created_at       DateTime  @default(now())
   updated_at       DateTime?
 
-  // Reference to Property table
-  property Property? @relation(fields: [user_property_id], references: [id])
+  userProperty       Property? @relation("UserProperty", fields: [user_property_id], references: [id])
 
-  // Reference to AgentProperty table
-  agentProperty AgentProperty[]
+  agentProperty      Property? @relation("AgentProperty", fields: [agent_property_id], references: [id])
+
+
 }
 
-model AgentProperty {
-  id          Int       @id @default(autoincrement())
-  bidding_id  Int
-  property_id Int
-  status      String
-  created_at  DateTime  @default(now())
-  updated_at  DateTime?
-
-  // Reference to Property table
-  property Property? @relation(fields: [property_id], references: [id])
-
-  // Reference to Bidding table
-  bidding Bidding? @relation(fields: [bidding_id], references: [id])
-}

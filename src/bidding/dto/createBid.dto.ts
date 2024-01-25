@@ -14,11 +14,11 @@ export class CreateBidDto {
         required: true,
     })
     @IsNotEmpty({ message: 'At least one property id is required' })
-    readonly property_id: any[];
+    readonly agent_property_id: any[];
 
     @ApiProperty({ type: String, example: 1 })
-    @IsNotEmpty({ message: 'Bidding ID cannot be empty' })
-    readonly bidding_id: any;
+    @IsNotEmpty({ message: 'User Property ID cannot be empty' })
+    readonly user_property_id: any;
 
     @ApiProperty({ type: String, example: 1 })
     @IsNotEmpty({ message: 'status cannot be empty' })

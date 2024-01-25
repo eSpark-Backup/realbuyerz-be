@@ -498,8 +498,6 @@ export class PropertyService {
             include: {
                 amenities: true,
                 Property_data: true,
-                bidding: true,
-                agentProperty: true,
 
             },
             where,
@@ -523,7 +521,8 @@ export class PropertyService {
                 where: { id: parseInt(propertyId, 10) },
                 include: {
                     amenities: true,
-                    Property_data: true
+                    Property_data: true,
+                 
                 },
             });
 

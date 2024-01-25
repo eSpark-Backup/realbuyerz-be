@@ -143,10 +143,11 @@ export class CreateBidPropertyDto {
   @IsOptional()
   readonly other_features: string;
 
-
   @ApiProperty({ type: String, example: 1 })
-  @IsNotEmpty({ message: 'Bidding ID cannot be empty' })
-  readonly bidding_id: any;
+  @IsNotEmpty({ message: 'User Property ID cannot be empty' })
+  readonly user_property_id: any;
+
+
 
   @ApiProperty({ type: String, example: 1 })
   @IsNotEmpty({ message: 'status cannot be empty' })

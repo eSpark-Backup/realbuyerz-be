@@ -6,6 +6,8 @@ import { CreateBidDto } from './dto/createBid.dto';
 import { CreateBidPropertyDto } from './dto/createBidProperty.dto';
 import { PropertyService } from 'src/Property/property.service';
 import { PropertyModule } from 'src/Property/property.module';
+import { getBidDTO } from './dto/getBid.dto';
+import { response } from 'express';
 
 @Injectable()
 export class BiddingService {
@@ -13,48 +15,28 @@ export class BiddingService {
 
     constructor(
         private readonly prismaService: PrismaService,
-        propertyService: PropertyService, // Inject PropertyService
+        propertyService: PropertyService, 
     ) {
         this.propertyService = propertyService;
     }
     async createBidding(createBid: CreateBidDto) {
 
         try {
-            const propertyIds = createBid.property_id.map(id => parseInt(id));
-            const agentPropertyResults = await this.prismaService.agentProperty.createMany({
-                data: propertyIds.map(property_id => ({
-                    bidding_id: parseInt(createBid.bidding_id),
-                    property_id: property_id,
+            const propertyIds = createBid.agent_property_id.map(id => parseInt(id));
+
+            const result = await this.prismaService.bidding.createMany({
+                data: propertyIds.map(agent_property_id => ({
+                    agent_property_id: agent_property_id,
+                    user_property_id: parseInt(createBid.user_property_id),
                     status: createBid.status,
+                    proposal_count: 0,
                 })),
+
             });
 
-            if (agentPropertyResults) {
-                const updatedBidding = await this.prismaService.bidding.update({
-                    where: {
-                        id: parseInt(createBid.bidding_id),
-                    },
-                    data: {
-                        proposal_count: {
-                            increment: 1,
-                        },
-                        updated_at: new Date(),
-                    },
-                });
-                if (updatedBidding) {
-                    return {
-                        status: true,
-                        message: 'Proposal created successfully',
-                    };
-                }
-                else {
-                    return {
-                        status: false,
-                        message: 'Proposal not created',
-                    };
-                }
+            return result;
+            
 
-            }
         }
         catch (error) {
             throw error;
@@ -75,49 +57,45 @@ export class BiddingService {
           
 
         if (response) {
-            const agentPropertyResults = await this.prismaService.agentProperty.createMany({
-                data:  ({
-                    bidding_id: parseInt(createProperty.bidding_id),
-                    property_id: propertyId,
+            const result = await this.prismaService.bidding.create({
+                data: ({
+                    agent_property_id: propertyId,
+                    user_property_id: parseInt(createProperty.user_property_id),
                     status: createProperty.status,
+                    proposal_count: 0,
                 }),
-            });
-            if (agentPropertyResults) {
-                const updatedBidding = await this.prismaService.bidding.update({
-                    where: {
-                        id: parseInt(createProperty.bidding_id),
-                    },
-                    data: {
-                        proposal_count: {
-                            increment: 1,
-                        },
-                        updated_at: new Date(),
-                    },
-                });
-                if (updatedBidding) {
-                    return {
-                        status: true,
-                        message: 'Proposal created successfully',
-                    };
-                }
-                else {
-                    return {
-                        status: false,
-                        message: 'Proposal not created',
-                    };
-                }
 
-            }
+            });
+            
+            return result;
+            
         }
         else {
-            return {
-                status: false,
-                message: 'Property not created',
-            };
+            
+            const result = await this.prismaService.property.delete({
+                where: {
+                    id: propertyId,
+                },
+
+               
+            });
+            return result;
         }
 
 
 
     }
 
+    async getBidding(getBiddingDto: getBidDTO) {
+
+       const result = await this.prismaService.bidding.findMany({
+            where: {
+                user_property_id: parseInt(getBiddingDto.user_property_id),
+            },
+          include  : {
+                agentProperty: true,
+            },
+        });
+        return result;
+}
 }
