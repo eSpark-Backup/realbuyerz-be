@@ -20,9 +20,6 @@ export class CreateBidDto {
     @IsNotEmpty({ message: 'User Property ID cannot be empty' })
     readonly user_property_id: any;
 
-    @ApiProperty({ type: String, example: 1 })
-    @IsNotEmpty({ message: 'status cannot be empty' })
-    readonly status: string;
 
 
 }

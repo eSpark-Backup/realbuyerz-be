@@ -149,9 +149,7 @@ export class CreateBidPropertyDto {
 
 
 
-  @ApiProperty({ type: String, example: 1 })
-  @IsNotEmpty({ message: 'status cannot be empty' })
-  readonly status: string;
+ 
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",

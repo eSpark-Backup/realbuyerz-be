@@ -96,31 +96,33 @@ model Property {
   longitude            String?
   latitude             String?
   property_by          String?
+  proposal_count       Int?     @default(0)
   property_status      Boolean?  @default(false)
   isFeatured           Boolean?  @default(false)
-  created_at           DateTime  @default(now())
-  updated_at           DateTime?
+  
 
   Property_data Porperty_data[]
 
-  amenities     Ameneties?      @relation(fields: [property_ameneties], references: [id])
-   userPropertyBidding  Bidding[] @relation("UserProperty")
-  agentPropertyBidding Bidding[] @relation("AgentProperty")
+  amenities            Ameneties? @relation(fields: [property_ameneties], references: [id])
+  userPropertyBidding  Bidding[]  @relation("UserProperty")
+  agentPropertyBidding Bidding[]  @relation("AgentProperty")
+
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?
 }
 
 model Bidding {
-  id               Int       @id @default(autoincrement())
-  user_property_id Int      
-  agent_property_id Int      
-  status           String
-  proposal_count   Int
-  created_at       DateTime  @default(now())
-  updated_at       DateTime?
+  id                Int    @id @default(autoincrement())
+  user_property_id  Int
+  agent_property_id Int
+  agent_status            String? @default("submitted")
+  user_status            String? @default("pending")
+  
 
-  userProperty       Property? @relation("UserProperty", fields: [user_property_id], references: [id])
+  userProperty Property? @relation("UserProperty", fields: [user_property_id], references: [id])
 
-  agentProperty      Property? @relation("AgentProperty", fields: [agent_property_id], references: [id])
+  agentProperty Property? @relation("AgentProperty", fields: [agent_property_id], references: [id])
 
-
+  created_at DateTime  @default(now())
+  updated_at DateTime?
 }
-
