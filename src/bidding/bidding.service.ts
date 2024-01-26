@@ -28,8 +28,7 @@ export class BiddingService {
             const result = await this.prismaService.bidding.createMany({
                 data: propertyIds.map(agent_property_id => ({
                     agent_property_id: agent_property_id,
-                    user_property_id: parseInt(createBid.user_property_id),
-                    proposal_count: 0,
+                    user_property_id: parseInt(createBid.user_property_id)
                 })),
 
             });
@@ -131,6 +130,20 @@ export class BiddingService {
             },
         });
         return result;
+    }
+
+  async   getAgentBidding(agent_property_id: string) {
+        const result = await this.prismaService.bidding.findMany({
+            where: {
+                agent_property_id: parseInt(agent_property_id),
+            },
+            include: {
+                userProperty: true,
+                
+            },
+        });
+        return result;
+
     }
 
 

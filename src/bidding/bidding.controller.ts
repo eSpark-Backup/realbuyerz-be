@@ -37,6 +37,11 @@ export class BiddingController {
         return await this.biddingService.getBidding(user_property_id);
     }
 
+    @Post("viewAgentProposal/:agent_property_id")
+    async getAgentBidding(@Param("agent_property_id") agent_property_id: string){
+        return await this.biddingService.getAgentBidding(agent_property_id);
+    }
+
     @Post("acceptProposal")
     async acceptProposal(@Body() acceptProposal:updateProposalDTO){
         return await this.biddingService.acceptProposal(acceptProposal);
