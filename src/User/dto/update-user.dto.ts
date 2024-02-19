@@ -12,6 +12,7 @@ import { IsBoolean, IsBooleanString, IsEmail, IsEnum, IsOptional, IsString, isBo
 // }
 
 export class UpdateUserDto {
+    
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'First name must be a string' })
     @IsOptional()
@@ -22,7 +23,7 @@ export class UpdateUserDto {
     @IsOptional()
     readonly last_name: string;
 
-    @ApiProperty({ type: String,default:'ahsan@mail.com'})
+    @ApiProperty({ type: String,default:'ahsan@mail.com',required: false })
     @IsEmail({}, { message: 'Invalid email format' })
     @IsOptional()
 

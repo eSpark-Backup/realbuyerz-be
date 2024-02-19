@@ -53,6 +53,7 @@ model Porperty_data {
   id          Int       @id @default(autoincrement())
   property_id Int
   url         String
+  imageKey    String @default("property")
   type        String
   created_at  DateTime  @default(now())
   updated_at  DateTime?

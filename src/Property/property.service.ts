@@ -15,11 +15,14 @@ import { Prisma } from '@prisma/client';
 import * as uuid from 'uuid';
 import { saveImageToDisk } from '../utils/saveImage';
 import { generateResponse } from 'src/utils/response';
+import { BackblazeService } from 'src/utils/backblaze';
 
 
 @Injectable()
 export class PropertyService {
-    constructor(private readonly prismaService: PrismaService) { }
+    constructor(private readonly prismaService: PrismaService,
+        private readonly backblazeService: BackblazeService,
+        ) { }
     private async processSingleImage(file: Express.Multer.File): Promise<any> {
 
         const watermarkPath = 'src/utils/watermark/Quote.png';
@@ -40,12 +43,12 @@ export class PropertyService {
         //     originalMetadata.height !== resizedMetadata.height;
 
         // console.log('Dimensions Changed:', dimensionsChanged);
-
-        const savedImagePath = await saveImageToDisk(buffer, file.originalname);
+        const uploadResult = await this.backblazeService.uploadFileFromBuffer(buffer, file.originalname);
+        // const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
         return {
             ...file,
-            savedImagePath,
+            uploadResult,
         };
     }
 
@@ -176,10 +179,10 @@ export class PropertyService {
             if (files.image) {
                 processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
 
-
                 const propertyData = processedImages.map(image => ({
-                    url: image.savedImagePath,
+                    url:`${image.uploadResult.url}`,
                     type: 'image',
+                    imageKey: image.uploadResult.fileId,
                     property_id: result.id,
                 }));
 
@@ -305,14 +308,14 @@ export class PropertyService {
                             amenities: {
                                 update: {
                                     where: {
-                                        id: propert.amenities.id, // Replace with the actual ID of amenities
+                                        id: propert.amenities.id, 
                                     },
                                     data: {
                                         ameneties_name: JSON.stringify(property.amenities_name),
                                         count: property.count,
                                         other_features: JSON.stringify(property.other_features),
                                         updated_at: new Date(),
-                                        // Add any other fields you want to update in amenities
+                                       
                                     },
                                 },
                             },
@@ -338,17 +341,17 @@ export class PropertyService {
                         },
                     });
 
-                    await this.prismaService.porperty_data.deleteMany({
-                        where: {
-                            property_id: result.id,
-                            "type": "image"
-                        },
-                    });
+                    try {
+                        await this.deleteImagesForProperty(property_id);
+                      } catch (error) {
+                       return { success: false, message: 'Failed to delete images for property', error: error.message };
+                      }
 
 
                     const propertyData = processedImages.map(image => ({
-                        url: image.savedImagePath,
+                        url:`${image.uploadResult.url}`,
                         type: 'image',
+                        imageKey: image.uploadResult.fileId,
                         property_id: result.id,
                         updated_at: new Date(),
                     }));
@@ -460,6 +463,35 @@ export class PropertyService {
 
         }
     }
+
+    async deleteImagesForProperty(propertyId: string) {
+        try {
+         
+          const images = await this.prismaService.porperty_data.findMany({
+            where: {
+              property_id:parseInt( propertyId,10),
+              type: 'image',
+            },
+          });
+          await this.prismaService.porperty_data.deleteMany({
+            where: {
+              property_id: parseInt(propertyId,10),
+              type: 'image',
+            },
+          });
+    
+          for (const image of images) {
+            const { url: propertyImage, imageKey } = image;
+
+            const fileName = path.basename(new URL(propertyImage).pathname);
+    
+            await this.backblazeService.deleteFile(fileName, imageKey);
+          }
+        } catch (error) {
+          console.error('Error deleting images:', error);
+          throw new Error('Failed to delete images');
+        }
+      }
 
 
     async findAll(

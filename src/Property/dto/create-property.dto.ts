@@ -143,6 +143,9 @@ export class CreatePropertyDto {
   @IsOptional()
   readonly other_features: string;
 
+  imageKey?:string;
+
+
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
   //   "count": "1",

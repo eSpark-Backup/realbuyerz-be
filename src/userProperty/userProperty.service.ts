@@ -10,9 +10,10 @@ import { generateResponse } from "src/utils/response";
 export class UserPropertyService {
     constructor(private readonly prismaService: PrismaService) { }
 
-    async createProperty(createProperty: CreateUserPropertyDto) {
+    async createProperty(user_id :string, createProperty: CreateUserPropertyDto) {
 
         const property = { ...createProperty }
+        property.user_id = user_id;
         property.property_by = "user";
         if (property.user_id) {
             property.user_id = parseInt(property.user_id);

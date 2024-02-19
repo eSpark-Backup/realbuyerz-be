@@ -6,12 +6,22 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthMiddleware } from 'src/auth/jwt.auth-gaurd';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports: [PrismaModule], 
+  imports: [PrismaModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: process.env.TOKEN_KEY || 'realbuyerzsecretkey',
+      signOptions: {
+        expiresIn: process.env.TOKEN_EXPIRY || '1d',
+      },
+    }),
+  ], 
   controllers: [UserController], 
-  providers: [UserService,PrismaService,AuthMiddleware], 
+  providers: [UserService,PrismaService,JwtStrategy], 
   exports: [UserService], 
 })
 export class UserModule {}

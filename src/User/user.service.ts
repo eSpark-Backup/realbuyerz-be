@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
@@ -23,6 +24,8 @@ import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
 import { OAuth2Client } from 'google-auth-library';
 import { saveImageToDisk } from '../utils/saveImage';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -37,7 +40,9 @@ export class UserService {
 
   private twilioClient: Twilio.Twilio;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private jwtService: JwtService,
+    private readonly prismaService: PrismaService) {
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -58,14 +63,7 @@ export class UserService {
     return enteredPasswordHash === hashedPassword;
   }
 
-  async generateJwtToken(user) {
-    const token = jwt.sign(
-      { userId: user.id, role: user.role,email:user.email },
-      TOKEN_KEY,
-      { expiresIn: token_expiry }
-    );
-    return token;
-  }
+ 
 
   async generateResponse(action, token, message) {
     const response = {
@@ -185,34 +183,7 @@ export class UserService {
 
 
 
-  async verifyToken(token: string): Promise<string> {
-    try {
-      const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
-
-      if (!exp) {
-        throw new Error('Token does not contain expiration information');
-      }
-
-      const expirationTime = new Date(exp * 1000);
-      const currentTime = new Date();
-
-      if (currentTime >= expirationTime) {
-        throw new Error('Token has expired');
-      }
-
-      const user = await this.prismaService.user.findUnique({
-        where: { email },
-      });
-
-      if (!user) {
-        throw new Error('User not found with that Email');
-      }
-
-      return user.email;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
+  
 
 
 
@@ -301,7 +272,8 @@ export class UserService {
 
 
         if (existingUser) {
-          const token = await this.generateJwtToken(existingUser);
+         
+          const token = this.createToken({ id: existingUser.id, role: existingUser.role }, existingUser)
           const signUpResponse = this.generateResponse('Sign Up', token, 'User Logged in successfully');
 
           return signUpResponse;
@@ -316,7 +288,8 @@ export class UserService {
 
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
-        const token = await this.generateJwtToken(newUser);
+        const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
+
         const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
 
         return signUpResponse;
@@ -341,7 +314,8 @@ export class UserService {
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
 
-        const token = await this.generateJwtToken(newUser);
+        const token =   this.createToken({ id: newUser.id, role: newUser.role }, newUser)
+
 
 
         const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
@@ -379,7 +353,8 @@ export class UserService {
     if (!passwordMatch) {
       return { success: false, message: 'Invalid password' };
     }
-    const token = await this.generateJwtToken(user);
+    const token =  this.createToken({ id: user.id, role: user.role }, user)
+
 
     const loginResponse = this.generateResponse('Logged In', token, 'User Logged In successfully');
 
@@ -391,7 +366,7 @@ export class UserService {
 
 
 
-  async updateUser(token: string, files: { image?: Express.Multer.File[]; }, updateUserDto: UpdateUserDto) {
+  async updateUser(userId: string, files: { image?: Express.Multer.File[]; }, updateUserDto: UpdateUserDto) {
     try {
       let parsedIsVerified: boolean;
       let parsedProfileVisibility: boolean;
@@ -429,19 +404,8 @@ export class UserService {
         }
       }
 
-      const verificationResult = this.verifyTokenAndGetUserId(token);
-      if (!(await verificationResult).success) {
-        return { success: false, message: 'Invalid access token' };
-      }
-      const userId = (await verificationResult).userId;
-
-
-
-
-
-
       const existingUser = await this.prismaService.user.findUnique({
-        where: { id: parseInt(userId, 10) },
+        where: { id: parseInt(userId, 10)},
       });
 
       if (!existingUser) {
@@ -538,35 +502,10 @@ export class UserService {
       };
     }
   }
-  async verifyTokenAndGetUserId(token: string): Promise<{ success: boolean; userId?: string; }> {
+ 
+
+  async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
     try {
-      const decodedToken = jwt.verify(token, TOKEN_KEY);
-
-      const currentTimestamp = Math.floor(Date.now() / 1000);
-      if (decodedToken.exp && decodedToken.exp < currentTimestamp) {
-        return { success: false, userId: undefined };
-      }
-
-      const userId = decodedToken.userId;
-
-      return { success: true, userId: userId };
-    } catch (error) {
-      console.error('Error verifying token:', error.message);
-      return { success: false, userId: undefined };
-    }
-  }
-
-
-  async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
-    try {
-      const verificationResult = this.verifyTokenAndGetUserId(token);
-      if (!(await verificationResult).success) {
-        return { success: false, message: 'Invalid access token' };
-      }
-      const userId = (await verificationResult).userId;
-
-
-
 
       const existingUser = await this.prismaService.user.findUnique({
         where: { id: parseInt(userId, 10) },
@@ -640,7 +579,23 @@ export class UserService {
       savedImagePath,
     };
   }
-
+  
+  createToken(payload: object, userObj: any) {
+    const token = this.jwtService.sign(payload);
+    let user = {
+      user_name: userObj?.first_name + ' ' + userObj?.last_name,
+      email: userObj?.email,
+    }
+   
+    return { token, user };
+  }
+  async validateUser(payload: any) {
+    const { id } = payload;
+    const findUser = await this.prismaService.user.findUnique({
+      where: { id: id },
+    });
+    return findUser;
+  }
 
 
 }

@@ -17,7 +17,6 @@ export const CreateUserApiDocs = () => [
 ];
 
 export const LoginUserApiDocs = () => [
-  ApiTags('Authentication'),
   ApiOperation({ summary: 'Login user' }),
   ApiBody({ type: LoginUserDto }),
   ApiResponse({ status: 200, description: 'Login successful' }),

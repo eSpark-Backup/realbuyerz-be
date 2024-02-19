@@ -12,6 +12,7 @@ export class PropertyDataDTO{
     @ApiProperty({ type: String, example: 1 })
    readonly url: string;
    
+   
     @ApiProperty({ type: String, example: 1 })
    readonly type: string;
     

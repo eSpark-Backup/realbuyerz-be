@@ -6,11 +6,13 @@ import { BiddingService } from './bidding.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PropertyService } from 'src/Property/property.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BackblazeService } from 'src/utils/backblaze';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [PrismaModule], 
   controllers: [BiddingController],
-  providers: [BiddingService,PrismaService,PropertyService],
+  providers: [BiddingService,PrismaService,BackblazeService,PropertyService,JwtService],
   exports: [PropertyService],
 })
 export class BiddingModule {}

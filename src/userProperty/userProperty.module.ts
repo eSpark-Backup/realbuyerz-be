@@ -5,12 +5,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UserPropertyController } from './userProperty.controller';
 import { UserPropertyService } from './userProperty.service';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Module({
   imports: [PrismaModule], 
   controllers: [UserPropertyController],
-  providers: [UserPropertyService,PrismaService],
+  providers: [UserPropertyService,PrismaService,JwtService],
   exports: [UserPropertyService],
 })
 export class UserPropertyModule {}

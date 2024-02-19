@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Param, Post, Put, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Param, Post, Put, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -19,6 +19,9 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { Injectable } from '@nestjs/common';
 import { imageFileInterceptor } from 'src/utils/userfile.interceptor';
+import { UserId } from 'src/utils/userId.decorator';
+import { User } from '@prisma/client';
+import { JwtAuthGuard } from 'src/utils/guard';
 
 
 @Controller('user')
@@ -38,10 +41,12 @@ export class UserController {
   }
 
 
-  @Put('update/:token')
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  @Post('update')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(imageFileInterceptor)
-  async updateUser(@Param('token') token: string,
+  async updateUser(@UserId() userId: string,
     @UploadedFiles()
     files: {
       image?: Express.Multer.File[];
@@ -49,13 +54,15 @@ export class UserController {
 
 
     @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.userService.updateUser(token, files, updateUserDto);
+    const updatedUser = await this.userService.updateUser(userId, files, updateUserDto);
     return updatedUser;
   }
 
-  @Put('reset-password/:token')
-  async resetPassword(@Param('token') token: string, @Body() resetPassword: ResetPasswordDto) {
-    const updatedUser = await this.userService.resetPassword(token, resetPassword);
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  @Post('reset-password')
+  async resetPassword(@UserId() userId: string, @Body() resetPassword: ResetPasswordDto) {
+    const updatedUser = await this.userService.resetPassword(userId, resetPassword);
     return updatedUser;
   }
 

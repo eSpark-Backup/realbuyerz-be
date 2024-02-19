@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Body, Controller, DefaultValuePipe, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { PropertyService } from "./property.service";
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -11,12 +11,18 @@ import { updatedPropertyDto } from "./dto/update-property.dto";
 import { PropertyQueryDto } from "./dto/property_quey-dto";
 import { propertyImageFileInterceptor } from "src/utils/propertyfile.interceptor";
 import { CreateApiDocs, FindAllApiDocs, UpdateApiDocs } from "src/utils/property.decorator";
+import { JwtAuthGuard, RoleGuard } from "src/utils/guard";
+import { Roles } from "src/utils/role.decorator";
+import { swaggerDocs } from "src/utils/swagger.decorator";import { CONSTANT_RESPONSE } from "src/utils/constant/return.constant";
+import { UserId } from "src/utils/userId.decorator";
 
 @Controller('property')
-@ApiBearerAuth()
+@ApiBearerAuth('jwt')
 @ApiTags('property')
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) { }
+  @Roles('agent')
   @Post()
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
@@ -34,7 +40,7 @@ export class PropertyController {
   }
 
 
-
+  @Roles('agent')
   @Put('/:id')
   @ApiTags('property')
   @ApiConsumes('multipart/form-data')
@@ -52,17 +58,28 @@ export class PropertyController {
     return result;
 
   }
-  @Get('user/:id')
+
+
+  @swaggerDocs({
+    summary: 'Get all properties of User',
+    type:null,
+    goodResponse: { status: 201, description: 'Find All Properties listed by Agent' },
+    badresponse: { status: 400, description: 'Properties Not Found' }
+  })
+  @Roles('user')
+  @Get('user')
   @ApiTags('property')
-  async findbyuserId(@Param('id') user_id: string) {
+  async findbyuserId(@UserId() user_id: string){
     return this.propertyService.findbyuserId(user_id);
   }
 
+  @Roles('user')
   @Get(':id')
   async findById(@Param('id') propertyId: string) {
     return this.propertyService.findById(propertyId);
   }
 
+  @Roles('user')
   @Get()
   @FindAllApiDocs()
   async findAll(
