@@ -29,13 +29,14 @@ export class PropertyController {
   @UseInterceptors(propertyImageFileInterceptor)
   @CreateApiDocs()
   async createProperty(
+    @UserId() user_id: string,
     @UploadedFiles()
     files: {
       image?: Express.Multer.File[];
     },
     @Body() createProperty: CreatePropertyDto,
   ) {
-    const result = await this.propertyService.createProperty(files, createProperty);
+    const result = await this.propertyService.createProperty(user_id,files, createProperty);
     return result;
   }
 

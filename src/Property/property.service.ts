@@ -33,16 +33,6 @@ export class PropertyService {
             .png()
             .toBuffer();
 
-        // const resizedMetadata = await Sharp(buffer).metadata();
-
-        // console.log('Original Dimensions:', originalMetadata.width, 'x', originalMetadata.height);
-        // console.log('Resized Dimensions:', resizedMetadata.width, 'x', resizedMetadata.height);
-
-        // const dimensionsChanged =
-        //     originalMetadata.width !== resizedMetadata.width ||
-        //     originalMetadata.height !== resizedMetadata.height;
-
-        // console.log('Dimensions Changed:', dimensionsChanged);
         const uploadResult = await this.backblazeService.uploadFileFromBuffer(buffer, file.originalname);
         // const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
@@ -56,17 +46,17 @@ export class PropertyService {
         try {
 
 
-            const userIdNumber = parseInt(user_id);
+           
 
             const totalCount = await this.prismaService.property.count({
                 where: {
-                    user_id: userIdNumber,
+                    user_id: user_id,
                 },
             });
 
             const properties = await this.prismaService.property.findMany({
                 where: {
-                    user_id: userIdNumber,
+                    user_id: user_id,
                 },
                 include: {
                     amenities: true,
@@ -97,9 +87,9 @@ export class PropertyService {
 
 
     }
-    async createProperty(files: { image?: Express.Multer.File[] }, createProperty: CreatePropertyDto) {
+    async createProperty(user_id:string, files: { image?: Express.Multer.File[] }, createProperty: CreatePropertyDto) {
 
-
+        createProperty.user_id = user_id;
         if (files.image) {
             const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
             for (const file of files.image) {
@@ -120,9 +110,7 @@ export class PropertyService {
         const property = { ...createProperty }
         property.property_by = "agent";
         let processedImages: any = [];
-        if (property.user_id) {
-            property.user_id = parseInt(property.user_id);
-        }
+       
         if (property.property_price) {
             property.property_price = parseInt(property.property_price);
 
@@ -242,9 +230,7 @@ export class PropertyService {
 
     async updateProperty(property_id: string, files: { image?: Express.Multer.File[]}, updateProperty: updatedPropertyDto) {
         const property = { ...updateProperty }
-        if (property.user_id) {
-            property.user_id = parseInt(property.user_id);
-        }
+       
         if (property.property_price) {
             property.property_price = parseInt(property.property_price);
 
@@ -280,14 +266,14 @@ export class PropertyService {
             const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
             try {
                 const propert = await this.prismaService.property.findUnique({
-                    where: { id: parseInt(property_id, 10) },
+                    where: { id: property_id },
                     include: { amenities: true },
                 });
                 if (propert) {
 
 
                     const result = await this.prismaService.property.update({
-                        where: { id: parseInt(property_id, 10) },
+                        where: { id: property_id },
                         data: {
 
                             property_name: property.property_name,
@@ -382,14 +368,14 @@ export class PropertyService {
         else if (!files.image) {
             try {
                 const propert = await this.prismaService.property.findUnique({
-                    where: { id: parseInt(property_id, 10) },
+                    where: { id: property_id },
                     include: { amenities: true },
                 });
                 if (propert) {
 
 
                     const result = await this.prismaService.property.update({
-                        where: { id: parseInt(property_id, 10) },
+                        where: { id: property_id },
                         data: {
 
                             property_name: property.property_name,
@@ -469,13 +455,13 @@ export class PropertyService {
          
           const images = await this.prismaService.porperty_data.findMany({
             where: {
-              property_id:parseInt( propertyId,10),
+              property_id:propertyId,
               type: 'image',
             },
           });
           await this.prismaService.porperty_data.deleteMany({
             where: {
-              property_id: parseInt(propertyId,10),
+              property_id: propertyId,
               type: 'image',
             },
           });
@@ -550,7 +536,7 @@ export class PropertyService {
     async findById(propertyId: string) {
         try {
             const property = await this.prismaService.property.findUnique({
-                where: { id: parseInt(propertyId, 10) },
+                where: { id: propertyId },
                 include: {
                     amenities: true,
                     Property_data: true,

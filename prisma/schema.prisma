@@ -11,8 +11,8 @@ datasource db {
 }
 
 model preferences {
-  id                 Int       @id @default(autoincrement())
-  user_id            Int?      @unique
+  id                 String       @id @default(uuid())
+  user_id            String?      @unique
   email_notification Boolean
   newsletter         Boolean
   automated_report   Boolean
@@ -25,7 +25,7 @@ model preferences {
 }
 
 model User {
-  id                   Int       @id @default(autoincrement())
+  id                   String       @id @default(uuid())
   first_name           String
   last_name            String
   email                String    @unique
@@ -50,8 +50,8 @@ model User {
 }
 
 model Porperty_data {
-  id          Int       @id @default(autoincrement())
-  property_id Int
+  id          String       @id @default(uuid())
+  property_id String
   url         String
   imageKey    String @default("property")
   type        String
@@ -62,14 +62,14 @@ model Porperty_data {
 }
 
 model Cities {
-  id         Int       @id @default(autoincrement())
+  id         String       @id @default(uuid())
   city_name  String
   created_at DateTime  @default(now())
   updated_at DateTime?
 }
 
 model Ameneties {
-  id             Int       @id @default(autoincrement())
+  id             String       @id @default(uuid())
   ameneties_name String
   count          Int?
   other_features String?
@@ -80,9 +80,9 @@ model Ameneties {
 }
 
 model Property {
-  id                   Int       @id @default(autoincrement())
+  id                  String       @id @default(uuid())
   user                 User?     @relation(fields: [user_id], references: [id])
-  user_id              Int?
+  user_id              String?
   property_name        String
   property_type        String?
   sub_type             String?
@@ -93,7 +93,7 @@ model Property {
   property_city        String?
   property_zip         String?
   property_description String?
-  property_ameneties   Int?      @unique
+  property_ameneties   String?      @unique
   longitude            String?
   latitude             String?
   property_by          String?
@@ -113,9 +113,9 @@ model Property {
 }
 
 model Bidding {
-  id                Int    @id @default(autoincrement())
-  user_property_id  Int
-  agent_property_id Int
+  id                String       @id @default(uuid())
+  user_property_id  String
+  agent_property_id String
   agent_status            String? @default("submitted")
   user_status            String? @default("pending")
   

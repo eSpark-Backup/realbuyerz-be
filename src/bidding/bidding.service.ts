@@ -23,27 +23,26 @@ export class BiddingService {
     async createBidding(createBid: CreateBidDto) {
 
         try {
-            const propertyIds = createBid.agent_property_id.map(id => parseInt(id));
+            const propertyIds = createBid.agent_property_id.map(id =>id);
 
             const result = await this.prismaService.bidding.createMany({
                 data: propertyIds.map(agent_property_id => ({
                     agent_property_id: agent_property_id,
-                    user_property_id: parseInt(createBid.user_property_id)
+                    user_property_id: createBid.user_property_id,
                 })),
 
             });
 
-            const userPropertyIdToUpdate = parseInt(createBid.user_property_id);
 
             const rowCount = await this.prismaService.bidding.count({
                 where: {
-                    user_property_id: userPropertyIdToUpdate,
+                    user_property_id: createBid.user_property_id,
                 },
             });
 
             await this.prismaService.property.update({
                 where: {
-                    id: userPropertyIdToUpdate,
+                    id: createBid.user_property_id,
                 },
                 data: {
                     proposal_count: rowCount,
@@ -66,8 +65,8 @@ export class BiddingService {
 
         createProperty.user_id = user_id;
 
-        const response = await this.propertyService.createProperty(files, createProperty);
-        function isPropertyResponse(response: any): response is { success: boolean; message: any; response: { Property: { result: { id: number } } } } {
+        const response = await this.propertyService.createProperty(user_id,files, createProperty);
+        function isPropertyResponse(response: any): response is { success: boolean; message: any; response: { Property: { result: { id: string } } } } {
             return 'response' in response && 'Property' in response.response && 'result' in response.response.Property;
         }
 
@@ -80,21 +79,20 @@ export class BiddingService {
                 const result = await this.prismaService.bidding.create({
                     data: ({
                         agent_property_id: propertyId,
-                        user_property_id: parseInt(createProperty.user_property_id),
+                        user_property_id: createProperty.user_property_id,
                     }),
                 });
 
-                const userPropertyIdToUpdate = parseInt(createProperty.user_property_id);
 
                 const rowCount = await this.prismaService.bidding.count({
                     where: {
-                        user_property_id: userPropertyIdToUpdate,
+                        user_property_id: createProperty.user_property_id,
                     },
                 });
 
                 await this.prismaService.property.update({
                     where: {
-                        id: userPropertyIdToUpdate,
+                        id: createProperty.user_property_id,
                     },
                     data: {
                         proposal_count: rowCount,
@@ -129,7 +127,7 @@ export class BiddingService {
 
         const result = await this.prismaService.bidding.findMany({
             where: {
-                user_property_id: parseInt(user_property_id),
+                user_property_id: user_property_id,
             },
             include: {
                 agentProperty: true,
@@ -142,7 +140,7 @@ export class BiddingService {
     async getAgentBidding(agent_property_id: string) {
         const result = await this.prismaService.bidding.findMany({
             where: {
-                agent_property_id: parseInt(agent_property_id),
+                agent_property_id: agent_property_id,
             },
             include: {
                 userProperty: true,
@@ -154,18 +152,17 @@ export class BiddingService {
     }
 
 
-    async acceptProposal(acceptProposal: updateProposalDTO) {
-        const { user_property_id, agent_property_id } = acceptProposal;
+    async acceptProposal(id: string) {
+      
 
         try {
 
             const biddingEntry = await this.prismaService.bidding.findFirst({
                 where: {
-                    agent_property_id: parseInt(agent_property_id),
-                    user_property_id: parseInt(user_property_id),
-                }
+                    id: id,
+                },
             });
-
+    
             if (!biddingEntry) {
                 throw new Error('Bidding entry not found');
             }
@@ -183,23 +180,41 @@ export class BiddingService {
                 }
             });
 
+            const allOtherBiddingEntries = await this.prismaService.bidding.findMany({
+                where: {
+                    NOT: {
+                        id: biddingEntry.id
+                    }
+                }
+            });
+            
+            for (const entry of allOtherBiddingEntries) {
+                await this.prismaService.bidding.update({
+                    where: {
+                        id: entry.id
+                    },
+                    data: {
+                        user_status: 'rejected',
+                        agent_status: 'archive',
+                        updated_at: new Date()
+                    }
+                });
+            }
+
             return updatedBiddingEntry;
         } catch (error) {
             throw new Error(`Error accepting proposal: ${error.message}`);
         }
     }
 
-    async rejectProposal(rejectProposal: updateProposalDTO) {
-        const { user_property_id, agent_property_id } = rejectProposal;
+    async rejectProposal(id: string) {
 
         try {
 
             const biddingEntry = await this.prismaService.bidding.findFirst({
                 where: {
-                    agent_property_id: parseInt(agent_property_id),
-                    user_property_id: parseInt(user_property_id),
-
-                }
+                    id: id,
+                },
             });
 
             if (!biddingEntry) {

@@ -27,7 +27,7 @@ export class CreateBidPropertyDto {
   readonly property_name: string;
   
  
-   user_id: any;
+   user_id: string;
 
   
   @ApiProperty({ type: String, example: 'House' })

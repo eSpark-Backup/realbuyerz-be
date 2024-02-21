@@ -53,15 +53,15 @@ export class BiddingController {
     }
 
     @Roles('user')
-    @Post("acceptProposal")
-    async acceptProposal(@Body() acceptProposal:updateProposalDTO){
-        return await this.biddingService.acceptProposal(acceptProposal);
+    @Post("acceptProposal/:id")
+    async acceptProposal(@Param('id') id: string){
+        return await this.biddingService.acceptProposal(id);
     }
 
     @Roles('user')
-    @Post("rejectProposal")
-    async rejectProposal(@Body() rejectProposal:updateProposalDTO){
-        return await this.biddingService.rejectProposal(rejectProposal);
+    @Post("rejectProposal/:id")
+    async rejectProposal(@Param('id') id: string){
+        return await this.biddingService.rejectProposal(id);
     }
     
 

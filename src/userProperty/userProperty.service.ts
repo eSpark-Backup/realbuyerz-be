@@ -15,9 +15,7 @@ export class UserPropertyService {
         const property = { ...createProperty }
         property.user_id = user_id;
         property.property_by = "user";
-        if (property.user_id) {
-            property.user_id = parseInt(property.user_id);
-        }
+       
         if (property.property_price) {
             property.property_price = parseInt(property.property_price);
 

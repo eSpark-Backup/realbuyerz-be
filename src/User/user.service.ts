@@ -405,7 +405,7 @@ export class UserService {
       }
 
       const existingUser = await this.prismaService.user.findUnique({
-        where: { id: parseInt(userId, 10)},
+        where: { id: userId},
       });
 
       if (!existingUser) {
@@ -432,7 +432,7 @@ export class UserService {
         updatedUserDto = { ...updatedUserDto, isVerified: parsedIsVerified };
         updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
-          where: { id: parseInt(userId, 10) },
+          where: { id: userId },
           data: updatedUserDto,
           select: {
             id: true,
@@ -466,7 +466,7 @@ export class UserService {
         updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
         updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
-          where: { id: parseInt(userId, 10) },
+          where: { id: userId },
           data: updatedUserDto,
           select: {
             id: true,
@@ -508,7 +508,7 @@ export class UserService {
     try {
 
       const existingUser = await this.prismaService.user.findUnique({
-        where: { id: parseInt(userId, 10) },
+        where: { id:userId },
       });
 
       if (!existingUser) {
@@ -539,7 +539,7 @@ export class UserService {
       updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
 
       await this.prismaService.user.update({
-        where: { id: parseInt(userId, 10) },
+        where: { id: userId },
         data: updatedUserDto,
 
       });
