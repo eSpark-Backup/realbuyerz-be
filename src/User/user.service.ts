@@ -111,7 +111,7 @@ export class UserService {
         },
       });
 
-      return {success:true, message:CONSTANT_RESPONSE.PWD_RESET_SUCCESS };
+      return {action:'Reset Password With Link', message:CONSTANT_RESPONSE.PWD_RESET_SUCCESS };
 
     } catch (error) {
 

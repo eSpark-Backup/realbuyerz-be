@@ -16,9 +16,6 @@ export class SuccessResponseInterceptor implements NestInterceptor {
       map((data) => {
         const action = data.hasOwnProperty('action') ? data.action : 'Success';
         const message = data.hasOwnProperty('message') ? data.message : 'Success';
-
-        // If 'success' property is not explicitly set in the response data
-        // and 'data' is null or undefined, consider it as a failure
         const success = data.hasOwnProperty('success') ? data.success : !!data.data;
 
         const modifiedResponse = generateResponse(
