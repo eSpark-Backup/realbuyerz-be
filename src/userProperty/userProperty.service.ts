@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Prisma } from "@prisma/client";
-import { generateResponse } from "src/utils/response";
+import { generateResponse } from 'src/utils/function/response';
 
 
 @Injectable()
@@ -13,11 +13,11 @@ export class UserPropertyService {
     async createProperty(user_id :string, createProperty: CreateUserPropertyDto) {
 
         const property = { ...createProperty }
-        property.user_id = user_id;
-        property.property_by = "user";
+        property.userId = user_id;
+        property.propertyBy = "user";
        
-        if (property.property_price) {
-            property.property_price = parseInt(property.property_price);
+        if (property.propertyPrice) {
+            property.propertyPrice = parseInt(property.propertyPrice);
 
         }
         if (property.count) {
@@ -27,26 +27,26 @@ export class UserPropertyService {
         try {
             const result = await this.prismaService.property.create({
                 data: {
-                    user: { connect: { id: property.user_id } },
-                    property_name: property.property_name,
-                    property_type: property.property_type,
-                    sub_type: property.sub_type,
+                    user: { connect: { id: property.userId } },
+                    propertyName: property.propertyName,
+                    propertyType: property.propertyType,
+                    subType: property.subType,
                     purpose: property.purpose,
-                    property_price: property.property_price,
-                    property_area: property.property_area,
-                    property_city: property.property_city,
-                    property_by: property.property_by,
-                    property_address: property.property_address,
-                    property_zip: property.property_zip,
-                    property_description: property.property_description,
+                    propertyPrice: property.propertyPrice,
+                    propertyArea: property.propertyArea,
+                    propertyCity: property.propertyCity,
+                    propertyBy: property.propertyBy,
+                    propertyAddress: property.propertyAddress,
+                    propertyZip: property.propertyZip,
+                    propertyDescription: property.propertyDescription,
                     longitude: property.longitude,
                     latitude: property.latitude,
 
                     amenities: {
                         create: {
-                            ameneties_name: JSON.stringify(property.amenities_name),
+                            amenetiesName: JSON.stringify(property.amenitiesName),
                             count: property.count,
-                            other_features: JSON.stringify(property.other_features),
+                            otherFeatures: JSON.stringify(property.otherFeatures),
                         },
                     },
 

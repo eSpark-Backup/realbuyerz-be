@@ -4,12 +4,10 @@ import { BiddingService } from './bidding.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateBidDto } from './dto/createBid.dto';
 import { CreateBidPropertyDto } from './dto/createBidProperty.dto';
-import { propertyImageFileInterceptor } from 'src/utils/propertyfile.interceptor';
-import { getBidDTO } from './dto/getBid.dto';
-import { updateProposalDTO } from './dto/update.proposal.dto';
+import { propertyImageFileInterceptor } from 'src/utils/interceptor/propertyfile.interceptor';
 import { JwtAuthGuard, RoleGuard } from 'src/utils/guard';
-import { Roles } from 'src/utils/role.decorator';
-import { UserId } from 'src/utils/userId.decorator';
+import { Roles } from 'src/utils/decorator/role.decorator';
+import { UserId } from 'src/utils/decorator/userId.decorator';
 
 @Controller('bidding')
 @ApiBearerAuth('jwt')

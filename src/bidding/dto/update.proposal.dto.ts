@@ -10,9 +10,9 @@ export class updateProposalDTO{
     
     @ApiProperty({ type: String, example: 1 })
     @IsNotEmpty({ message: 'User Property ID cannot be empty' })
-    readonly user_property_id: any;
+    readonly userPropertyId: any;
 
     @ApiProperty({ type: String, example: 1 })
     @IsNotEmpty({ message: 'User Property ID cannot be empty' })
-    readonly agent_property_id: any;
+    readonly agentPropertyId: any;
 }

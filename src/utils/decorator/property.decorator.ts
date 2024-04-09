@@ -41,9 +41,9 @@ export const FindAllApiDocs = (): MethodDecorator => {
       ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' }),
       ApiQuery({ name: 'pageSize', required: false, type: Number, description: 'Number of items per page' }),
       ApiQuery({ name: 'purpose', required: false, type: String, description: 'Property purpose' }),
-      ApiQuery({ name: 'property_type', required: false, type: String, description: 'Property type' }),
-      ApiQuery({ name: 'sub_type', required: false, type: String, description: 'Property sub-type' }),
-      ApiQuery({ name: 'property_city', required: false, type: String, description: 'Property city' }),
+      ApiQuery({ name: 'propertyType', required: false, type: String, description: 'Property type' }),
+      ApiQuery({ name: 'subType', required: false, type: String, description: 'Property sub-type' }),
+      ApiQuery({ name: 'propertyCity', required: false, type: String, description: 'Property city' }),
       ApiResponse({ status: 200, description: 'Properties retrieved successfully' }),
       ApiResponse({ status: 400, description: 'Bad Request' }),
     ];

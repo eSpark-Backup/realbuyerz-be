@@ -12,29 +12,29 @@ export class updatedPropertyDto {
   @IsString({ message: 'Property name must be a string' })
  @IsOptional()
 
-  readonly property_name: string;
+  readonly propertyName: string;
   
  @ApiProperty({ type:Number, example: 'User ID',required:false  })
  @IsOptional()
-  readonly user_id: any;
+  readonly userId: any;
 
   
   @ApiProperty({ type: String, example: 'House',required:false  })
   @IsString({ message: 'Property type must be a string' })
  @IsOptional()
 
-  readonly property_type: string;
+  readonly propertyType: string;
   
   @ApiProperty({ type: String, example: 'Flat',required:false  })
   @IsString({ message: 'Property  Sub type must be a string' })
   @IsOptional()
-  readonly sub_type: string;
+  readonly subType: string;
 
   @ApiProperty({ type: String, example: 500000,required:false })
   @IsString({ message: 'Property price must be a number' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property price cannot be empty' })
-  readonly property_price: any;
+  readonly propertyPrice: any;
 
   @ApiProperty({ type: String, example: 2000 ,required:false })
   @IsString( { message: 'Property area must be a string' })
@@ -51,7 +51,7 @@ export class updatedPropertyDto {
   @IsString({ message: 'Property address must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property address cannot be empty' })
-  readonly property_address: string;
+  readonly propertyAddress: string;
 
 
 
@@ -61,19 +61,19 @@ export class updatedPropertyDto {
   // @IsNotEmpty({ message: 'Property zip cannot be empty' })
   @IsOptional()
 
-  readonly property_zip: string;
+  readonly propertyZip: string;
 
   @ApiProperty({ type: String, example: 'A wonderful property for sale',required:false  })
   @IsString({ message: 'Property description must be a string' })
   // @IsNotEmpty({ message: 'Property description cannot be empty' })
   @IsOptional()
-  readonly property_description: string;
+  readonly propertyDescription: string;
 
   @ApiProperty({ type: String, example: 'Karachi',required:false})
   @IsString({ message: 'Property city must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property city cannot be empty' })
-  readonly property_city: string;
+  readonly propertyCity: string;
 
 
   @ApiProperty({ type: String, example: '123.456',required:false  })
@@ -93,13 +93,13 @@ export class updatedPropertyDto {
   @ApiProperty({ type: Boolean, example: 'True ',default:false,required:false  })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
-  readonly property_status: boolean;
+  readonly propertyStatus: boolean;
 
 
   @ApiProperty({ type: String, example: 'Swimming Pool ' })
   @IsString()
   @IsOptional()
-  readonly amenities_name: string;
+  readonly amenitiesName: string;
 
   @ApiProperty({example: '1' })
   @IsString()
@@ -109,7 +109,7 @@ export class updatedPropertyDto {
   @ApiProperty({ type: String, example: 'Waterfall ' })
   @IsString()
   @IsOptional()
-  readonly other_features: string;
+  readonly otherFeatures: string;
 
   @ApiProperty({
     type: 'array',

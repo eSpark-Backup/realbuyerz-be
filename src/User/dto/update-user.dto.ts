@@ -16,12 +16,12 @@ export class UpdateUserDto {
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'First name must be a string' })
     @IsOptional()
-    readonly first_name: string;
+    readonly firstName: string;
 
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Last name must be a string' })
     @IsOptional()
-    readonly last_name: string;
+    readonly lastName: string;
 
     @ApiProperty({ type: String,default:'ahsan@mail.com',required: false })
     @IsEmail({}, { message: 'Invalid email format' })
@@ -29,16 +29,16 @@ export class UpdateUserDto {
 
     readonly email: string;
 
-    @ApiProperty({ type: String, required: false })
-    @IsString({ message: 'Mobile number must be a string' })
-    @IsOptional()
+    // @ApiProperty({ type: String, required: false })
+    // @IsString({ message: 'Mobile number must be a string' })
+    // @IsOptional()
 
-    readonly mobile_number: string;
+    // readonly mobileNumber: string;
 
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Landline number must be a string' })
     @IsOptional()
-    readonly landline_number?: string;
+    readonly landlineNumber?: string;
 
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Whatsapp number must be a string' })
@@ -59,7 +59,7 @@ export class UpdateUserDto {
     // @ApiProperty({ type: String, required: false })
     // @IsString({ message: 'Profile image must be a string' })
     // @IsOptional()
-    readonly profile_image: string;
+    readonly profileImage: string;
 
     // @ApiProperty({ enum: UserRole, required: false })
     // @IsEnum(UserRole, { message: 'Invalid role' })
@@ -69,7 +69,7 @@ export class UpdateUserDto {
     @ApiProperty({ type: String, required: false })
     @IsString({ message: 'Social id must be a string' })
     @IsOptional()
-    readonly social_id: string;
+    readonly socialId: string;
 
     @ApiProperty({ type: Boolean, default: false, required: false })
     @IsOptional()
@@ -77,10 +77,9 @@ export class UpdateUserDto {
 
     @ApiProperty({ type: Boolean, default: false, required: false })
     @IsOptional()
-    readonly profile_visibility: boolean;
+    readonly profileVisibility: boolean;
 
 
-    readonly updated_at: Date;
 
     @ApiProperty({ type: 'string', format: 'binary', example: 'image1.jpg', required: false })
     @IsOptional()

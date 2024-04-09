@@ -13,9 +13,9 @@ import { updatedPropertyDto } from './dto/update-property.dto';
 import { PropertyDataDTO } from './dto/create-propertyData.dto';
 import { Prisma } from '@prisma/client';
 import * as uuid from 'uuid';
-import { saveImageToDisk } from '../utils/saveImage';
-import { generateResponse } from 'src/utils/response';
-import { BackblazeService } from 'src/utils/backblaze';
+import { saveImageToDisk } from '../utils/function/saveImage';
+import { generateResponse } from 'src/utils/function/response';
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 
 @Injectable()
@@ -50,17 +50,17 @@ export class PropertyService {
 
             const totalCount = await this.prismaService.property.count({
                 where: {
-                    user_id: user_id,
+                    userId: user_id,
                 },
             });
 
             const properties = await this.prismaService.property.findMany({
                 where: {
-                    user_id: user_id,
+                    userId: user_id,
                 },
                 include: {
                     amenities: true,
-                    Property_data: true,
+                    PropertyData: true,
                 }
 
 
@@ -89,7 +89,7 @@ export class PropertyService {
     }
     async createProperty(user_id:string, files: { image?: Express.Multer.File[] }, createProperty: CreatePropertyDto) {
 
-        createProperty.user_id = user_id;
+        createProperty.userId = user_id;
         if (files.image) {
             const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
             for (const file of files.image) {
@@ -108,11 +108,11 @@ export class PropertyService {
         }
 
         const property = { ...createProperty }
-        property.property_by = "agent";
+        property.propertyBy = "agent";
         let processedImages: any = [];
        
-        if (property.property_price) {
-            property.property_price = parseInt(property.property_price);
+        if (property.propertyPrice) {
+            property.propertyPrice = parseInt(property.propertyPrice);
 
         }
         if (property.count) {
@@ -123,26 +123,26 @@ export class PropertyService {
         try {
             result = await this.prismaService.property.create({
                 data: {
-                    user: { connect: { id: property.user_id } },
-                    property_name: property.property_name,
-                    property_type: property.property_type,
-                    sub_type: property.sub_type,
+                    userId: { connect: { id: property.userId } },
+                    propertyName: property.propertyName,
+                    propertyType: property.propertyType,
+                    subType: property.subType,
                     purpose: property.purpose,
-                    property_price: property.property_price,
-                    property_area: property.property_area,
-                    property_city: property.property_city,
-                    property_address: property.property_address,
-                    property_zip: property.property_zip,
-                    property_by: property.property_by,
-                    property_description: property.property_description,
+                    propertyPrice: property.propertyPrice,
+                    propertyArea: property.propertyArea,
+                    propertyCity: property.propertyCity,
+                    propertyAddress: property.propertyAddress,
+                    propertyZip: property.propertyZip,
+                    propertyBy: property.propertyBy,
+                    propertyDescription: property.propertyDescription,
                     longitude: property.longitude,
                     latitude: property.latitude,
 
                     amenities: {
                         create: {
-                            ameneties_name: JSON.stringify(property.amenities_name),
+                            amenetiesName: JSON.stringify(property.amenitiesName),
                             count: property.count,
-                            other_features: JSON.stringify(property.other_features),
+                            otherFeatures: JSON.stringify(property.otherFeatures),
                         },
                     },
                 } as Prisma.PropertyCreateInput,
@@ -231,16 +231,16 @@ export class PropertyService {
     async updateProperty(property_id: string, files: { image?: Express.Multer.File[]}, updateProperty: updatedPropertyDto) {
         const property = { ...updateProperty }
        
-        if (property.property_price) {
-            property.property_price = parseInt(property.property_price);
+        if (property.propertyPrice) {
+            property.propertyPrice = parseInt(property.propertyPrice);
 
         }
         if (property.count) {
             property.count = parseInt(property.count);
         }
 
-        if (property.property_status) {
-            property.property_status = Boolean(property.property_status);
+        if (property.propertyStatus) {
+            property.propertyStatus = Boolean(property.propertyStatus);
         }
         if (files.image) {
             const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
@@ -276,20 +276,19 @@ export class PropertyService {
                         where: { id: property_id },
                         data: {
 
-                            property_name: property.property_name,
-                            property_type: property.property_type,
-                            sub_type: property.sub_type,
+                            propertyName: property.propertyName,
+                            propertyType: property.propertyType,
+                            subType: property.subType,
                             purpose: property.purpose,
-                            property_price: property.property_price,
-                            property_area: property.property_area,
-                            property_city: property.property_city,
-                            property_address: property.property_address,
-                            property_zip: property.property_zip,
-                            property_status: property.property_status,
-                            property_description: property.property_description,
+                            propertyPrice: property.propertyPrice,
+                            propertyArea: property.propertyArea,
+                            propertyCity: property.propertyCity,
+                            propertyAddress: property.propertyAddress,
+                            propertyZip: property.propertyAddress,
+                            propertyStatus: property.propertyStatus,
+                            propertyDescription: property.propertyDescription,
                             longitude: property.longitude,
                             latitude: property.latitude,
-                            updated_at: new Date(),
 
                             amenities: {
                                 update: {
@@ -297,9 +296,9 @@ export class PropertyService {
                                         id: propert.amenities.id, 
                                     },
                                     data: {
-                                        ameneties_name: JSON.stringify(property.amenities_name),
+                                        amenetiesName: JSON.stringify(property.amenitiesName),
                                         count: property.count,
-                                        other_features: JSON.stringify(property.other_features),
+                                        otherFeatures: JSON.stringify(property.otherFeatures),
                                         updated_at: new Date(),
                                        
                                     },
@@ -308,22 +307,20 @@ export class PropertyService {
                         } as Prisma.PropertyUpdateInput,
                         select: {
                             id: true,
-                            property_name: true,
-                            property_type: true,
-                            sub_type: true,
+                            propertyName: true,
+                            propertyType: true,
+                            subType: true,
                             purpose: true,
-                            property_price: true,
-                            property_area: true,
-                            property_city: true,
-                            property_address: true,
-                            property_zip: true,
-                            property_status: true,
-                            property_description: true,
+                            propertyPrice: true,
+                            propertyArea: true,
+                            propertyCity: true,
+                            propertyAddress: true,
+                            propertyZip: true,
+                            propertyStatus: true,
+                            propertyDescription: true,
                             longitude: true,
                             latitude: true,
                             amenities: true,
-                            created_at: true,
-                            updated_at: true,
                         },
                     });
 
@@ -338,8 +335,7 @@ export class PropertyService {
                         url:`${image.uploadResult.url}`,
                         type: 'image',
                         imageKey: image.uploadResult.fileId,
-                        property_id: result.id,
-                        updated_at: new Date(),
+                        propertyId: result.id,
                     }));
 
                     await this.prismaService.porperty_data.createMany({
@@ -378,20 +374,19 @@ export class PropertyService {
                         where: { id: property_id },
                         data: {
 
-                            property_name: property.property_name,
-                            property_type: property.property_type,
-                            sub_type: property.sub_type,
+                            propertyName: property.propertyName,
+                            propertyType: property.propertyType,
+                            subType: property.subType,
                             purpose: property.purpose,
-                            property_price: property.property_price,
-                            property_area: property.property_area,
-                            property_city: property.property_city,
-                            property_address: property.property_address,
-                            property_status: property.property_status,
-                            property_zip: property.property_zip,
-                            property_description: property.property_description,
+                            propertyPrice: property.propertyPrice,
+                            propertyArea: property.propertyArea,
+                            propertyCity: property.propertyCity,
+                            propertyAddress: property.propertyAddress,
+                            propertyStatus: property.propertyStatus,
+                            propertyZip: property.propertyZip,
+                            propertyDescription: property.propertyDescription,
                             longitude: property.longitude,
                             latitude: property.latitude,
-                            updated_at: new Date(),
 
                             amenities: {
                                 update: {
@@ -399,32 +394,29 @@ export class PropertyService {
                                         id: propert.amenities.id, 
                                     },
                                     data: {
-                                        ameneties_name: JSON.stringify(property.amenities_name),
+                                        ameneties_name: JSON.stringify(property.amenitiesName),
                                         count: property.count,
-                                        other_features: JSON.stringify(property.other_features),
-                                        updated_at: new Date(),
+                                        otherFeatures: JSON.stringify(property.otherFeatures),
                                     },
                                 },
                             },
                         } as Prisma.PropertyUpdateInput,
                         select: {
                             id: true,
-                            property_name: true,
-                            property_type: true,
-                            sub_type: true,
+                            propertyName: true,
+                            propertyType: true,
+                            subType: true,
                             purpose: true,
-                            property_price: true,
-                            property_area: true,
-                            property_city: true,
-                            property_address: true,
-                            property_zip: true,
-                            property_description: true,
-                            property_status: true,
+                            propertyPrice: true,
+                            propertyArea: true,
+                            propertyCity: true,
+                            propertyAddress: true,
+                            propertyZip: true,
+                            propertyDescription: true,
+                            propertyStatus: true,
                             longitude: true,
                             latitude: true,
                             amenities: true,
-                            created_at: true,
-                            updated_at: true,
                         },
                     });
 
@@ -455,13 +447,13 @@ export class PropertyService {
          
           const images = await this.prismaService.porperty_data.findMany({
             where: {
-              property_id:propertyId,
+              propertyId:propertyId,
               type: 'image',
             },
           });
           await this.prismaService.porperty_data.deleteMany({
             where: {
-              property_id: propertyId,
+              propertyId: propertyId,
               type: 'image',
             },
           });
@@ -495,18 +487,18 @@ export class PropertyService {
             }
 
             if (filters.property_type) {
-                where.property_type = filters.property_type;
+                where.propertyType = filters.property_type;
             }
 
             if (filters.sub_type) {
-                where.sub_type = filters.sub_type;
+                where.subType = filters.sub_type;
             }
 
             if (filters.property_city) {
-                where.property_city = filters.property_city;
+                where.propertyCity = filters.property_city;
             }
             if (filters.property_by) {
-                where.property_by = filters.property_by;
+                where.propertyBy = filters.property_by;
             }
         }
 
@@ -515,7 +507,7 @@ export class PropertyService {
             take: pageSize,
             include: {
                 amenities: true,
-                Property_data: true,
+                PropertyData: true,
 
             },
             where,
@@ -539,7 +531,7 @@ export class PropertyService {
                 where: { id: propertyId },
                 include: {
                     amenities: true,
-                    Property_data: true,
+                    PropertyData: true,
                  
                 },
             });

@@ -24,35 +24,35 @@ export class CreateBidPropertyDto {
   @IsString({ message: 'Property name must be a string' })
   @IsNotEmpty({ message: 'Property name cannot be empty' })
   
-  readonly property_name: string;
+  readonly propertyName: string;
   
  
-   user_id: string;
+   userId: string;
 
   
   @ApiProperty({ type: String, example: 'House' })
   @IsString({ message: 'Property type must be a string' })
   @IsNotEmpty({ message: 'Property type cannot be empty' })
-  readonly property_type: string;
+  readonly propertyType: string;
 
-  readonly property_by: string;
+  readonly propertyBy: string;
   
   @ApiProperty({ type: String, example: 'Flat' })
   @IsString({ message: 'Property  Sub type must be a string' })
   @IsNotEmpty({ message: 'Property Sub type cannot be empty' })
-  readonly sub_type: string;
+  readonly subType: string;
 
   @ApiProperty({ type: String, example: 500000 })
   @IsString({ message: 'Property price must be a number' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property price cannot be empty' })
-  readonly property_price: any;
+  readonly propertyPrice: any;
 
   @ApiProperty({ type: String, example: 2000 })
   @IsString( { message: 'Property area must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property area cannot be empty' })
-  readonly property_area: string;
+  readonly propertyArea: string;
 
   @ApiProperty({ type: String, example: 'Sale' })
   @IsString({ message: 'Purpose must be a string' })
@@ -63,13 +63,13 @@ export class CreateBidPropertyDto {
   @IsString({ message: 'Property address must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property address cannot be empty' })
-  readonly property_address: string;
+  readonly propertyAddress: string;
 
   @ApiProperty({ type: String, example: 'Karachi' })
   @IsString({ message: 'Property city must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property city cannot be empty' })
-  readonly property_city: string;
+  readonly propertyCity: string;
 
 
 
@@ -78,13 +78,13 @@ export class CreateBidPropertyDto {
   // @IsNotEmpty({ message: 'Property zip cannot be empty' })
   @IsOptional()
 
-  readonly property_zip: string;
+  readonly propertyZip: string;
 
   @ApiProperty({ type: String, example: 'A wonderful property for sale' })
   @IsString({ message: 'Property description must be a string' })
   // @IsNotEmpty({ message: 'Property description cannot be empty' })
   @IsOptional()
-  readonly property_description: string;
+  readonly propertyDescription: string;
 
 
 
@@ -123,12 +123,12 @@ export class CreateBidPropertyDto {
   @IsOptional()
 
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
-  readonly property_status: boolean;
+  readonly propertyStatus: boolean;
 
   @ApiProperty({ type: String, example: 'Swimming Pool ' })
   @IsString()
   @IsOptional()
-  readonly amenities_name: string;
+  readonly amenitiesName: string;
 
   @ApiProperty({example: '1' })
   @IsString()
@@ -138,11 +138,11 @@ export class CreateBidPropertyDto {
   @ApiProperty({ type: String, example: 'Waterfall ' })
   @IsString()
   @IsOptional()
-  readonly other_features: string;
+  readonly otherFeatures: string;
 
   @ApiProperty({ type: String, example: 1 })
   @IsNotEmpty({ message: 'User Property ID cannot be empty' })
-  readonly user_property_id: any;
+  readonly userPropertyId: any;
 
 
 

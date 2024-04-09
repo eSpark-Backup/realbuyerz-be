@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { EmailDto } from './dto/reset-email.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { CreateUserDocs, LoginUserDocs, SendEmailDocs, SendOtpDocs, VerifyOtpDocs } from '../utils/user.decorator';
+import { CreateUserDocs, LoginUserDocs, SendEmailDocs, SendOtpDocs, VerifyOtpDocs } from '../utils/decorator/user.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
 import { LinkEmailDto } from './dto/reset-link.dto';
@@ -18,8 +18,8 @@ import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { Injectable } from '@nestjs/common';
-import { imageFileInterceptor } from 'src/utils/userfile.interceptor';
-import { UserId } from 'src/utils/userId.decorator';
+import { imageFileInterceptor } from 'src/utils/interceptor/userfile.interceptor';
+import { UserId } from 'src/utils/decorator/userId.decorator';
 import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/utils/guard';
 
@@ -102,7 +102,7 @@ export class UserController {
         verifyOtpDto.hash,
 
       );
-      return { message: verificationResult ? 'OTP verified successfully' : 'Invalid OTP' };
+      return verificationResult;
   }
    // @Post('send-email')
   // @SendEmailDocs()

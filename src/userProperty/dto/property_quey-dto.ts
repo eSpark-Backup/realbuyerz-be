@@ -21,15 +21,15 @@ export class PropertyQueryDto {
   @IsOptional()
   @IsString({ message: 'Property type must be a string' })
   @IsNotEmpty({ message: 'Property type cannot be empty' })
-  readonly property_type?: string;
+  readonly propertyType?: string;
 
   @ApiProperty({ required: false, description: 'The sub-type of the property', example: 'Flat' })
   @IsOptional()
   @IsString({ message: 'Property sub-type must be a string' })
-  readonly sub_type?: string;
+  readonly subType?: string;
 
   @ApiProperty({ required: false, description: 'The city of the property', example: 'New York' })
   @IsOptional()
   @IsString({ message: 'Property city must be a string' })
-  readonly property_city?: string;
+  readonly propertyCity?: string;
 }

@@ -2,9 +2,9 @@
 // utils/decorators/user.decorators.ts
 
 import { SetMetadata } from '@nestjs/common';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from '../User/dto/create-user.dto';
-import { LoginUserDto } from '../User/dto/login-user.dto';
+import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { CreateUserDto } from '../../User/dto/create-user.dto';
+import { LoginUserDto } from '../../User/dto/login-user.dto';
 import { EmailDto } from 'src/User/dto/reset-email.dto';
 import { SendOtpDto } from 'src/User/dto/send-otp.dto';
 import { VerifyOtpDto } from 'src/User/dto/verify-otp.dto';

@@ -9,12 +9,12 @@ import { extname } from "path";
 import { CreatePropertyDto } from "./dto/create-property.dto";
 import { updatedPropertyDto } from "./dto/update-property.dto";
 import { PropertyQueryDto } from "./dto/property_quey-dto";
-import { propertyImageFileInterceptor } from "src/utils/propertyfile.interceptor";
-import { CreateApiDocs, FindAllApiDocs, UpdateApiDocs } from "src/utils/property.decorator";
+import { propertyImageFileInterceptor } from "src/utils/interceptor/propertyfile.interceptor";
+import { CreateApiDocs, FindAllApiDocs, UpdateApiDocs } from "src/utils/decorator/property.decorator";
 import { JwtAuthGuard, RoleGuard } from "src/utils/guard";
-import { Roles } from "src/utils/role.decorator";
-import { swaggerDocs } from "src/utils/swagger.decorator";import { CONSTANT_RESPONSE } from "src/utils/constant/return.constant";
-import { UserId } from "src/utils/userId.decorator";
+import { Roles } from "src/utils/decorator/role.decorator";
+import { swaggerDocs } from "src/utils/decorator/swagger.decorator";import { CONSTANT_RESPONSE } from "src/utils/constant/return.constant";
+import { UserId } from "src/utils/decorator/userId.decorator";
 
 @Controller('property')
 @ApiBearerAuth('jwt')
@@ -90,10 +90,10 @@ export class PropertyController {
   ) {
     const filters = {
       purpose: query.purpose,
-      property_type: query.property_type,
-      sub_type: query.sub_type,
-      property_city: query.property_city,
-      property_by: query.property_by,
+      propertyType: query.propertyType,
+      subType: query.subType,
+      propertyCity: query.propertyCity,
+      propertyBy: query.propertyBy,
     };
 
     return this.propertyService.findAll(page, pageSize, filters);

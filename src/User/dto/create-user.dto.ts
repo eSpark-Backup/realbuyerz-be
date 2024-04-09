@@ -16,12 +16,12 @@ export class CreateUserDto {
   @ApiProperty({ type: String ,default:'Ahsan'})
   @IsString({ message: 'First name must be a string' })
   @IsNotEmpty({ message: 'First name cannot be empty' })
-  readonly first_name: string;
+  readonly firstName: string;
 
   @ApiProperty({ type: String,default:'Badami' })
   @IsString({ message: 'Last name must be a string' })
   @IsNotEmpty({ message: 'Last name cannot be empty' })
-  readonly last_name: string;
+  readonly lastName: string;
 
   @ApiProperty({ type: String,default:'ahsan@mail.com'})
   @IsEmail({}, { message: 'Invalid email format' })
@@ -31,7 +31,7 @@ export class CreateUserDto {
   @ApiProperty({ type: String,required:false })
   @IsString({ message: 'Mobile number must be a string' })
   @IsNotEmpty({ message: 'Mobile number cannot be empty' })
-  readonly mobile_number: string;
+  readonly mobileNumber: string;
 
  
   @ApiProperty({ type: String ,required:false })
@@ -42,20 +42,20 @@ export class CreateUserDto {
   @ApiProperty({ type: String  ,required:false})
   @IsString({ message: 'Profile Image must be a string' })
   @IsOptional()
-  readonly profile_image?: string;
+  readonly profileImage?: string;
  
   @ApiProperty({ enum: UserRole, default: UserRole.User })
   @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" or "agent".' })
   @IsOptional()
   readonly role: string;
 
-  readonly social_login?:boolean;
+  readonly socialLogin?:boolean;
 
 
   @ApiProperty({ type: String ,required:false })
   @IsString({ message: 'Social id must be a string' })
   @IsOptional()
-  readonly social_id: string;
+  readonly socialId: string;
 
 
 

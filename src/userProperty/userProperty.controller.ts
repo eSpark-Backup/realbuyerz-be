@@ -5,10 +5,10 @@ import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { UserPropertyService } from "./userProperty.service";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
-import { CreateApiDocs } from "src/utils/property.decorator";
+import { CreateApiDocs } from "src/utils/decorator/property.decorator";
 import { JwtAuthGuard, RoleGuard } from "src/utils/guard";
-import { Roles } from "src/utils/role.decorator";
-import { UserId } from "src/utils/userId.decorator";
+import { Roles } from "src/utils/decorator/role.decorator";
+import { UserId } from "src/utils/decorator/userId.decorator";
 
 
 @Controller('userProperty')

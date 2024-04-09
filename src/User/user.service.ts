@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+// eslint-disable-next-line prettier/prettier
 /* eslint-disable prefer-const */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -23,9 +25,10 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordwithMailDto } from './dto/reset-pw-with-mail.dto';
 import { extname } from 'path';
 import { OAuth2Client } from 'google-auth-library';
-import { saveImageToDisk } from '../utils/saveImage';
+import { saveImageToDisk } from '../utils/function/saveImage';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -65,16 +68,7 @@ export class UserService {
 
  
 
-  async generateResponse(action, token, message) {
-    const response = {
-      timestamp_ms: Date.now(),
-      action: action,
-      User: {
-        token: token
-      },
-    };
-    return { success: true, message: message, response };
-  }
+  
 
   async resetPasswordwithMail(token: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
     try {
@@ -102,7 +96,7 @@ export class UserService {
       if (!user) {
         return { success: false, message: 'User not found' };
       }
-      if (!user.password_reset_token || user.password_reset_token !== token) {
+      if (!user.passwordResetToken || user.passwordResetToken !== token) {
         return { success: false, message: 'Password reset link is expired or invalid' };
       }
 
@@ -113,17 +107,16 @@ export class UserService {
         where: { email: email },
         data: {
           password: hashedPassword,
-          password_reset_token: null,
+          passwordResetToken: null,
         },
       });
-      const passwordResetResponse = this.generateResponse('Password Reset', null, 'Password reset successfully');
 
-      return passwordResetResponse;
+      return {success:true, message:CONSTANT_RESPONSE.PWD_RESET_SUCCESS };
 
     } catch (error) {
 
 
-      return { success: false, message: 'Failed to reset password. Please try again later.', error };
+      return { success: false, message: CONSTANT_RESPONSE.FAILED_TO_RESET, error };
     }
   }
 
@@ -135,7 +128,7 @@ export class UserService {
     try {
       await this.prismaService.user.update({
         where: { email: to },
-        data: { password_reset_token: token },
+        data: { passwordResetToken: token },
       });
 
       await this.sendEmail(to, 'Password Reset Link', link);
@@ -192,7 +185,7 @@ export class UserService {
 
 
 
-  async verifyOtp(phone: string, otp: string, hash: string): Promise<string> {
+  async verifyOtp(phone: string, otp: string, hash: string): Promise<any> {
     try {
       const [hashValue, expires] = hash.split('.');
       const now = Date.now();
@@ -205,7 +198,20 @@ export class UserService {
       const newCalculateHash = crypto.createHmac('sha256', key).update(data).digest('hex');
 
       if (newCalculateHash === hashValue) {
-        return 'Success';
+
+     const user = await this.prismaService.user.update({
+        where: {  mobileNumber: phone },
+        data: {
+          isVerified: true,
+        },
+      });
+    
+       return {
+        success: true,
+        message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
+        response: user,
+       }
+       
       }
 
       throw new Error('Invalid OTP');
@@ -261,26 +267,30 @@ export class UserService {
       const emailSubject = 'Welcome to YourApp';
       const emailContent = 'Thank you for signing up!';
 
-      if (!createUserDto.password && !createUserDto.profile_image) {
+      if (!createUserDto.password && !createUserDto.profileImage) {
         return { success: false, message: 'Password or Profile Image is required' }
       }
 
-      if (!createUserDto.password && createUserDto.profile_image && createUserDto.social_id) {
+      if (!createUserDto.password && createUserDto.profileImage && createUserDto.socialId) {
         const existingUser = await this.prismaService.user.findUnique({
           where: { email: createUserDto.email },
         });
 
 
-        if (existingUser) {
-         
+        if (existingUser) {     
           const token = this.createToken({ id: existingUser.id, role: existingUser.role }, existingUser)
-          const signUpResponse = this.generateResponse('Sign Up', token, 'User Logged in successfully');
+         return  {
+            action: 'Logged In',
+            message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
+            data: {
+              token: token
+            }
+          };
 
-          return signUpResponse;
         }
 
         const userData = { ...createUserDto };
-        userData.social_login= true;
+        userData.socialLogin= true;
     
         const newUser = await this.prismaService.user.create({
           data: userData,
@@ -289,20 +299,34 @@ export class UserService {
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
         const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
-
-        const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
-
+        const signUpResponse = {
+          action: 'Sign Up', 
+          message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
+          data: {
+            token: token
+          }
+        };
+        
         return signUpResponse;
 
 
       }
       else {
-        const existingUser = await this.prismaService.user.findUnique({
-          where: { email: createUserDto.email },
+        const existingUser = await this.prismaService.user.findFirst({
+          where: {
+            OR: [
+              { email: createUserDto.email },
+              { mobileNumber: createUserDto.mobileNumber }
+            ]
+          }
         });
-
+        
         if (existingUser) {
-          throw new ConflictException('Email is already in use');
+          throw new ConflictException('Email or Mobile Number is already in use');
+        }
+        
+        if (existingUser) {
+          throw new ConflictException('Email or Mobile Number is already in use');
         }
 
         const hashedPassword = await this.hashPassword(createUserDto.password);
@@ -312,13 +336,19 @@ export class UserService {
           data: userData,
         });
 
-        await this.sendEmail(newUser.email, emailSubject, emailContent);
+        // await this.sendEmail(newUser.email, emailSubject, emailContent);
 
         const token =   this.createToken({ id: newUser.id, role: newUser.role }, newUser)
 
 
 
-        const signUpResponse = this.generateResponse('Sign Up', token, 'User Created successfully');
+        const signUpResponse = {
+          action: 'Sign Up', 
+          message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
+          data: {
+            token: token
+          }
+        };
 
         return signUpResponse;
 
@@ -327,6 +357,7 @@ export class UserService {
     } catch (error) {
       if (error instanceof ConflictException) {
         return {
+          action:'User not created',
           success: false,
           message: error.message,
         };
@@ -356,9 +387,13 @@ export class UserService {
     const token =  this.createToken({ id: user.id, role: user.role }, user)
 
 
-    const loginResponse = this.generateResponse('Logged In', token, 'User Logged In successfully');
-
-    return loginResponse;
+    return {
+      action: 'Login',
+      message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
+      data: {
+        token: token
+      }
+    };
 
 
 
@@ -371,11 +406,11 @@ export class UserService {
       let parsedIsVerified: boolean;
       let parsedProfileVisibility: boolean;
 
-      if (typeof updateUserDto.profile_visibility === 'string') {
-        const stringValue: string = updateUserDto.profile_visibility;
+      if (typeof updateUserDto.profileVisibility === 'string') {
+        const stringValue: string = updateUserDto.profileVisibility;
         parsedProfileVisibility = stringValue.toLowerCase() === 'true';
       } else {
-        parsedProfileVisibility = updateUserDto.profile_visibility;
+        parsedProfileVisibility = updateUserDto.profileVisibility;
       }
 
 
@@ -413,7 +448,7 @@ export class UserService {
       }
 
 
-      const allowedFields = ['first_name', 'last_name', 'email', 'mobile_number', 'landline_number', 'country', 'address', 'profile_image', 'role', , 'whatsapp', 'social_id', 'isVerified', 'profile_visibility'];
+      const allowedFields = ['firstName', 'lastName', 'email', 'landlineNumber', 'country', 'address', 'profileImage' , 'whatsapp', 'socialId', 'isVerified', 'profileVisibility'];
       const invalidFields = Object.keys(updateUserDto).filter(field => !allowedFields.includes(field));
 
       if (invalidFields.length > 0) {
@@ -427,35 +462,35 @@ export class UserService {
         const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
         const imagePathsString = processedImages.map(image => image.savedImagePath).join(', ');
 
-        updatedUserDto = { ...updatedUserDto, profile_image: imagePathsString };
-        updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
+        updatedUserDto = { ...updatedUserDto, profileImage: imagePathsString };
+        updatedUserDto = { ...updatedUserDto, profileVisibility: parsedProfileVisibility };
         updatedUserDto = { ...updatedUserDto, isVerified: parsedIsVerified };
-        updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
+        // updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: userId },
           data: updatedUserDto,
           select: {
             id: true,
-            first_name: true,
-            last_name: true,
+            firstName: true,
+            lastName: true,
             email: true,
-            mobile_number: true,
-            landline_number: true,
+            landlineNumber: true,
             whatsapp: true,
             country: true,
             address: true,
             isVerified: true,
-            social_id: true,
-            role: true,
-            profile_image: true,
-            profile_visibility: true,
-            created_at: true,
-            updated_at: true,
+            socialId: true,
+            profileImage: true,
+            profileVisibility: true,
           },
         });
 
 
-        const updateResponse = this.generateResponse('update', results, 'User updated successfully');
+        const updateResponse = {
+         action:'Update',
+          message: 'User updated successfully',
+          data: results,
+        };
 
         return updateResponse;
 
@@ -463,33 +498,34 @@ export class UserService {
 
       else {
         updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
-        updatedUserDto = { ...updatedUserDto, profile_visibility: parsedProfileVisibility };
-        updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
+        updatedUserDto = { ...updatedUserDto, profileVisibility: parsedProfileVisibility };
+        // updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: userId },
           data: updatedUserDto,
           select: {
             id: true,
-            first_name: true,
-            last_name: true,
+            firstName: true,
+            lastName: true,
             email: true,
-            mobile_number: true,
-            landline_number: true,
+            landlineNumber: true,
             whatsapp: true,
             country: true,
             address: true,
             isVerified: true,
-            social_id: true,
+            socialId: true,
             role: true,
-            profile_image: true,
-            profile_visibility: true,
-            created_at: true,
-            updated_at: true,
+            profileImage: true,
+            profileVisibility: true,
           },
         });
 
 
-        const updateResponse = this.generateResponse('Update', results, 'User updated successfully');
+        const updateResponse = {
+          action:'Update',
+          message:CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
+          data: results,
+        };
 
         return updateResponse;
       }
@@ -543,11 +579,14 @@ export class UserService {
         data: updatedUserDto,
 
       });
-      const emailContent = `Dear ${existingUser.first_name} ${existingUser.last_name},\n\nYour password has been successfully updated. If you did not perform this action, please contact us immediately.`;
+      const emailContent = `Dear ${existingUser.firstName} ${existingUser.lastName},\n\nYour password has been successfully updated. If you did not perform this action, please contact us immediately.`;
       await this.sendEmail(existingUser.email, 'Password Update Notification', emailContent);
 
 
-      const passwordUpdateResponse = this.generateResponse('Password Update', null, 'Password updated successfully');
+      const passwordUpdateResponse ={
+        action:'Update Password',
+        message: CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
+      }
 
       return passwordUpdateResponse;
 
@@ -583,7 +622,7 @@ export class UserService {
   createToken(payload: object, userObj: any) {
     const token = this.jwtService.sign(payload);
     let user = {
-      user_name: userObj?.first_name + ' ' + userObj?.last_name,
+      userName: userObj?.firstName + ' ' + userObj?.lastName,
       email: userObj?.email,
     }
    

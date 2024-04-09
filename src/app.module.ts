@@ -11,11 +11,23 @@ import { UserModule } from './User/user.module';
 import { PropertyModule } from './Property/property.module';
 import { UserPropertyModule } from './userProperty/userProperty.module';
 import { BiddingModule } from './bidding/bidding.module';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { GlobalExceptionFilter } from './utils/global-exception-handler/global-exception.filter';
+import { SuccessResponseInterceptor } from './utils/interceptor/success-response.interceptor';
 
 @Module({
   imports: [PrismaModule, UserModule, PropertyModule, UserPropertyModule, BiddingModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SuccessResponseInterceptor,
+    },
+  ],
 })
 export class AppModule {
 

@@ -23,12 +23,12 @@ export class BiddingService {
     async createBidding(createBid: CreateBidDto) {
 
         try {
-            const propertyIds = createBid.agent_property_id.map(id =>id);
+            const propertyIds = createBid.agentPropertyId.map(id =>id);
 
             const result = await this.prismaService.bidding.createMany({
-                data: propertyIds.map(agent_property_id => ({
-                    agent_property_id: agent_property_id,
-                    user_property_id: createBid.user_property_id,
+                data: propertyIds.map(agentPropertyId => ({
+                    agentPropertyId: agentPropertyId,
+                    userPropertyId: createBid.userPropertyId,
                 })),
 
             });
@@ -36,16 +36,16 @@ export class BiddingService {
 
             const rowCount = await this.prismaService.bidding.count({
                 where: {
-                    user_property_id: createBid.user_property_id,
+                    userPropertyId: createBid.userPropertyId,
                 },
             });
 
             await this.prismaService.property.update({
                 where: {
-                    id: createBid.user_property_id,
+                    id: createBid.userPropertyId,
                 },
                 data: {
-                    proposal_count: rowCount,
+                    proposalCount: rowCount,
                 },
             });
 
@@ -63,7 +63,7 @@ export class BiddingService {
 
     async createSingleProperty(user_id: string, files: { image?: Express.Multer.File[] }, createProperty: CreateBidPropertyDto) {
 
-        createProperty.user_id = user_id;
+        createProperty.userId = user_id;
 
         const response = await this.propertyService.createProperty(user_id,files, createProperty);
         function isPropertyResponse(response: any): response is { success: boolean; message: any; response: { Property: { result: { id: string } } } } {
@@ -78,24 +78,24 @@ export class BiddingService {
             if (response.success === true) {
                 const result = await this.prismaService.bidding.create({
                     data: ({
-                        agent_property_id: propertyId,
-                        user_property_id: createProperty.user_property_id,
+                        agentPropertyId: propertyId,
+                        userPropertyId: createProperty.userPropertyId,
                     }),
                 });
 
 
                 const rowCount = await this.prismaService.bidding.count({
                     where: {
-                        user_property_id: createProperty.user_property_id,
+                        userPropertyId: createProperty.userPropertyId,
                     },
                 });
 
                 await this.prismaService.property.update({
                     where: {
-                        id: createProperty.user_property_id,
+                        id: createProperty.userPropertyId,
                     },
                     data: {
-                        proposal_count: rowCount,
+                        proposalCount: rowCount,
                     },
                 });
 
@@ -127,7 +127,7 @@ export class BiddingService {
 
         const result = await this.prismaService.bidding.findMany({
             where: {
-                user_property_id: user_property_id,
+                userPropertyId: user_property_id,
             },
             include: {
                 agentProperty: true,
@@ -140,7 +140,7 @@ export class BiddingService {
     async getAgentBidding(agent_property_id: string) {
         const result = await this.prismaService.bidding.findMany({
             where: {
-                agent_property_id: agent_property_id,
+                agentPropertyId: agent_property_id,
             },
             include: {
                 userProperty: true,
@@ -173,9 +173,8 @@ export class BiddingService {
                     id: biddingEntry.id
                 },
                 data: {
-                    agent_status: 'active',
-                    user_status: 'accepted',
-                    updated_at: new Date(),
+                    agentStatus: 'active',
+                    userStatus: 'accepted',
 
                 }
             });
@@ -194,9 +193,8 @@ export class BiddingService {
                         id: entry.id
                     },
                     data: {
-                        user_status: 'rejected',
-                        agent_status: 'archive',
-                        updated_at: new Date()
+                        userStatus: 'rejected',
+                        agentStatus: 'archive',
                     }
                 });
             }
@@ -227,9 +225,8 @@ export class BiddingService {
                     id: biddingEntry.id
                 },
                 data: {
-                    agent_status: 'Archive',
-                    user_status: 'Rejected',
-                    updated_at: new Date(),
+                    agentStatus: 'Archive',
+                    userStatus: 'Rejected',
                 }
             });
 

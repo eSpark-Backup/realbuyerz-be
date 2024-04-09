@@ -7,6 +7,6 @@ export class getBidDTO {
 
     @ApiProperty({ type: String, example: 1 })
     @IsNotEmpty({ message: 'Bidding ID cannot be empty' })
-    readonly user_property_id: string;
+    readonly userPropertyId: string;
   }
   

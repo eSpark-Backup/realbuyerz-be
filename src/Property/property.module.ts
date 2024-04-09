@@ -5,7 +5,7 @@ import { PropertyController } from './property.controller';
 import { PropertyService } from './property.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { BackblazeService } from 'src/utils/backblaze';
+import { BackblazeService } from 'src/utils/function/backblaze';
 import { JwtService } from '@nestjs/jwt';
 
 

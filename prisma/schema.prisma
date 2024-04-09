@@ -11,119 +11,118 @@ datasource db {
 }
 
 model preferences {
-  id                 String       @id @default(uuid())
-  user_id            String?      @unique
-  email_notification Boolean
-  newsletter         Boolean
-  automated_report   Boolean
-  currency           String
-  area_unit          String
-  created_at         DateTime  @default(now())
-  updated_at         DateTime?
+  id                String    @id @default(uuid())
+  userId            String?   @unique
+  emailNotification Boolean
+  newsLetter        Boolean
+  automatedReport   Boolean
+  currency          String
+  areaUnit          String
+  created_at        DateTime  @default(now())
+  updated_at        DateTime?
 
-  user User? @relation(fields: [user_id], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id                   String       @id @default(uuid())
-  first_name           String
-  last_name            String
-  email                String    @unique
-  mobile_number        String
-  landline_number      String?
-  whatsapp             String?
-  country              String?
-  address              String?
-  password             String?
-  isVerified           Boolean   @default(false)
-  social_id            String?
-  social_login         Boolean   @default(false)
-  role                 String?   @default("user")
-  profile_image        String?
-  profile_visibility   Boolean   @default(false)
-  password_reset_token String?
-  created_at           DateTime  @default(now())
-  updated_at           DateTime?
+  id                 String   @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String   @unique
+  mobileNumber       String   @unique
+  landlineNumber     String?
+  whatsapp           String?
+  country            String?
+  address            String?
+  password           String?
+  isVerified         Boolean  @default(false)
+  socialId           String?
+  socialLogin        Boolean  @default(false)
+  role               String?  @default("user")
+  profileImage       String?
+  imageKey           String?   
+  profileVisibility  Boolean  @default(false)
+  passwordResetToken String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
 
   property    Property[]
   preferences preferences?
 }
 
 model Porperty_data {
-  id          String       @id @default(uuid())
-  property_id String
-  url         String
-  imageKey    String @default("property")
-  type        String
-  created_at  DateTime  @default(now())
-  updated_at  DateTime?
+  id         String   @id @default(uuid())
+  propertyId String
+  url        String
+  imageKey   String   @default("property")
+  type       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  Property Property @relation(fields: [property_id], references: [id])
+  Property Property @relation(fields: [propertyId], references: [id])
 }
 
 model Cities {
-  id         String       @id @default(uuid())
-  city_name  String
-  created_at DateTime  @default(now())
-  updated_at DateTime?
+  id         String   @id @default(uuid())
+  cityName   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Ameneties {
-  id             String       @id @default(uuid())
-  ameneties_name String
-  count          Int?
-  other_features String?
-  created_at     DateTime  @default(now())
-  updated_at     DateTime?
+  id            String   @id @default(uuid())
+  amenetiesName String
+  count         Int?
+  otherFeatures String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
   Property Property?
 }
 
 model Property {
-  id                  String       @id @default(uuid())
-  user                 User?     @relation(fields: [user_id], references: [id])
-  user_id              String?
-  property_name        String
-  property_type        String?
-  sub_type             String?
-  property_price       Int?
-  property_area        String?
-  purpose              String?
-  property_address     String?
-  property_city        String?
-  property_zip         String?
-  property_description String?
-  property_ameneties   String?      @unique
-  longitude            String?
-  latitude             String?
-  property_by          String?
-  proposal_count       Int?     @default(0)
-  property_status      Boolean?  @default(false)
-  isFeatured           Boolean?  @default(false)
-  
+  id                  String   @id @default(uuid())
+  user                User?    @relation(fields: [userId], references: [id])
+  userId              String?
+  propertyName        String
+  propertyType        String?
+  subType             String?
+  propertyPrice       Int?
+  propertyArea        String?
+  purpose             String?
+  propertyAddress     String?
+  propertyCity        String?
+  propertyZip         String?
+  propertyDescription String?
+  propertyAmeneties   String?  @unique
+  longitude           String?
+  latitude            String?
+  propertyBy          String?
+  proposalCount      Int?     @default(0)
+  propertyStatus     Boolean? @default(false)
+  isFeatured          Boolean? @default(false)
 
-  Property_data Porperty_data[]
+  PropertyData Porperty_data[]
 
-  amenities            Ameneties? @relation(fields: [property_ameneties], references: [id])
+  amenities            Ameneties? @relation(fields: [propertyAmeneties], references: [id])
   userPropertyBidding  Bidding[]  @relation("UserProperty")
   agentPropertyBidding Bidding[]  @relation("AgentProperty")
 
-  created_at           DateTime  @default(now())
-  updated_at           DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Bidding {
-  id                String       @id @default(uuid())
-  user_property_id  String
-  agent_property_id String
-  agent_status            String? @default("submitted")
-  user_status            String? @default("pending")
-  
+  id              String  @id @default(uuid())
+  userPropertyId  String
+  agentPropertyId String
+  agentStatus     String? @default("submitted")
+  userStatus      String? @default("pending")
 
-  userProperty Property? @relation("UserProperty", fields: [user_property_id], references: [id])
+  userProperty Property? @relation("UserProperty", fields: [userPropertyId], references: [id])
 
-  agentProperty Property? @relation("AgentProperty", fields: [agent_property_id], references: [id])
+  agentProperty Property? @relation("AgentProperty", fields: [agentPropertyId], references: [id])
 
-  created_at DateTime  @default(now())
-  updated_at DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
