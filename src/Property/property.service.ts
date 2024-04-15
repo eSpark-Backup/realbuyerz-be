@@ -67,7 +67,16 @@ export class PropertyService {
             }
 
             );
-            return { totalCount, properties };
+            const data = {
+                properties,
+                totalCount,
+            };
+            return {
+                action:'Get All',
+                message:'All Properties of User',
+                data:data
+
+            }
         } catch (error) {
             console.error('Error finding properties by user ID:', error.message);
             return { message: 'Failed to find properties by user ID', status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message };
@@ -121,31 +130,31 @@ export class PropertyService {
 
         let result = null;
         try {
-            result = await this.prismaService.property.create({
-                data: {
-                    userId: { connect: { id: property.userId } },
-                    propertyName: property.propertyName,
-                    propertyType: property.propertyType,
-                    subType: property.subType,
-                    purpose: property.purpose,
-                    propertyPrice: property.propertyPrice,
-                    propertyArea: property.propertyArea,
-                    propertyCity: property.propertyCity,
-                    propertyAddress: property.propertyAddress,
-                    propertyZip: property.propertyZip,
-                    propertyBy: property.propertyBy,
-                    propertyDescription: property.propertyDescription,
-                    longitude: property.longitude,
-                    latitude: property.latitude,
-
-                    amenities: {
-                        create: {
-                            amenetiesName: JSON.stringify(property.amenitiesName),
-                            count: property.count,
-                            otherFeatures: JSON.stringify(property.otherFeatures),
-                        },
+            const propertyData: Prisma.PropertyCreateInput = {
+                user: { connect: { id: user_id } },
+                propertyName: property.propertyName,
+                propertyType: property.propertyType,
+                subType: property.subType,
+                purpose: property.purpose,
+                propertyPrice: property.propertyPrice,
+                propertyArea: property.propertyArea,
+                propertyCity: property.propertyCity,
+                propertyAddress: property.propertyAddress,
+                propertyZip: property.propertyZip,
+                propertyBy: property.propertyBy,
+                propertyDescription: property.propertyDescription,
+                longitude: property.longitude,
+                latitude: property.latitude,
+                amenities: {
+                    create: {
+                        amenetiesName: JSON.stringify(property.amenitiesName),
+                        count: property.count,
+                        otherFeatures: JSON.stringify(property.otherFeatures),
                     },
-                } as Prisma.PropertyCreateInput,
+                },
+            };
+            result = await this.prismaService.property.create({
+                data: propertyData,
             });
         }
         catch (error) {
@@ -171,7 +180,7 @@ export class PropertyService {
                     url:`${image.uploadResult.url}`,
                     type: 'image',
                     imageKey: image.uploadResult.fileId,
-                    property_id: result.id,
+                    propertyId: result.id,
                 }));
 
                 await this.prismaService.porperty_data.createMany({
@@ -179,11 +188,8 @@ export class PropertyService {
                 });
 
                 
-                const propertyResponse = generateResponse("Created Property Data", "Property Created successfully", { result },"Property");
-
-
+                const propertyResponse = { success: true,action:"Create Property",message: 'PropertyCreated Successfully', data:result};
                 return propertyResponse;
-
 
 
 
@@ -342,7 +348,11 @@ export class PropertyService {
                         data: propertyData,
                     });
 
-                    const propertyResponse = generateResponse('Updated Property Data', 'Property Updated successfully', { result }, "Property");
+                    const propertyResponse = {
+                        action: 'Update Property',
+                        message: 'Property Updated successfully',
+                        data: result,
+                    }
 
 
                     return propertyResponse;
@@ -420,12 +430,12 @@ export class PropertyService {
                         },
                     });
 
-                    const propertyResponse = generateResponse(
-                        'Updated Property Data',
-                        'Property Updated successfully',
-                        { result },
-                        'Property'
-                    );
+                    const propertyResponse =  {
+                        action: 'Update Property Data',
+                        message:'Property Updated Successfully',
+                        data:result
+                    }
+                   
                     return propertyResponse;
 
 
@@ -517,12 +527,19 @@ export class PropertyService {
 
         const totalCount = await this.prismaService.property.count({ where });
 
-        return {
+        const data = {
             properties,
             totalCount,
             currentPage: page,
             totalPages: Math.ceil(totalCount / pageSize),
+            itemsPerPage:pageSize
         };
+
+        return {
+            action: 'Find All Properties',
+            message: 'Properties Found',
+            data,
+        }
     }
 
     async findById(propertyId: string) {
@@ -540,7 +557,7 @@ export class PropertyService {
                 throw new NotFoundException('Property not found');
             }
 
-            return { success: true, property };
+            return {message:'Property Fetched', success: true, property };
         } catch (error) {
             console.error(error);
 

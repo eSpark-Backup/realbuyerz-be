@@ -55,7 +55,12 @@ export class UserPropertyService {
             });
 
             if (result) {
-                const propertyResponse = generateResponse("Created User Property Request Data", "Property Request for User Created successfully", { result }, "Property");
+                const propertyResponse = {
+                    action: 'create',
+                    success: true,
+                    message: 'Property created successfully for User',
+                    data: result
+                }
 
                 return propertyResponse;
 

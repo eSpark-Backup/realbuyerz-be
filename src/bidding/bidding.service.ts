@@ -49,7 +49,7 @@ export class BiddingService {
                 },
             });
 
-            return { success: true, message: 'Proposal created successfully', response: { Bidding: { result } } };
+            return { success: true, message: 'Proposal created successfully', data:result };
 
 
         }
@@ -66,11 +66,20 @@ export class BiddingService {
         createProperty.userId = user_id;
 
         const response = await this.propertyService.createProperty(user_id,files, createProperty);
-        function isPropertyResponse(response: any): response is { success: boolean; message: any; response: { Property: { result: { id: string } } } } {
-            return 'response' in response && 'Property' in response.response && 'result' in response.response.Property;
+        function hasData(response: any): response is { success: boolean; action?: string; message: string; data: any; } {
+            return 'data' in response;
         }
+        let propertyId;
+        if(response.message && hasData(response)){
+            {   
+                 propertyId = response.data.id;
 
-        const propertyId = isPropertyResponse(response) ? response.response.Property.result.id : undefined;
+            }
+
+        }
+        else {
+            console.error('Failed to retrieve property ID from the response.');
+        }
 
 
         if (response) {
@@ -134,7 +143,11 @@ export class BiddingService {
 
             },
         });
-        return result;
+        return {
+            success: true,
+            message: 'Bidding retrieved successfully',
+           data:result
+        }
     }
 
     async getAgentBidding(agent_property_id: string) {
@@ -147,8 +160,11 @@ export class BiddingService {
 
             },
         });
-        return result;
-
+        return {
+            success: true,
+            message: 'Bidding retrieved successfully',
+           data:result
+        }
     }
 
 
