@@ -3,7 +3,6 @@ import { Injectable } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Prisma } from "@prisma/client";
-import { generateResponse } from 'src/utils/function/response';
 
 
 @Injectable()

@@ -1,0 +1,20 @@
+model Bidding {
+	id String @id @default(uuid())
+	userPropertyId String 
+	agentPropertyId String 
+	agentStatus String? @default("submitted")
+	userStatus String? @default("pending")
+	userProperty Property? @relation(name: "UserProperty", fields: [userPropertyId], references: [id])
+	agentProperty Property? @relation(name: "AgentProperty", fields: [agentPropertyId], references: [id])
+	created_at DateTime @default(now())
+	updated_at DateTime @updatedAt
+
+    @@map("bidding")
+}
+
+model Property {
+    id String @id @default(uuid())
+    userPropertyBidding Bidding[] @relation(name: "UserProperty")
+	agentPropertyBidding Bidding[] @relation(name: "AgentProperty")
+
+}

@@ -1,0 +1,20 @@
+model preferences {
+    id                String    @id @default(uuid())
+    userId            String?   @unique
+    emailNotification Boolean
+    newsLetter        Boolean
+    automatedReport   Boolean
+    currency          String
+    areaUnit          String
+    created_at        DateTime  @default(now())
+    updated_at        DateTime?
+
+    user User? @relation(fields: [userId], references: [id])
+
+     @@map("preference")
+}
+
+model User {
+    id          String       @id @default(uuid())
+    preferences preferences?
+}

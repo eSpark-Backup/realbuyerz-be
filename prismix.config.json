@@ -1,0 +1,15 @@
+{
+    "mixers": [
+      {
+          "input": [
+              "./prisma/schema.prisma",
+              "./prisma/property.prisma",
+              "./prisma/ameneties.prisma",
+              "./prisma/preferences.prisma",
+              "./prisma/property_data.prisma",
+              "./prisma/bidding.prisma"
+          ],
+          "output": "./prisma/schema.prisma"
+      }
+    ]
+  }

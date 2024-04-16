@@ -1,0 +1,18 @@
+model Ameneties {
+	id String @id @default(uuid())
+	amenetiesName String 
+	count Int? 
+	otherFeatures String? 
+	created_at DateTime @default(now())
+	updated_at DateTime @updatedAt
+	Property Property? @relation(name: "AmenetiesToProperty")
+
+    @@map("ameneties")
+}
+
+model Property {
+    id String @id @default(uuid())
+	propertyAmeneties String? @unique
+	amenities Ameneties? @relation(name: "AmenetiesToProperty", fields: [propertyAmeneties], references: [id])
+
+}

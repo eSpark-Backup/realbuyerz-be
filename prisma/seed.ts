@@ -5,11 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Create cities
-  await prisma.cities.create({
-    data: {
-      cityName: 'City1',
-    },
-  });
+
 
   // Create amenities
  const ameneties= await prisma.ameneties.create({

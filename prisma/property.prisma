@@ -1,0 +1,55 @@
+model Property {
+	id String @id @default(uuid())
+	user User? @relation(name: "PropertyToUser", fields: [userId], references: [id])
+	userId String? 
+	propertyName String 
+	propertyType String? 
+	subType String? 
+	propertyPrice Int? 
+	propertyArea String? 
+	purpose String? 
+	propertyAddress String? 
+	propertyCity String? 
+	propertyZip String? 
+	propertyDescription String? 
+	propertyAmeneties String? @unique
+	longitude String? 
+	latitude String? 
+	propertyBy String? 
+	proposalCount Int? @default(0)
+	propertyStatus Boolean? @default(false)
+	isFeatured Boolean? @default(false)
+	amenities Ameneties? @relation(name: "AmenetiesToProperty", fields: [propertyAmeneties], references: [id])
+	userPropertyBidding Bidding[] @relation(name: "UserProperty")
+	agentPropertyBidding Bidding[] @relation(name: "AgentProperty")
+	created_at DateTime @default(now())
+	updated_at DateTime @updatedAt
+	PropertyData Porperty_data[] @relation(name: "Porperty_dataToProperty")
+	@@map("properties")
+}
+
+model Porperty_data {
+    id String @id @default(uuid())
+    propertyId String
+    Property Property @relation(name: "Porperty_dataToProperty", fields: [propertyId], references: [id])
+}
+model User {
+    id String @id @default(uuid())
+    property Property[] @relation(name: "PropertyToUser")
+
+}
+
+model Bidding {
+    id String @id @default(uuid())
+
+    userPropertyId String 
+	agentPropertyId String 
+    userProperty Property? @relation(name: "UserProperty", fields: [userPropertyId], references: [id])
+	agentProperty Property? @relation(name: "AgentProperty", fields: [agentPropertyId], references: [id])
+}
+
+model Ameneties {
+    id String @id @default(uuid())
+    amenetiesName String 
+    Property Property? @relation(name: "AmenetiesToProperty")
+}

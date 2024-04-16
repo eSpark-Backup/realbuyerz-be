@@ -1,0 +1,18 @@
+model Porperty_data {
+  id         String   @id @default(uuid())
+  propertyId String
+  url        String
+  imageKey   String   @default("property")
+  type       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Property Property @relation(fields: [propertyId], references: [id])
+  @@map("properties_data")
+}
+
+model Property{
+    id String @id @default(uuid())
+    PropertyData Porperty_data[]
+    
+}
