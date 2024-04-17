@@ -30,7 +30,7 @@ export class CreateUserDto {
 
   @ApiProperty({ type: String,required:false })
   @IsString({ message: 'Mobile number must be a string' })
-  @IsNotEmpty({ message: 'Mobile number cannot be empty' })
+  @IsOptional()
   readonly mobileNumber: string;
 
  

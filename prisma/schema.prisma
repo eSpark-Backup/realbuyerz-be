@@ -59,7 +59,6 @@ model User {
 	password String? 
 	isVerified Boolean @default(false)
 	socialId String? 
-  test String?
 	socialLogin Boolean @default(false)
 	role String? @default("user")
 	profileImage String? 

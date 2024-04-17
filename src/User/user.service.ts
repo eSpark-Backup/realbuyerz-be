@@ -272,15 +272,20 @@ export class UserService {
       }
 
       if (!createUserDto.password && createUserDto.profileImage && createUserDto.socialId) {
-        const existingUser = await this.prismaService.user.findUnique({
-          where: { email: createUserDto.email },
+        const existingUser = await this.prismaService.user.findFirst({
+          where: {
+            AND: [
+              { email: createUserDto.email },
+              { socialLogin: true }
+            ]
+          }
         });
 
 
         if (existingUser) {     
           const token = this.createToken({ id: existingUser.id, role: existingUser.role }, existingUser)
          return  {
-            action: 'Logged In',
+            action: 'Socially Logged In',
             message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
             data: {
               token: token
@@ -300,7 +305,7 @@ export class UserService {
         await this.sendEmail(newUser.email, emailSubject, emailContent);
         const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
         const signUpResponse = {
-          action: 'Sign Up', 
+          action: 'Socially Signed Up', 
           message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
           data: {
             token: token
@@ -324,11 +329,10 @@ export class UserService {
         if (existingUser) {
           throw new ConflictException('Email or Mobile Number is already in use');
         }
-        
-        if (existingUser) {
-          throw new ConflictException('Email or Mobile Number is already in use');
+        if(createUserDto.socialId  || createUserDto.profileImage){
+          return { success: false, message: 'Social Id or Profile Image is not required' }
         }
-
+        
         const hashedPassword = await this.hashPassword(createUserDto.password);
         const userData = { ...createUserDto, password: hashedPassword };
 
@@ -377,6 +381,9 @@ export class UserService {
 
     if (!user) {
       return { success: false, message: 'User not found' };
+    }
+    if (user.socialLogin == true){
+      return { success: false, message: 'Please login with social login' };
     }
 
     const passwordMatch = await this.comparePasswords(loginUserDto.password, user.password);
