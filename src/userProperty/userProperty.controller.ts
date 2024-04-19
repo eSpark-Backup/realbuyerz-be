@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { UserPropertyService } from "./userProperty.service";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
@@ -9,6 +9,7 @@ import { CreateApiDocs } from "src/utils/decorator/property.decorator";
 import { JwtAuthGuard, RoleGuard } from "src/utils/guard";
 import { Roles } from "src/utils/decorator/role.decorator";
 import { UserId } from "src/utils/decorator/userId.decorator";
+import { updateUserPropertyDto } from "./dto/update-property.dto";
 
 
 @Controller('userProperty')
@@ -29,5 +30,17 @@ export class UserPropertyController {
         return result;
     }
 
+    @Roles('user')
+    @Put(':id')
+    @ApiTags('User Property Update')
+    async updateProperty(
+        @Body() updateProperty: updateUserPropertyDto,
+        @Param('id') id: string,
+    ) {
+        const result = await this.userPropertyService.updateProperty(updateProperty,id);
+        return result;
+    }
+
 
 }
+

@@ -2,6 +2,7 @@
 import { Body, Controller, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BiddingService } from './bidding.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CreateBidDto } from './dto/createBid.dto';
 import { CreateBidPropertyDto } from './dto/createBidProperty.dto';
 import { propertyImageFileInterceptor } from 'src/utils/interceptor/propertyfile.interceptor';

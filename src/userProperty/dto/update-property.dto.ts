@@ -7,16 +7,14 @@ import { IsString, IsNumber, IsOptional, ValidateNested, IsNotEmpty   } from 'cl
 
 
 
-export class updatedPropertyDto {
+export class updateUserPropertyDto {
   @ApiProperty({ type: String, example: 'Beautiful House',required:false })
   @IsString({ message: 'Property name must be a string' })
  @IsOptional()
 
   readonly propertyName: string;
   
- @ApiProperty({ type:Number, example: 'User ID',required:false  })
- @IsOptional()
-  readonly userId: any;
+
 
   
   @ApiProperty({ type: String, example: 'House',required:false  })
@@ -101,7 +99,7 @@ export class updatedPropertyDto {
   @IsOptional()
   readonly amenitiesName: string;
 
-  @ApiProperty({example: '1' })
+  @ApiProperty({type: String,example: "1" })
   @IsString()
   @IsOptional()
   readonly count: any;
@@ -111,19 +109,7 @@ export class updatedPropertyDto {
   @IsOptional()
   readonly otherFeatures: string;
 
-  @ApiProperty({
-    type: 'array',
-    items: {
-      type: 'string',
-      format: 'binary',
-    },
-    example: ['image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg'],
-    required: false,
-  })
-  @IsOptional()
-  @IsNotEmpty({ message: 'At least one image is required' })
-  readonly image: any[];
-  
+
 
 //   @ApiProperty({ type: Object, example:  {
 //     "amenities_name": "Swimming Pool",

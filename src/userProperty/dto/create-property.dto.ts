@@ -96,7 +96,7 @@ export class CreateUserPropertyDto {
   @IsOptional()
   readonly amenitiesName: string;
 
-  @ApiProperty({example: '1' })
+  @ApiProperty({type: String,example: "1" })
   @IsString()
   @IsOptional()
   readonly count: any;
