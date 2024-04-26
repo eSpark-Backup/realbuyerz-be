@@ -115,6 +115,19 @@ export class CreateBidPropertyDto {
   @IsOptional()
   @IsNotEmpty({ message: 'At least one image is required' })
   readonly image: any[];
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string'
+    },
+    example: ['video.com','youtube.com','video2/youtube.com','video3/youtube.com','video4/youtube.com'],
+    required: false,
+  })
+  @IsOptional()
+  readonly video: any[];
+  
+  
   
   
 

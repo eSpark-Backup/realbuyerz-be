@@ -13,6 +13,8 @@ export class CreateBidDto {
         example: ['Property_id1', 'Property_id1', 'Property_id1', 'Property_id1', 'Property_id1'],
         required: true,
     })
+    
+    
     @IsNotEmpty({ message: 'At least one property id is required' })
     readonly agentPropertyId: any[];
 

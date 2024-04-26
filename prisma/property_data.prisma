@@ -2,7 +2,7 @@ model Porperty_data {
   id         String   @id @default(uuid())
   propertyId String
   url        String
-  imageKey   String   @default("property")
+  imageKey   String?   @default("NA")
   type       String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

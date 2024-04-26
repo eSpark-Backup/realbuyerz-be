@@ -3,7 +3,7 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty  } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsOptional, IsNotEmpty, ValidateNested  } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, ValidateNested, IsUrl, ArrayMinSize, ArrayMaxSize  } from 'class-validator';
 
 class AmenityDto {
   @IsString()
@@ -119,6 +119,21 @@ export class CreatePropertyDto {
   
   
 
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'url',
+    },
+    example: ['https://www.youtube.com/watch?v=yourvideo1', 'https://www.youtube.com/watch?v=yourvideo2'],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  readonly video?: any[];
+
+  
   @ApiProperty({ type: Boolean, example: 'True ',default:false,required:false })
   @IsString({ message: 'Property status must be a string' })
   @IsOptional()

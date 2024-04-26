@@ -16,6 +16,16 @@ import * as uuid from 'uuid';
 import { saveImageToDisk } from '../utils/function/saveImage';
 import { generateResponse } from 'src/utils/function/response';
 import { BackblazeService } from 'src/utils/function/backblaze';
+import { url } from 'inspector';
+
+function isValidUrl(url: string): boolean {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
 
 
 @Injectable()
@@ -109,6 +119,12 @@ export class PropertyService {
             }
         }
 
+
+     
+        
+        
+        
+
         const maxFileSize = 4 * 1024 * 1024;
         for (const file of [...(files.image || [])]) {
             if (file.size > maxFileSize) {
@@ -176,13 +192,23 @@ export class PropertyService {
             if (files.image) {
                 processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
 
-                const propertyData = processedImages.map(image => ({
+                let propertyData = processedImages.map(image => ({
                     url:`${image.uploadResult.url}`,
                     type: 'image',
                     imageKey: image.uploadResult.fileId,
                     propertyId: result.id,
                 }));
 
+                if (createProperty.video) {
+                    const videoUrls = String(createProperty.video).split(',').map(url => url.trim()); // Split the string and trim each URL
+                    
+                   const  videoData = videoUrls.map(url => ({
+                        url: url,
+                        type: 'video',
+                        propertyId: result.id // Assuming result.id is the ID of the property
+                    }));
+                    propertyData=[...propertyData,...videoData]
+                }
                 await this.prismaService.porperty_data.createMany({
                     data: propertyData,
                 });
@@ -194,6 +220,8 @@ export class PropertyService {
 
 
             }
+           
+
             // else if(files.video && !files.image){
             //     // files.video.map(file => this.processSingleImage(file));
             //     // const propertyData = processedImages.map(image => ({
@@ -569,3 +597,4 @@ export class PropertyService {
     }
 
 }
+
