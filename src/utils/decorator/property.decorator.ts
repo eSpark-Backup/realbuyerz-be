@@ -44,6 +44,7 @@ export const FindAllApiDocs = (): MethodDecorator => {
       ApiQuery({ name: 'propertyType', required: false, type: String, description: 'Property type' }),
       ApiQuery({ name: 'subType', required: false, type: String, description: 'Property sub-type' }),
       ApiQuery({ name: 'propertyCity', required: false, type: String, description: 'Property city' }),
+      ApiQuery({ name: 'propertyId', required: false, type: String, description: 'PropertyId'}),
       ApiResponse({ status: 200, description: 'Properties retrieved successfully' }),
       ApiResponse({ status: 400, description: 'Bad Request' }),
     ];

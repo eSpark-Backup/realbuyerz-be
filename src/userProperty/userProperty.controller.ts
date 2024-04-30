@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { CreateUserPropertyDto } from "./dto/create-property.dto";
 import { UserPropertyService } from "./userProperty.service";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
@@ -32,12 +32,20 @@ export class UserPropertyController {
 
     @Roles('user')
     @Put(':id')
-    @ApiTags('User Property Update')
     async updateProperty(
         @Body() updateProperty: updateUserPropertyDto,
         @Param('id') id: string,
     ) {
         const result = await this.userPropertyService.updateProperty(updateProperty,id);
+        return result;
+    }
+
+    @Roles('user')
+    @Delete(':id')
+    async deleteProperty(
+        @Param('id') id: string,
+    ) {
+        const result = await this.userPropertyService.deleteProperty(id);
         return result;
     }
 

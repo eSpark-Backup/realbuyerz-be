@@ -513,7 +513,7 @@ export class PropertyService {
     async findAll(
         page = 1,
         pageSize = 50,
-        filters?: { purpose?: string; property_type?: string; sub_type?: string; property_city?: string;property_by?:string }
+        filters?: { purpose?: string; property_type?: string; sub_type?: string; property_city?: string;property_by?:string, propertyId?: string}
     ) {
         const skip = (page - 1) * pageSize;
 
@@ -537,6 +537,9 @@ export class PropertyService {
             }
             if (filters.property_by) {
                 where.propertyBy = filters.property_by;
+            }
+            if(filters.propertyId){
+                where.id = filters.propertyId;
             }
         }
 

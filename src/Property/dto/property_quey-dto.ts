@@ -38,4 +38,9 @@ export class PropertyQueryDto {
   @IsOptional()
   @IsString({ message: 'Property city must be a string' })
   readonly propertyCity?: string;
+
+  @ApiProperty({ required: false, description: 'The id of the property', example: '1' })
+  @IsOptional()
+  @IsString({ message: 'Property id must be a string' })
+  readonly propertyId?: string;
 }

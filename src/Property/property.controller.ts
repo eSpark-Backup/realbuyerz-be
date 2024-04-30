@@ -74,11 +74,11 @@ export class PropertyController {
     return this.propertyService.findbyuserId(user_id);
   }
 
-  @Roles('user')
-  @Get(':id')
-  async findById(@Param('id') propertyId: string) {
-    return this.propertyService.findById(propertyId);
-  }
+  // @Roles('user')
+  // @Get(':id')
+  // async findById(@Param('id') propertyId: string) {
+  //   return this.propertyService.findById(propertyId);
+  // }
 
   @Roles('user')
   @Get()
@@ -94,6 +94,7 @@ export class PropertyController {
       subType: query.subType,
       propertyCity: query.propertyCity,
       propertyBy: query.propertyBy,
+      propertyId: query.propertyId,
     };
 
     return this.propertyService.findAll(page, pageSize, filters);
