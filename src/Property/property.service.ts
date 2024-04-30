@@ -200,14 +200,9 @@ export class PropertyService {
                 }));
 
                 if (createProperty.video) {
-                    const videoUrls = String(createProperty.video).split(',').map(url => url.trim()); // Split the string and trim each URL
                     
-                   const  videoData = videoUrls.map(url => ({
-                        url: url,
-                        type: 'video',
-                        propertyId: result.id // Assuming result.id is the ID of the property
-                    }));
-                    propertyData=[...propertyData,...videoData]
+                   const  videoData =this.formatVideoData(createProperty.video, result.id);
+                    propertyData = [...propertyData, ...videoData];
                 }
                 await this.prismaService.porperty_data.createMany({
                     data: propertyData,
@@ -360,17 +355,23 @@ export class PropertyService {
 
                     try {
                         await this.deleteImagesForProperty(property_id);
+                        await this.deleteVideosForProperty(property_id);
                       } catch (error) {
-                       return { success: false, message: 'Failed to delete images for property', error: error.message };
+                       return { success: false, message: 'Failed to delete images/Videos for property', error: error.message };
                       }
+                        
 
-
-                    const propertyData = processedImages.map(image => ({
+                    let propertyData = processedImages.map(image => ({
                         url:`${image.uploadResult.url}`,
                         type: 'image',
                         imageKey: image.uploadResult.fileId,
                         propertyId: result.id,
                     }));
+                    if (updateProperty.video) {
+                    
+                        const  videoData =this.formatVideoData(updateProperty.video, result.id);
+                        propertyData = [...propertyData, ...videoData];
+                     }
 
                     await this.prismaService.porperty_data.createMany({
                         data: propertyData,
@@ -480,6 +481,21 @@ export class PropertyService {
         }
     }
 
+     formatVideoData(video: string[], id: string): { imageKey:string , url: string; type: string; propertyId: string }[] {
+        const videoUrls = String(video).split(',').map(url => url.trim());
+    
+        const videoData = videoUrls.map(url => ({
+            url: url,
+            type: 'video',
+            propertyId: id ,
+            imageKey: 'NA',
+        }));
+    
+        return videoData;
+    }
+    
+
+
     async deleteImagesForProperty(propertyId: string) {
         try {
          
@@ -508,6 +524,24 @@ export class PropertyService {
           throw new Error('Failed to delete images');
         }
       }
+
+      async deleteVideosForProperty(propertyId: string) {
+        try{
+           
+            await this.prismaService.porperty_data.deleteMany({
+                where: {
+                    propertyId: propertyId,
+                    type: 'video',
+                },
+            });
+
+           
+        }
+        catch(error){
+            console.error('Error deleting videos:', error);
+            throw new Error('Failed to delete videos');
+        }
+    }
 
 
     async findAll(

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty  } from '@nestjs/swagger';
-import { IsString,  IsOptional, IsNotEmpty   } from 'class-validator';
+import { IsString,  IsOptional, IsNotEmpty, IsUrl   } from 'class-validator';
 
 
 
@@ -120,6 +120,21 @@ export class updatedPropertyDto {
   @IsOptional()
   @IsNotEmpty({ message: 'At least one image is required' })
   readonly image: any[];
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'url',
+    },
+    example: ['https://www.youtube.com/watch?v=yourvideo1', 'https://www.youtube.com/watch?v=yourvideo2'],
+    required: false,
+  })
+  @IsString({ each: true })
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  readonly video?: any[];
+
   
 
 //   @ApiProperty({ type: Object, example:  {
