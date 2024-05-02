@@ -7,7 +7,8 @@
               "./prisma/ameneties.prisma",
               "./prisma/preferences.prisma",
               "./prisma/property_data.prisma",
-              "./prisma/bidding.prisma"
+              "./prisma/bidding.prisma",
+              "./prisma/subscription.prisma"
           ],
           "output": "./prisma/schema.prisma"
       }

@@ -8,6 +8,7 @@ import { IsNotEmpty, IsString, IsEmail, IsOptional, IsEnum } from 'class-validat
 enum UserRole {
   User = 'user',
   Agent = 'agent',
+  Admin = 'admin',
 }
 
 export class CreateUserDto {
@@ -45,7 +46,7 @@ export class CreateUserDto {
   readonly profileImage?: string;
  
   @ApiProperty({ enum: UserRole, default: UserRole.User })
-  @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" or "agent".' })
+  @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" "admin" or "agent".' })
   @IsOptional()
   readonly role: string;
 

@@ -105,3 +105,12 @@ model preferences {
 	user User? @relation(name: "UserTopreferences", fields: [userId], references: [id])
 	@@map("preference")
 }
+model Subscription {
+	id String @id @default(uuid())
+	name String 
+	Description String 
+	Price Int 
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
+	@@map("subscriptions")
+}

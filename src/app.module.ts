@@ -14,9 +14,10 @@ import { BiddingModule } from './bidding/bidding.module';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/global-exception-handler/global-exception.filter';
 import { SuccessResponseInterceptor } from './utils/interceptor/success-response.interceptor';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, PropertyModule, UserPropertyModule, BiddingModule],
+  imports: [PrismaModule, UserModule, PropertyModule, UserPropertyModule, BiddingModule,SubscriptionModule],
   controllers: [AppController],
   providers: [AppService,
     {

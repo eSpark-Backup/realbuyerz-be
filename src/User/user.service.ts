@@ -270,6 +270,7 @@ export class UserService {
       if (!createUserDto.password && !createUserDto.profileImage) {
         return { success: false, message: 'Password or Profile Image is required' }
       }
+     
 
       if (!createUserDto.password && createUserDto.profileImage && createUserDto.socialId) {
         const existingUser = await this.prismaService.user.findFirst({
@@ -328,6 +329,22 @@ export class UserService {
         
         if (existingUser) {
           throw new ConflictException('Email or Mobile Number is already in use');
+        }
+
+        if(createUserDto.role == 'admin'){
+          const hashedPassword = await this.hashPassword(createUserDto.password);
+          const userData = { ...createUserDto, password: hashedPassword };
+          const newUser = await this.prismaService.user.create({
+            data: userData,
+          });
+          const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
+          return {
+            action: 'Admin Created',
+            message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
+            data: {
+              token: token
+            }
+          };
         }
         if(createUserDto.socialId  || createUserDto.profileImage){
           return { success: false, message: 'Social Id or Profile Image is not required' }
