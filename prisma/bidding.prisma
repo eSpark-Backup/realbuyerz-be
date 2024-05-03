@@ -6,8 +6,8 @@ model Bidding {
 	userStatus String? @default("pending")
 	userProperty Property? @relation(name: "UserProperty", fields: [userPropertyId], references: [id])
 	agentProperty Property? @relation(name: "AgentProperty", fields: [agentPropertyId], references: [id])
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 
     @@map("bidding")
 }

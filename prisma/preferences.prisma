@@ -6,8 +6,8 @@ model preferences {
     automatedReport   Boolean
     currency          String
     areaUnit          String
-    created_at        DateTime  @default(now())
-    updated_at        DateTime?
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime?
 
     user User? @relation(fields: [userId], references: [id])
 

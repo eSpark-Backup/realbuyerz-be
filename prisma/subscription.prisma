@@ -1,10 +1,10 @@
 model Subscription {
     id          String   @id @default(uuid())
     name        String
-    Description String
-    Price       Int
+    description String
+    price       Int
+    listing     Int
+    connects    Int
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
-
 }
-

@@ -22,8 +22,8 @@ model Property {
 	amenities Ameneties? @relation(name: "AmenetiesToProperty", fields: [propertyAmeneties], references: [id])
 	userPropertyBidding Bidding[] @relation(name: "UserProperty")
 	agentPropertyBidding Bidding[] @relation(name: "AgentProperty")
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	PropertyData Porperty_data[] @relation(name: "Porperty_dataToProperty")
 	@@map("properties")
 }

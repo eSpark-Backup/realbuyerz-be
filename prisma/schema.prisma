@@ -30,8 +30,8 @@ model Property {
 	amenities Ameneties? @relation(name: "AmenetiesToProperty", fields: [propertyAmeneties], references: [id])
 	userPropertyBidding Bidding[] @relation(name: "UserProperty")
 	agentPropertyBidding Bidding[] @relation(name: "AgentProperty")
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	PropertyData Porperty_data[] @relation(name: "Porperty_dataToProperty")
 	@@map("properties")
 }
@@ -42,8 +42,8 @@ model Porperty_data {
 	url String 
 	imageKey String? @default("NA")
 	type String 
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	@@map("properties_data")
 }
 model User {
@@ -65,8 +65,8 @@ model User {
 	imageKey String? 
 	profileVisibility Boolean @default(false)
 	passwordResetToken String? 
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	property Property[] @relation(name: "PropertyToUser")
 	preferences preferences? @relation(name: "UserTopreferences")
 }
@@ -78,8 +78,8 @@ model Bidding {
 	agentProperty Property? @relation(name: "AgentProperty", fields: [agentPropertyId], references: [id])
 	agentStatus String? @default("submitted")
 	userStatus String? @default("pending")
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	@@map("bidding")
 }
 model Ameneties {
@@ -87,8 +87,8 @@ model Ameneties {
 	amenetiesName String 
 	count Int? 
 	otherFeatures String? 
-	created_at DateTime @default(now())
-	updated_at DateTime @updatedAt
+	createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
 	Property Property? @relation(name: "AmenetiesToProperty")
 	@@map("ameneties")
 }
@@ -100,17 +100,19 @@ model preferences {
 	automatedReport Boolean 
 	currency String 
 	areaUnit String 
-	created_at DateTime @default(now())
-	updated_at DateTime? 
+	createdAt DateTime @default(now())
+	updatedAt DateTime? 
 	user User? @relation(name: "UserTopreferences", fields: [userId], references: [id])
 	@@map("preference")
 }
 model Subscription {
 	id String @id @default(uuid())
 	name String 
-	Description String 
-	Price Int 
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
+	description String 
+	price Int 
+	listing Int 
+	connects Int 
 	@@map("subscriptions")
 }

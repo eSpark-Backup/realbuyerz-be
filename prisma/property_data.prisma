@@ -4,8 +4,8 @@ model Porperty_data {
   url        String
   imageKey   String?   @default("NA")
   type       String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   Property Property @relation(fields: [propertyId], references: [id])
   @@map("properties_data")
