@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import mongoose, { Schema, model } from "mongoose";
 
 const chatSchema = new Schema(

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 class ErrorHandler extends Error{
     constructor( message,statusCode){
         super();

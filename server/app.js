@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import express from "express";
 
 import { Server } from "socket.io";
@@ -9,6 +10,7 @@ const app = express();
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { errorMiddleware } from "./middlewares/error.js";
+import { createUSer } from "./seeder/user.js";
 const port =process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
@@ -26,6 +28,7 @@ const io = new Server(server,{
     
 });
 connectDb(process.env.URI);
+
 
 app.get("/", (req, res) => {
   res.send("Hello World");
