@@ -1,12 +1,18 @@
 /* eslint-disable prettier/prettier */
-import { ALERT, REFETCH_CHAT } from '../constants/events.js';
+import {
+  ALERT,
+  NEW_ATTACHMENT,
+  NEW_MESSAGE_ALERT,
+  REFETCH_CHAT,
+} from '../constants/events.js';
 import { getOtherMember } from '../lib/helper.js';
-import { tryCatch } from '../middlewares/error.js';
+import { TryCatch } from '../middlewares/error.js';
 import Chat from '../models/chat.js';
 import User from '../models/user.js';
+import Message from '../models/message.js';
 import { emitEvent } from '../utils/features.js';
 import { ErrorHandler } from '../utils/utility.js';
-const newGroupChat = tryCatch(async (req, res) => {
+const newGroupChat = TryCatch(async (req, res) => {
   const { name, members } = req.body;
 
   const allMembers = [...members, req.user];
@@ -17,7 +23,7 @@ const newGroupChat = tryCatch(async (req, res) => {
   return res.status(201).json({ message: 'Group chat created' });
 });
 
-const getMyChats = tryCatch(async (req, res) => {
+const getMyChats = TryCatch(async (req, res) => {
   const chats = await Chat.find({ members: req.user }).populate(
     'members',
     'name avatar',
@@ -32,8 +38,8 @@ const getMyChats = tryCatch(async (req, res) => {
   return res.status(200).json({ Chats, message: 'Get All chat' });
 });
 
-const leaveChat = tryCatch(async (req, res, next) => {
-  const  chatId  = req.params.id;
+const leaveChat = TryCatch(async (req, res, next) => {
+  const chatId = req.params.id;
   const chat = await Chat.findById(chatId);
 
   if (!chat) {
@@ -50,4 +56,123 @@ const leaveChat = tryCatch(async (req, res, next) => {
   return res.status(200).json({ message: `${findUser.name} left the Chat` });
 });
 
-export { newGroupChat, getMyChats, leaveChat };
+const sendAttachments = TryCatch(async (req, res, next) => {
+  const { chatId } = req.body;
+  const [chat, me] = await Promise.all([
+    Chat.findById(chatId),
+    User.findByIdAndUpdate(req.user, 'name'),
+  ]);
+  const files = req.files || [];
+
+  if (!chat) {
+    return next(new ErrorHandler('Chat not found', 404));
+  }
+  if (!files.length) {
+    return next(new ErrorHandler('No files found', 404));
+  }
+  const attachments = [];
+  const messageForDB = {
+    contentType: ' ',
+    attachments,
+    sender: me._id,
+    chat: chatId,
+  };
+  const messageForRealTime = {
+    ...messageForDB,
+    sender: {
+      _id: me._id,
+      name: me.name,
+    },
+    chat: chatId,
+  };
+
+  const message = await Message.create(messageForDB);
+  emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    message: messageForRealTime,
+    chatId,
+  });
+  emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+    chatId,
+  });
+  return res.status(201).json({ message: message });
+});
+
+const getChatDetail = TryCatch(async (req, res, next) => {
+  if (req.query.populate === 'true') {
+    const chat = await Chat.findById(req.params.id)
+      .populate('members', 'name avatar')
+      .lean();
+    if (!chat) {
+      return next(new ErrorHandler('Chat not found', 404));
+    }
+    chat.members = chat.members.map(({ _id, name, avatar }) => ({
+      _id,
+      name,
+      avatar: avatar.url,
+    }));
+    return res.status(200).json({ success: true, chat });
+  } else {
+    const chat = await Chat.findById(req.params.id);
+    if (!chat) {
+      return next(new ErrorHandler('Chat not found', 404));
+    }
+    return res.status(200).json({ success: true, chat });
+  }
+});
+
+const renameGroup = TryCatch(async (req, res, next) => {
+  const { name } = req.body;
+  const chat = await Chat.findByIdAndUpdate(
+    req.params.id,
+    { name },
+    { new: true },
+  );
+  if (!chat) {
+    return next(new ErrorHandler('Chat not found', 404));
+  }
+  emitEvent(req, REFETCH_CHAT, chat.members);
+  return res.status(200).json({ success: true, chat });
+});
+
+const deleteChat = TryCatch(async (req, res, next) => {
+  const chat = await Chat.findByIdAndDelete(req.params.id);
+  if (!chat) {
+    return next(new ErrorHandler('Chat not found', 404));
+  }
+  emitEvent(req, REFETCH_CHAT, chat.members);
+  return res.status(200).json({ success: true, message: 'Chat deleted' });
+});
+
+const getMessages = TryCatch(async (req, res, next) => {
+  const chatId = req.params.id;
+  const resultPerPage= 10;
+  const { page = 1 } = req.query;
+  const skip = (page - 1) * resultPerPage;
+  const [messages, totalMessagesCount] = await Promise.all([
+    Message.find({ chat: chatId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(resultPerPage)
+      .populate('sender', 'name avatar')
+      .lean(),
+    Message.countDocuments({ chat: chatId }),
+  ]);
+  const totalPages = Math.ceil(totalMessagesCount / resultPerPage);
+  return res
+    .status(200)
+    .json({
+      success: true,
+      messages: messages.reverse(),
+      totalPages: totalPages,
+    });
+});
+export {
+  newGroupChat,
+  getMyChats,
+  leaveChat,
+  sendAttachments,
+  getChatDetail,
+  renameGroup,
+  deleteChat,
+  getMessages,
+};

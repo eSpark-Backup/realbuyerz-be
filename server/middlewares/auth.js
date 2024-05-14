@@ -1,4 +1,3 @@
-import { tryCatch } from "./error.js";
 import { ErrorHandler } from "../utils/utility.js";
 import jwt from "jsonwebtoken";
 

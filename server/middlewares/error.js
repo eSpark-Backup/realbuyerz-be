@@ -6,11 +6,11 @@ const errorMiddleware = (err, req, res, next) => {
     message: err.message,
   });
 };
-const tryCatch = (passedFunction) => async (req, res, next) => {
+const TryCatch = (passedFunction) => async (req, res, next) => {
   try {
     await passedFunction(req, res, next);
   } catch (err) {
     next(err);
   }
 };
-export { errorMiddleware, tryCatch };
+export { errorMiddleware, TryCatch };

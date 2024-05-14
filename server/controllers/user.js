@@ -3,8 +3,8 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.js";
 import { ErrorHandler } from "../utils/utility.js";
 import { cookieOptions, sendToken } from "../utils/features.js";
-import { tryCatch } from "../middlewares/error.js";
-const newUser = tryCatch(async (req, res, next) => {
+import { TryCatch } from "../middlewares/error.js";
+const newUser = TryCatch(async (req, res, next) => {
   const { name, username, email, password } = req.body;
 
   const avatar = {
@@ -16,7 +16,7 @@ const newUser = tryCatch(async (req, res, next) => {
   sendToken(res, user, 200, "User created successfully");
 });
 
-const loginUser = tryCatch(async (req, res, next) => {
+const loginUser = TryCatch(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -38,13 +38,13 @@ const loginUser = tryCatch(async (req, res, next) => {
   sendToken(res, user, 200, "User logged in successfully");
 });
 
-const getMyProfile = tryCatch(async (req, res, next) => {
+const getMyProfile = TryCatch(async (req, res) => {
   await User.findById(req.user).then((user) => {
     res.status(200).json({ user });
   });
 });
 
-const logOutUser = tryCatch(async (req, res, next) => {
+const logOutUser = TryCatch(async (req, res) => {
   res.cookie("badami", null, {
     ...cookieOptions,maxAge:0 
   });
@@ -52,7 +52,7 @@ const logOutUser = tryCatch(async (req, res, next) => {
   res.status(200).json({ success: true, message: "Logged out" });
 });
 
-const searchUser = tryCatch(async (req, res, next) => {
+const searchUser = TryCatch(async (req, res) => {
   const {name} = req.query;
   const users = await User.find({name:{$regex:name,$options:"i"}}).select("name avatar");
   res.status(200).json({users});

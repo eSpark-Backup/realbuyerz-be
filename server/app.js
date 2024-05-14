@@ -10,7 +10,7 @@ const app = express();
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { errorMiddleware } from "./middlewares/error.js";
-import { createUSer } from "./seeder/user.js";
+import { createMessage, createMessagesInChat, createSingleChats, createUSer } from "./seeder/user.js";
 const port =process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
@@ -28,7 +28,9 @@ const io = new Server(server,{
     
 });
 connectDb(process.env.URI);
-
+//seeders
+// createMessage(10);
+//  createMessagesInChat("66433c40348963b325b0be79",10)
 
 app.get("/", (req, res) => {
   res.send("Hello World");
