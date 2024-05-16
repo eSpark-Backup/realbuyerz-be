@@ -1,8 +1,21 @@
 /* eslint-disable prettier/prettier */
 import { isNotEmpty } from 'class-validator';
-import { body, check, validationResult } from 'express-validator';
+import { body, check, param, query, validationResult } from 'express-validator';
 import { ErrorHandler } from '../utils/utility.js';
 
+const validateHandler = (req, res, next) => {
+  const errors = validationResult(req);
+  const errorMessage = errors
+    .array()
+    .map((errors) => errors.msg)
+    .join(', ');
+  console.log(errorMessage);
+
+  if (!errors.isEmpty()) {
+    return next(new ErrorHandler(errorMessage, 400));
+  }
+  next();
+};
 const registerValidator = () => [
   body('name', 'Username is Required')
     .isString()
@@ -22,7 +35,7 @@ const registerValidator = () => [
     .isLength({ min: 6 })
     .notEmpty()
     .withMessage('Password must be at least 6 characters'),
-    check('avatar','Please upload an Avatar').notEmpty()
+  check('avatar', 'Please upload an Avatar').notEmpty(),
 ];
 
 const loginValidator = () => [
@@ -36,18 +49,42 @@ const loginValidator = () => [
     .withMessage('Password must be at least 6 characters'),
 ];
 
-const validateHandler = (req, res, next) => {
-  const errors = validationResult(req);
-  const errorMessage = errors
-    .array()
-    .map((errors) => errors.msg)
-    .join(', ');
-  console.log(errorMessage);
+const newChatValidator = () => [
+  body('name', 'Please enter a Name')
+    .isString()
+    .notEmpty()
+    .withMessage('Please enter a name'),
+  body('members', 'Please enter a member')
+    .isString()
+    .notEmpty()
+    .withMessage('Please enter a member')
+    .isArray()
+    .withMessage('Please enter a member'),
+];
 
-  if (!errors.isEmpty()) {
-    return next(new ErrorHandler(errorMessage, 400));
-  }
-  next();
+const leaveChatValidator = () => [
+  param('id', 'Please enter Chat ID').notEmpty().isMongoId(),
+];
+
+const sendAttachmentsValidator = () => [
+  body('chatId', 'Please enter a chat ID').notEmpty().isMongoId(),
+  check('files', 'Please upload a file')
+    .notEmpty()
+    .isArray({min:1, max: 5})
+    .withMessage('Please upload a file'),
+];
+const chatIdValidator=()=>[
+
+  param('id', 'Please enter Chat ID').notEmpty().isMongoId(),
+  
+]
+
+export {
+  registerValidator,
+  validateHandler,
+  loginValidator,
+  newChatValidator,
+  leaveChatValidator,
+  sendAttachmentsValidator,
+  chatIdValidator
 };
-
-export { registerValidator, validateHandler, loginValidator };
