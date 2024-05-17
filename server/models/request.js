@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import mongoose, { Schema, model } from "mongoose";
 
 const requestSchema = new Schema(
@@ -26,5 +27,5 @@ const requestSchema = new Schema(
   }
 );
 
- const Request =  mongoose.models.Request  || model("Request", messageSChema);
+ const Request =  mongoose.models.Request  || model("Request", requestSchema);
  export default Request;

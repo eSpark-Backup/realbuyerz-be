@@ -27,7 +27,7 @@ const sendToken = (res, user, code, message) => {
 };
 
 const emitEvent = (req, event, users, data) => {
-  console.log("Emitting event");
+  console.log("Emitting event:"+event);
 };
 
 const deleteFilesFromCloudinary = async (public_ids) => {

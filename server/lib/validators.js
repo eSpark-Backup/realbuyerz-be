@@ -78,7 +78,19 @@ const chatIdValidator=()=>[
   param('id', 'Please enter Chat ID').notEmpty().isMongoId(),
   
 ]
+const sendRequestValidator = () => [
+  body('userId', 'Please enter a UserId')
+    .isString()
+    .notEmpty()
+    .withMessage('Please enter a UserId'),
+];
 
+const acceptRequestValidator = () => [
+  body('requestId', 'Please enter a RequestId')
+    .isString()
+    .notEmpty()
+    .withMessage('Please enter a RequestId'),
+];
 export {
   registerValidator,
   validateHandler,
@@ -86,5 +98,7 @@ export {
   newChatValidator,
   leaveChatValidator,
   sendAttachmentsValidator,
-  chatIdValidator
+  chatIdValidator,
+  sendRequestValidator,
+  acceptRequestValidator
 };
