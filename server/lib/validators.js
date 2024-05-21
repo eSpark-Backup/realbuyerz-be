@@ -70,14 +70,12 @@ const sendAttachmentsValidator = () => [
   body('chatId', 'Please enter a chat ID').notEmpty().isMongoId(),
   check('files', 'Please upload a file')
     .notEmpty()
-    .isArray({min:1, max: 5})
+    .isArray({ min: 1, max: 5 })
     .withMessage('Please upload a file'),
 ];
-const chatIdValidator=()=>[
-
+const chatIdValidator = () => [
   param('id', 'Please enter Chat ID').notEmpty().isMongoId(),
-  
-]
+];
 const sendRequestValidator = () => [
   body('userId', 'Please enter a UserId')
     .isString()
@@ -90,6 +88,11 @@ const acceptRequestValidator = () => [
     .isString()
     .notEmpty()
     .withMessage('Please enter a RequestId'),
+
+  body('acceptRequest', 'Please Add Accept')
+    .notEmpty()
+    .isBoolean()
+    .withMessage('Please Add Accept must be boolean'),
 ];
 export {
   registerValidator,
@@ -100,5 +103,5 @@ export {
   sendAttachmentsValidator,
   chatIdValidator,
   sendRequestValidator,
-  acceptRequestValidator
+  acceptRequestValidator,
 };

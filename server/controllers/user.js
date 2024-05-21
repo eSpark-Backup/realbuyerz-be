@@ -1,11 +1,13 @@
 /* eslint-disable prettier/prettier */
 import bcrypt from 'bcryptjs';
 import User from '../models/user.js';
+import Chat from '../models/chat.js';
 import { ErrorHandler } from '../utils/utility.js';
 import { cookieOptions, emitEvent, sendToken } from '../utils/features.js';
 import { TryCatch } from '../middlewares/error.js';
 import Request from '../models/request.js';
-import { NEW_REQUEST } from '../constants/events.js';
+import { NEW_REQUEST, REFETCH_CHAT } from '../constants/events.js';
+import { request } from 'http';
 const newUser = TryCatch(async (req, res, next) => {
   const { name, username, email, password } = req.body;
 
@@ -79,6 +81,56 @@ const sendRequest = TryCatch(async (req, res, next) => {
     .status(200)
     .json({ success: true, message: 'Connect Request sent to Agent' });
 });
+const acceptRequest = TryCatch(async (req, res, next) => {
+  const { requestId, acceptRequest } = req.body;
+  const request = await Request.findById(requestId)
+    .populate('sender', 'name')
+    .populate('receiver', 'name');
+  if (!request) return next(new ErrorHandler('Request not found', 404));
+
+  if (request.receiver._id.toString() !== req.user) {
+    return next(
+      new ErrorHandler('You are not authorized to accept this request', 401),
+    );
+  }
+  if (!acceptRequest) {
+    await request.deleteOne();
+    return res.status(200).json({ success: true, message: 'Request Rejected' });
+  }
+  const members = [request.sender._id, request.receiver._id];
+  await Promise.all([
+    Chat.create({
+      members,
+      name: `${request.sender.name} and ${request.receiver.name}`,
+    }),
+    request.deleteOne(),
+  ]);
+  emitEvent(req, REFETCH_CHAT, members);
+  res
+    .status(200)
+    .json({
+      success: true,
+      message: 'Request Accepted',
+      senderId: request.sender._id,
+    });
+});
+
+const getMyNotifications = TryCatch(async (req, res) => {
+  const requests = await Request.find({ receiver: req.user })
+    .populate('sender', 'name avatar')
+    .sort('-createdAt');
+
+    const allRequests = requests.map(({ sender, _id }) => ({
+      _id,
+      sender: { 
+        _id: sender._id,
+        name: sender.name,
+        avatar: sender.avatar.url,
+      },
+    })
+  );
+  res.status(200).json({ allRequests });
+});
 
 export {
   newUser,
@@ -87,4 +139,6 @@ export {
   logOutUser,
   searchUser,
   sendRequest,
+  acceptRequest,
+  getMyNotifications
 };

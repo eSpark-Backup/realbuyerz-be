@@ -7,6 +7,8 @@ import {
   getMyProfile,
   logOutUser,
   sendRequest,
+  acceptRequest,
+  getMyNotifications,
 } from '../controllers/user.js';
 import { singleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -43,6 +45,13 @@ router.put(
     '/acceptRequest',
     acceptRequestValidator(),
     validateHandler,
-    sendRequest,
+    acceptRequest,
   );
+
+  router.get(
+    '/notifications',
+    getMyNotifications,
+  );
+
+
 export default router;
