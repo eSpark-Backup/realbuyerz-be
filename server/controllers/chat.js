@@ -72,7 +72,7 @@ const sendAttachments = TryCatch(async (req, res, next) => {
   }
   const attachments = [];
   const messageForDB = {
-    contentType: ' ',
+    content: ' ',
     attachments,
     sender: me._id,
     chat: chatId,

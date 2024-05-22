@@ -8,6 +8,7 @@ import { TryCatch } from '../middlewares/error.js';
 import Request from '../models/request.js';
 import { NEW_REQUEST, REFETCH_CHAT } from '../constants/events.js';
 import { request } from 'http';
+import { getOtherMember } from '../lib/helper.js';
 const newUser = TryCatch(async (req, res, next) => {
   const { name, username, email, password } = req.body;
 
@@ -106,13 +107,11 @@ const acceptRequest = TryCatch(async (req, res, next) => {
     request.deleteOne(),
   ]);
   emitEvent(req, REFETCH_CHAT, members);
-  res
-    .status(200)
-    .json({
-      success: true,
-      message: 'Request Accepted',
-      senderId: request.sender._id,
-    });
+  res.status(200).json({
+    success: true,
+    message: 'Request Accepted',
+    senderId: request.sender._id,
+  });
 });
 
 const getMyNotifications = TryCatch(async (req, res) => {
@@ -120,16 +119,41 @@ const getMyNotifications = TryCatch(async (req, res) => {
     .populate('sender', 'name avatar')
     .sort('-createdAt');
 
-    const allRequests = requests.map(({ sender, _id }) => ({
-      _id,
-      sender: { 
-        _id: sender._id,
-        name: sender.name,
-        avatar: sender.avatar.url,
-      },
-    })
-  );
+  const allRequests = requests.map(({ sender, _id }) => ({
+    _id,
+    sender: {
+      _id: sender._id,
+      name: sender.name,
+      avatar: sender.avatar.url,
+    },
+  }));
   res.status(200).json({ allRequests });
+});
+
+const getMyFriends = TryCatch(async (req, res) => {
+  const chatId = req.query.chatId;
+  const chat = await Chat.find({ members: req.user }).populate(
+    'members',
+    'name avatar',
+  );
+
+  const friends = chat.map(({members}) => {
+    const otherUser = getOtherMember(members, req.user);
+    return {
+      _id: otherUser._id,
+      name: otherUser.name,
+      avatar: otherUser.avatar.url,
+    };
+  });
+  if (chatId) {
+    const chat = await Chat.findById(chatId);
+    const availableFriends = friends.filter(
+      (friend) => !chat.members.includes(friend._id),
+    );
+    return res.status(200).json({ success: true, friends: availableFriends });
+  } else {
+    return res.status(200).json({ success: true, friends });
+  }
 });
 
 export {
@@ -140,5 +164,6 @@ export {
   searchUser,
   sendRequest,
   acceptRequest,
-  getMyNotifications
+  getMyNotifications,
+  getMyFriends
 };

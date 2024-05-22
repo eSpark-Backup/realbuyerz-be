@@ -13,7 +13,7 @@ const messageSChema = new Schema(
       ref: "Chat",
       required: true,
     },
-    contentType: {
+    content: {
       type: String,
       required: true,
     },

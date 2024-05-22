@@ -9,6 +9,7 @@ import {
   sendRequest,
   acceptRequest,
   getMyNotifications,
+  getMyFriends,
 } from '../controllers/user.js';
 import { singleAvatar } from '../middlewares/multer.js';
 import { isAuthenticated } from '../middlewares/auth.js';
@@ -51,6 +52,10 @@ router.put(
   router.get(
     '/notifications',
     getMyNotifications,
+  );
+  router.get(
+    '/friends',
+    getMyFriends,
   );
 
 

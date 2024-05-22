@@ -69,7 +69,7 @@ const createMessage = async(numMessages)=>{
             const message = Message.create({
                 chat: chats[i],
                 sender: users[i],
-                contentType: faker.lorem.sentence(),
+                content: faker.lorem.sentence(),
             });
             messagesPromise.push(message);
         }
@@ -92,7 +92,7 @@ const createMessagesInChat = async (chatId,numMessages)=>{
             const message = Message.create({
                 chat: chatId,
                 sender: users[i],
-                contentType: faker.lorem.sentence(),
+                content: faker.lorem.sentence(),
             });
             messagesPromise.push(message);
         }
