@@ -3,6 +3,43 @@ import { TryCatch } from '../middlewares/error.js';
 import Chat from '../models/chat.js';
 import Message from '../models/message.js';
 import User from '../models/user.js';
+import { ErrorHandler } from '../utils/utility.js';
+import { cookieOptions } from '../utils/features.js';
+
+import jwt from 'jsonwebtoken';
+import { max } from 'class-validator';
+
+const adminLogin = TryCatch(async (req, res, next) => {
+  const { secretKey } = req.body;
+  const adminSecretKey = process.env.ADMIN_SECRET_KEY || 'admin1234';
+  const isMatch = secretKey === adminSecretKey;
+  if (!isMatch) return next(new ErrorHandler('Invalid Secret Key', 401));
+  const token = jwt.sign({ secretKey }, process.env.JWT_SECRET);
+  return res
+    .status(200)
+    .cookie('badami-admin', token, {
+      ...cookieOptions,
+      maxAge: 24 * 3600 * 1000,
+    })
+    .json({ success: true, message: 'Admin Logged In' });
+});
+
+const adminLogout = TryCatch(async (req,res) => {
+  return res
+    .status(200)
+    .cookie('badami-admin', '', {
+      ...cookieOptions,
+      maxAge: 0,
+    })
+    .json({ success: true, message: 'Admin Logged Out' });
+});
+
+const getAdminData = TryCatch(async (req, res,next) => {
+  const adminId= req.id;
+  
+  return res.status(200).json({ success: true, message: 'Admin Data'})
+});
+
 
 const allUsers = TryCatch(async (req, res) => {
   const users = await User.find({});
@@ -60,13 +97,39 @@ const allMessages = TryCatch(async (req, res) => {
 
 const getDashboardStats = TryCatch(async (req, res) => {
   const [totalUsers, totalChats, totalMessages] = await Promise.all([
-    User.countDocuments({where: {role: 'user'}}),
+    User.countDocuments(),
     Chat.countDocuments(),
     Message.countDocuments(),
   ]);
-  return res
-    .status(200)
-    .json({ success: true, totalUsers, totalChats, totalMessages });
+
+  const today = new Date();
+  const last7Days = new Date();
+  last7Days.setDate(last7Days.getDate() - 7);
+
+  const last7DaysMessages = await Message.find({
+    createdAt: {
+      $gte: last7Days,
+      $lte: new Date(),
+    },
+  }).select('createdAt');
+
+  const messages = new Array(7).fill(0);
+  const dayInMiliseconds = 24 * 60 * 60 * 1000;
+
+  last7DaysMessages.forEach((message) => {
+    const indexApprox =
+      (today.getTime() - message.createdAt.getTime()) / dayInMiliseconds;
+    const index = Math.floor(indexApprox);
+    messages[6 - index]++;
+  });
+
+  const stats = {
+    totalUsers,
+    totalChats,
+    totalMessages,
+    messagesChart: messages,
+  };
+  return res.status(200).json({ success: true, stats });
 });
 
 const allChats = TryCatch(async (req, res) => {
@@ -92,4 +155,12 @@ const allChats = TryCatch(async (req, res) => {
   return res.status(200).json({ transformedChats });
 });
 
-export { allUsers, allChats, allMessages,getDashboardStats };
+export {
+  allUsers,
+  allChats,
+  allMessages,
+  getDashboardStats,
+  adminLogin,
+  adminLogout,
+  getAdminData
+};

@@ -58,18 +58,21 @@ const leaveChat = TryCatch(async (req, res, next) => {
 
 const sendAttachments = TryCatch(async (req, res, next) => {
   const { chatId } = req.body;
+
+  const files = req.files || [];
+  if (!files.length < 1) return next(new ErrorHandler('No files found', 404));
+  if(files.length > 5) return next(new ErrorHandler('You can only upload 5 files at a time', 400));
+
+
   const [chat, me] = await Promise.all([
     Chat.findById(chatId),
     User.findByIdAndUpdate(req.user, 'name'),
   ]);
-  const files = req.files || [];
 
   if (!chat) {
     return next(new ErrorHandler('Chat not found', 404));
   }
-  if (!files.length) {
-    return next(new ErrorHandler('No files found', 404));
-  }
+  
   const attachments = [];
   const messageForDB = {
     content: ' ',
@@ -145,7 +148,7 @@ const deleteChat = TryCatch(async (req, res, next) => {
 
 const getMessages = TryCatch(async (req, res, next) => {
   const chatId = req.params.id;
-  const resultPerPage= 10;
+  const resultPerPage = 10;
   const { page = 1 } = req.query;
   const skip = (page - 1) * resultPerPage;
   const [messages, totalMessagesCount] = await Promise.all([
@@ -158,15 +161,12 @@ const getMessages = TryCatch(async (req, res, next) => {
     Message.countDocuments({ chat: chatId }),
   ]);
   const totalPages = Math.ceil(totalMessagesCount / resultPerPage);
-  return res
-    .status(200)
-    .json({
-      success: true,
-      messages: messages.reverse(),
-      totalPages: totalPages,
-    });
+  return res.status(200).json({
+    success: true,
+    messages: messages.reverse(),
+    totalPages: totalPages,
+  });
 });
-
 
 export {
   newChat,

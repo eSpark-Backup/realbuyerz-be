@@ -35,7 +35,6 @@ const registerValidator = () => [
     .isLength({ min: 6 })
     .notEmpty()
     .withMessage('Password must be at least 6 characters'),
-  check('avatar', 'Please upload an Avatar').notEmpty(),
 ];
 
 const loginValidator = () => [
@@ -74,7 +73,7 @@ const sendAttachmentsValidator = () => [
     .withMessage('Please upload a file'),
 ];
 const chatIdValidator = () => [
-  param('id', 'Please enter Chat ID').notEmpty().isMongoId(),
+  param('id', 'Please enter Chat ID').notEmpty().isMongoId().withMessage('Please enter a valid Chat ID'),
 ];
 const sendRequestValidator = () => [
   body('userId', 'Please enter a UserId')
@@ -94,6 +93,14 @@ const acceptRequestValidator = () => [
     .isBoolean()
     .withMessage('Please Add Accept must be boolean'),
 ];
+
+const adminLoginValidator = () => [
+  body('secretKey', 'Please enter a secretKey').notEmpty().isString(),
+  
+];
+
+
+
 export {
   registerValidator,
   validateHandler,
@@ -104,4 +111,5 @@ export {
   chatIdValidator,
   sendRequestValidator,
   acceptRequestValidator,
+  adminLoginValidator
 };

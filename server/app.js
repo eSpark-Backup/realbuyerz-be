@@ -43,6 +43,6 @@ app.use("/admin",adminRoute)
 
 app.use(errorMiddleware);
 app.listen(port, () => {
-  console.log("Server is running on http://localhost:3000");
+  console.log(`Server is running on port ${port} in ${process.env.NODE_ENV} mode`);
 });
 

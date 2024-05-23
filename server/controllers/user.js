@@ -12,6 +12,12 @@ import { getOtherMember } from '../lib/helper.js';
 const newUser = TryCatch(async (req, res, next) => {
   const { name, username, email, password } = req.body;
 
+  const file = req.file;
+  if (!file) {
+    return next(new ErrorHandler('Please upload an image', 400));
+  }
+  
+
   const avatar = {
     public_id: '123456',
     url: 'https://www.google.com',
