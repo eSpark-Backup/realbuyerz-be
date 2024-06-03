@@ -71,6 +71,28 @@ const uploadFilesToCloudinary = async (files = []) => {
 };
 const deleteFilesFromCloudinary = async (public_ids) => {
   // delete files from cloudinary
+  if (public_ids.length === 0) {
+    throw new Error("Missing required parameter - public_ids");
+  }
+  else{
+    const deletePromises = public_ids.map((public_id) => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(public_id, (err, result) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+    });
+    try {
+      await Promise.all(deletePromises);
+      return;
+    } catch (err) {
+      throw new Error(`Error deleting files: ${err.message}`);
+    }
+  
+  }
 };
 export {
   connectDb,

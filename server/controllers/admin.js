@@ -7,7 +7,6 @@ import { ErrorHandler } from '../utils/utility.js';
 import { cookieOptions } from '../utils/features.js';
 
 import jwt from 'jsonwebtoken';
-import { max } from 'class-validator';
 
 const adminLogin = TryCatch(async (req, res, next) => {
   const { secretKey } = req.body;

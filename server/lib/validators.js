@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { isNotEmpty } from 'class-validator';
-import { body, check, param, query, validationResult } from 'express-validator';
+import { body, check, param, validationResult } from 'express-validator';
 import { ErrorHandler } from '../utils/utility.js';
 
 const validateHandler = (req, res, next) => {

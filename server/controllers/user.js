@@ -39,7 +39,7 @@ const loginUser = TryCatch(async (req, res, next) => {
   const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
-    return next(new ErrorHandler('Invalid credentials', 401));
+    return next(new ErrorHandler('User no Found with that email', 401));
   }
 
   const isMatch = bcrypt.compareSync(password, user.password);
