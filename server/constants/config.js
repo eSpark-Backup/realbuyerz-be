@@ -1,5 +1,5 @@
 const corsOptions = {
-    origin: '*', // replace with your client URL
+    origin: '*', 
   Credential: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   };

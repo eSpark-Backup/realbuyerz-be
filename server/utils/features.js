@@ -10,15 +10,34 @@ const cookieOptions = {
   secure: true,
   httpOnly: true,
 };
-const connectDb = (uri) => {
-  return new Promise((resolve, reject) => {
-    mongoose.connect(uri).then((res, err) => {
-      if (err) return reject(err);
+const connectDbWithRetries = async (uri, options = {}) => {
+  const { reconnectTries = Infinity, reconnectTimeout = 5000 } = options;
+
+  let numTries = 0;
+
+  const connect = async () => {
+    try {
+      await mongoose.connect(uri); // Remove options here
       console.log('Connected to the database');
-      resolve();
-    });
-  });
+    } catch (err) {
+      console.error(`Database connection failed (attempt ${numTries + 1}):`, err);
+      numTries++;
+
+      if (numTries < reconnectTries) {
+        await new Promise((resolve) => setTimeout(resolve, reconnectTimeout));
+        await connect(); // Recursive call to retry connection
+      } else {
+        throw err; // Re-throw the error if all retries are exhausted
+      }
+    }
+  };
+
+  await connect(); // Initial connection attempt
 };
+
+
+
+
 const sendToken = (res, user, code, message) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: '1d',
@@ -95,10 +114,10 @@ const deleteFilesFromCloudinary = async (public_ids) => {
   }
 };
 export {
-  connectDb,
   sendToken,
   cookieOptions,
   emitEvent,
   deleteFilesFromCloudinary,
   uploadFilesToCloudinary,
+  connectDbWithRetries
 };

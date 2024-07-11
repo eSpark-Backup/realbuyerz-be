@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { Server } from 'socket.io';
 import { createServer as CreateServer } from 'http';
-import { connectDb } from './utils/features.js';
+import { connectDbWithRetries } from './utils/features.js';
 import userRoute from './routes/user.js';
 import chatRoute from './routes/chat.js';
 import adminRoute from './routes/admin.js';
@@ -43,7 +43,13 @@ dotenv.config();
 
 
 const userSocketIds = new Map();
-connectDb(process.env.URI);
+// connectDb(process.env.URI);
+const options = { reconnectTries: 3, reconnectTimeout: 10000 }; // 3 retries, 10 seconds between retries
+
+connectDbWithRetries(process.env.URI, options)
+  .then(() => console.log('Database connection established with retries'))
+  .catch((err) => console.error('Failed to connect to database after retries:', err));
+
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
@@ -63,7 +69,11 @@ app.use('/chat', chatRoute);
 app.use('/admin', adminRoute);
 
 io.use((socket, next) => {
+
+  const cookie = socket.handshake.headers.cookie;
+
   cookieParser()(socket.request, socket.request.res, async (err) => {
+    console.log(socket.request.cookies['badami']);
     await socketAuthenticator(err, socket, next);
   });
 });
