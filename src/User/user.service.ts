@@ -366,9 +366,7 @@ export class UserService {
         const signUpResponse = {
           action: 'Sign Up', 
           message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
-          data: {
-            token: token
-          }
+          data: token
         };
 
         return signUpResponse;
