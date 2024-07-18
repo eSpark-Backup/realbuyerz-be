@@ -648,6 +648,7 @@ export class UserService {
     let user = {
       userName: userObj?.firstName + ' ' + userObj?.lastName,
       email: userObj?.email,
+      role: userObj?.role,
     }
    
     return { token, user };

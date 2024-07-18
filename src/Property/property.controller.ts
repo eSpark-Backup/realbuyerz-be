@@ -17,11 +17,12 @@ import { swaggerDocs } from "src/utils/decorator/swagger.decorator";import { CON
 import { UserId } from "src/utils/decorator/userId.decorator";
 
 @Controller('property')
-@ApiBearerAuth('jwt')
 @ApiTags('property')
-@UseGuards(JwtAuthGuard, RoleGuard)
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) { }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles('agent')
   @Post()
   @ApiTags('property')
@@ -41,6 +42,8 @@ export class PropertyController {
   }
 
 
+  @ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard, RoleGuard)
   @Roles('agent')
   @Put('/:id')
   @ApiTags('property')
@@ -61,6 +64,9 @@ export class PropertyController {
   }
 
 
+
+  @ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
     summary: 'Get all properties of User',
     type:null,
@@ -80,7 +86,7 @@ export class PropertyController {
   //   return this.propertyService.findById(propertyId);
   // }
 
-  @Roles('user')
+
   @Get()
   @FindAllApiDocs()
   async findAll(
