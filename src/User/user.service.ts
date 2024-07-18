@@ -414,9 +414,8 @@ export class UserService {
     return {
       action: 'Login',
       message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
-      data: {
-        token: token
-      }
+      data: token
+    
     };
 
 
@@ -651,7 +650,7 @@ export class UserService {
       role: userObj?.role,
     }
    
-    return { token, user };
+    return {token, user };
   }
   async validateUser(payload: any) {
     const { id } = payload;
