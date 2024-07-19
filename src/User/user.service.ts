@@ -4,7 +4,13 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -12,12 +18,12 @@ import * as jwt from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
 import sgMail = require('@sendgrid/mail');
 import * as CryptoJS from 'crypto-js';
-import { PBKDF2,SHA256 } from 'crypto-js';
+import { PBKDF2, SHA256 } from 'crypto-js';
 import * as uuid from 'uuid';
 import * as path from 'path';
 import { promises as fsPromises } from 'fs';
 import axios from 'axios';
-import * as  Sharp from 'sharp';
+import * as Sharp from 'sharp';
 import * as otpGenerator from 'otp-generator';
 import * as crypto from 'crypto';
 import * as Twilio from 'twilio';
@@ -45,34 +51,45 @@ export class UserService {
 
   constructor(
     private jwtService: JwtService,
-    private readonly prismaService: PrismaService) {
+    private readonly prismaService: PrismaService,
+  ) {
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     this.twilioClient = Twilio(twilioAccountSid, twilioAuthToken);
-
   }
   async hashPassword(password: string): Promise<string> {
-    const iterations = 10000; 
-    const derivedKey = PBKDF2(password, process.env.PW_KEY, { keySize: 256 / 32, iterations });
+    const iterations = 10000;
+    const derivedKey = PBKDF2(password, process.env.PW_KEY, {
+      keySize: 256 / 32,
+      iterations,
+    });
     const hashedPassword = derivedKey.toString();
     return hashedPassword;
   }
 
-  async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    const iterations = 10000; 
-    const derivedKey = PBKDF2(plainPassword, process.env.PW_KEY, { keySize: 256 / 32, iterations });
+  async comparePasswords(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    const iterations = 10000;
+    const derivedKey = PBKDF2(plainPassword, process.env.PW_KEY, {
+      keySize: 256 / 32,
+      iterations,
+    });
     const enteredPasswordHash = derivedKey.toString();
     return enteredPasswordHash === hashedPassword;
   }
 
- 
-
-  
-
-  async resetPasswordwithMail(token: string, resetPasswordwithMailDto: ResetPasswordwithMailDto) {
+  async resetPasswordwithMail(
+    token: string,
+    resetPasswordwithMailDto: ResetPasswordwithMailDto,
+  ) {
     try {
-      const { email, exp } = jwt.verify(token, TOKEN_KEY) as { email: string, exp?: number };
+      const { email, exp } = jwt.verify(token, TOKEN_KEY) as {
+        email: string;
+        exp?: number;
+      };
 
       if (!exp) {
         return { error: 'Invalid access token' };
@@ -85,8 +102,6 @@ export class UserService {
         return { error: 'Token has Expired' };
       }
 
-
-
       const { password } = resetPasswordwithMailDto;
 
       const user = await this.prismaService.user.findUnique({
@@ -97,9 +112,11 @@ export class UserService {
         return { success: false, message: 'User not found' };
       }
       if (!user.passwordResetToken || user.passwordResetToken !== token) {
-        return { success: false, message: 'Password reset link is expired or invalid' };
+        return {
+          success: false,
+          message: 'Password reset link is expired or invalid',
+        };
       }
-
 
       const hashedPassword = await this.hashPassword(password);
 
@@ -111,21 +128,37 @@ export class UserService {
         },
       });
 
-      return {action:'Reset Password With Link', message:CONSTANT_RESPONSE.PWD_RESET_SUCCESS };
-
+      return {
+        action: 'Reset Password With Link',
+        message: CONSTANT_RESPONSE.PWD_RESET_SUCCESS,
+      };
     } catch (error) {
-
-
-      return { success: false, message: CONSTANT_RESPONSE.FAILED_TO_RESET, error };
+      return {
+        success: false,
+        message: CONSTANT_RESPONSE.FAILED_TO_RESET,
+        error,
+      };
     }
   }
 
-  async sendpasswordResetEmail(to: string): Promise<void> {
-    const token = jwt.sign({ email: to }, TOKEN_KEY, { expiresIn: token_expiry });
+  async sendpasswordResetEmail(to: string) {
+    const token = jwt.sign({ email: to }, TOKEN_KEY, {
+      expiresIn: token_expiry,
+    });
     const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
-
     try {
+      const findUser = await this.prismaService.user.findUnique({
+        where: { email: to },
+      });
+
+      if (!findUser) {
+        return {
+          success: false,
+          message: 'User not found',
+        };
+      }
+
       await this.prismaService.user.update({
         where: { email: to },
         data: { passwordResetToken: token },
@@ -133,6 +166,10 @@ export class UserService {
 
       await this.sendEmail(to, 'Password Reset Link', link);
 
+      return {
+        success: true,
+        message: 'Password reset link sent successfully',
+      };
     } catch (error) {
       throw new Error('Failed to send password reset email');
     }
@@ -163,27 +200,12 @@ export class UserService {
   //     const response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${accessToken}`);
   //     const tokenInfo = response.data;
 
-
-
   //     return tokenInfo;
   //   } catch (error) {
   //     return false;
 
   //   }
   // }
-
-
-
-
-
-  
-
-
-
-
-
-
-
 
   async verifyOtp(phone: string, otp: string, hash: string): Promise<any> {
     try {
@@ -195,23 +217,24 @@ export class UserService {
       }
 
       const data = `${phone}.${otp}.${expires}`;
-      const newCalculateHash = crypto.createHmac('sha256', key).update(data).digest('hex');
+      const newCalculateHash = crypto
+        .createHmac('sha256', key)
+        .update(data)
+        .digest('hex');
 
       if (newCalculateHash === hashValue) {
+        const user = await this.prismaService.user.update({
+          where: { mobileNumber: phone },
+          data: {
+            isVerified: true,
+          },
+        });
 
-     const user = await this.prismaService.user.update({
-        where: {  mobileNumber: phone },
-        data: {
-          isVerified: true,
-        },
-      });
-    
-       return {
-        success: true,
-        message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
-        response: user,
-       }
-       
+        return {
+          success: true,
+          message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
+          response: user,
+        };
       }
 
       throw new Error('Invalid OTP');
@@ -219,8 +242,6 @@ export class UserService {
       throw new Error(error.message);
     }
   }
-
-
 
   async sendOtp(phone: string): Promise<string> {
     const otp = otpGenerator.generate(4, {
@@ -268,88 +289,101 @@ export class UserService {
       const emailContent = 'Thank you for signing up!';
 
       if (!createUserDto.password && !createUserDto.profileImage) {
-        return { success: false, message: 'Password or Profile Image is required' }
+        return {
+          success: false,
+          message: 'Password or Profile Image is required',
+        };
       }
-     
 
-      if (!createUserDto.password && createUserDto.profileImage && createUserDto.socialId) {
+      if (
+        !createUserDto.password &&
+        createUserDto.profileImage &&
+        createUserDto.socialId
+      ) {
         const existingUser = await this.prismaService.user.findFirst({
           where: {
-            AND: [
-              { email: createUserDto.email },
-              { socialLogin: true }
-            ]
-          }
+            AND: [{ email: createUserDto.email }, { socialLogin: true }],
+          },
         });
 
-
-        if (existingUser) {     
-          const token = this.createToken({ id: existingUser.id, role: existingUser.role }, existingUser)
-         return  {
+        if (existingUser) {
+          const token = this.createToken(
+            { id: existingUser.id, role: existingUser.role },
+            existingUser,
+          );
+          return {
             action: 'Socially Logged In',
             message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
             data: {
-              token: token
-            }
+              token: token,
+            },
           };
-
         }
 
         const userData = { ...createUserDto };
-        userData.socialLogin= true;
-    
+        userData.socialLogin = true;
+
         const newUser = await this.prismaService.user.create({
           data: userData,
         });
 
-
         await this.sendEmail(newUser.email, emailSubject, emailContent);
-        const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
+        const token = this.createToken(
+          { id: newUser.id, role: newUser.role },
+          newUser,
+        );
         const signUpResponse = {
-          action: 'Socially Signed Up', 
+          action: 'Socially Signed Up',
           message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
           data: {
-            token: token
-          }
+            token: token,
+          },
         };
-        
+
         return signUpResponse;
-
-
-      }
-      else {
+      } else {
         const existingUser = await this.prismaService.user.findFirst({
           where: {
             OR: [
               { email: createUserDto.email },
-              { mobileNumber: createUserDto.mobileNumber }
-            ]
-          }
+              { mobileNumber: createUserDto.mobileNumber },
+            ],
+          },
         });
-        
+
         if (existingUser) {
-          throw new ConflictException('Email or Mobile Number is already in use');
+          throw new ConflictException(
+            'Email or Mobile Number is already in use',
+          );
         }
 
-        if(createUserDto.role == 'admin'){
-          const hashedPassword = await this.hashPassword(createUserDto.password);
+        if (createUserDto.role == 'admin') {
+          const hashedPassword = await this.hashPassword(
+            createUserDto.password,
+          );
           const userData = { ...createUserDto, password: hashedPassword };
           const newUser = await this.prismaService.user.create({
             data: userData,
           });
-          const token = this.createToken({ id: newUser.id, role: newUser.role }, newUser)
+          const token = this.createToken(
+            { id: newUser.id, role: newUser.role },
+            newUser,
+          );
           return {
             action: 'Admin Created',
             message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
             data: {
-              token: token
-            }
+              token: token,
+            },
           };
         }
-        if(createUserDto.socialId  || createUserDto.profileImage){
-          return { success: false, message: 'Social Id or Profile Image is not required' }
+        if (createUserDto.socialId || createUserDto.profileImage) {
+          return {
+            success: false,
+            message: 'Social Id or Profile Image is not required',
+          };
         }
-        
+
         const hashedPassword = await this.hashPassword(createUserDto.password);
         const userData = { ...createUserDto, password: hashedPassword };
 
@@ -359,24 +393,23 @@ export class UserService {
 
         // await this.sendEmail(newUser.email, emailSubject, emailContent);
 
-        const token =   this.createToken({ id: newUser.id, role: newUser.role }, newUser)
-
-
+        const token = this.createToken(
+          { id: newUser.id, role: newUser.role },
+          newUser,
+        );
 
         const signUpResponse = {
-          action: 'Sign Up', 
+          action: 'Sign Up',
           message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
-          data: token
+          data: token,
         };
 
         return signUpResponse;
-
-
       }
     } catch (error) {
       if (error instanceof ConflictException) {
         return {
-          action:'User not created',
+          action: 'User not created',
           success: false,
           message: error.message,
         };
@@ -397,32 +430,32 @@ export class UserService {
     if (!user) {
       return { success: false, message: 'User not found' };
     }
-    if (user.socialLogin == true){
+    if (user.socialLogin == true) {
       return { success: false, message: 'Please login with social login' };
     }
 
-    const passwordMatch = await this.comparePasswords(loginUserDto.password, user.password);
+    const passwordMatch = await this.comparePasswords(
+      loginUserDto.password,
+      user.password,
+    );
 
     if (!passwordMatch) {
       return { success: false, message: 'Invalid password' };
     }
-    const token =  this.createToken({ id: user.id, role: user.role }, user)
-
+    const token = this.createToken({ id: user.id, role: user.role }, user);
 
     return {
       action: 'Login',
       message: CONSTANT_RESPONSE.LOGIN_SUCCESS,
-      data: token
-    
+      data: token,
     };
-
-
-
   }
 
-
-
-  async updateUser(userId: string, files: { image?: Express.Multer.File[]; }, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    userId: string,
+    files: { image?: Express.Multer.File[] },
+    updateUserDto: UpdateUserDto,
+  ) {
     try {
       let parsedIsVerified: boolean;
       let parsedProfileVisibility: boolean;
@@ -433,7 +466,6 @@ export class UserService {
       } else {
         parsedProfileVisibility = updateUserDto.profileVisibility;
       }
-
 
       if (typeof updateUserDto.isVerified === 'string') {
         const stringValue: string = updateUserDto.isVerified;
@@ -447,44 +479,68 @@ export class UserService {
         for (const file of files.image) {
           const ext = extname(file.originalname);
           if (!allowedImageTypes.includes(ext)) {
-            throw new HttpException('Invalid image file type.', HttpStatus.BAD_REQUEST);
+            throw new HttpException(
+              'Invalid image file type.',
+              HttpStatus.BAD_REQUEST,
+            );
           }
         }
-
 
         const maxFileSize = 4 * 1024 * 1024;
         for (const file of [...(files.image || [])]) {
           if (file.size > maxFileSize) {
-            throw new HttpException('File size exceeds the limit.', HttpStatus.BAD_REQUEST);
+            throw new HttpException(
+              'File size exceeds the limit.',
+              HttpStatus.BAD_REQUEST,
+            );
           }
         }
       }
 
       const existingUser = await this.prismaService.user.findUnique({
-        where: { id: userId},
+        where: { id: userId },
       });
 
       if (!existingUser) {
         throw new NotFoundException('User not found');
       }
 
-
-      const allowedFields = ['firstName', 'lastName', 'email', 'landlineNumber', 'country', 'address', 'profileImage' , 'whatsapp', 'socialId', 'isVerified', 'profileVisibility'];
-      const invalidFields = Object.keys(updateUserDto).filter(field => !allowedFields.includes(field));
+      const allowedFields = [
+        'firstName',
+        'lastName',
+        'email',
+        'landlineNumber',
+        'country',
+        'address',
+        'profileImage',
+        'whatsapp',
+        'socialId',
+        'isVerified',
+        'profileVisibility',
+      ];
+      const invalidFields = Object.keys(updateUserDto).filter(
+        (field) => !allowedFields.includes(field),
+      );
 
       if (invalidFields.length > 0) {
         throw new Error(`Invalid fields: ${invalidFields.join(', ')}`);
       }
 
-
       let updatedUserDto: any = { ...updateUserDto };
 
       if (files.image) {
-        const processedImages = await Promise.all(files.image.map(file => this.processSingleImage(file)));
-        const imagePathsString = processedImages.map(image => image.savedImagePath).join(', ');
+        const processedImages = await Promise.all(
+          files.image.map((file) => this.processSingleImage(file)),
+        );
+        const imagePathsString = processedImages
+          .map((image) => image.savedImagePath)
+          .join(', ');
 
         updatedUserDto = { ...updatedUserDto, profileImage: imagePathsString };
-        updatedUserDto = { ...updatedUserDto, profileVisibility: parsedProfileVisibility };
+        updatedUserDto = {
+          ...updatedUserDto,
+          profileVisibility: parsedProfileVisibility,
+        };
         updatedUserDto = { ...updatedUserDto, isVerified: parsedIsVerified };
         // updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
@@ -506,20 +562,19 @@ export class UserService {
           },
         });
 
-
         const updateResponse = {
-         action:'Update',
+          action: 'Update',
           message: 'User updated successfully',
           data: results,
         };
 
         return updateResponse;
-
-      }
-
-      else {
+      } else {
         updatedUserDto = { ...updateUserDto, isVerified: parsedIsVerified };
-        updatedUserDto = { ...updatedUserDto, profileVisibility: parsedProfileVisibility };
+        updatedUserDto = {
+          ...updatedUserDto,
+          profileVisibility: parsedProfileVisibility,
+        };
         // updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
         const results = await this.prismaService.user.update({
           where: { id: userId },
@@ -541,31 +596,26 @@ export class UserService {
           },
         });
 
-
         const updateResponse = {
-          action:'Update',
-          message:CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
+          action: 'Update',
+          message: CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
           data: results,
         };
 
         return updateResponse;
       }
-    }
-    catch (error) {
-
+    } catch (error) {
       return {
         success: false,
         message: 'An error occurred while updating the user.' + error.message,
       };
     }
   }
- 
 
   async resetPassword(userId: string, resetPasswordDto: ResetPasswordDto) {
     try {
-
       const existingUser = await this.prismaService.user.findUnique({
-        where: { id:userId },
+        where: { id: userId },
       });
 
       if (!existingUser) {
@@ -575,8 +625,10 @@ export class UserService {
       let updatedUserDto: any = { ...resetPasswordDto };
 
       if (resetPasswordDto.oldPassword && resetPasswordDto.password) {
-        const passwordMatch = await this.comparePasswords(resetPasswordDto.oldPassword, existingUser.password);
-
+        const passwordMatch = await this.comparePasswords(
+          resetPasswordDto.oldPassword,
+          existingUser.password,
+        );
 
         if (!passwordMatch) {
           return {
@@ -585,47 +637,38 @@ export class UserService {
           };
         }
 
-        const hashedPassword = await this.hashPassword(resetPasswordDto.password);
+        const hashedPassword = await this.hashPassword(
+          resetPasswordDto.password,
+        );
         updatedUserDto = { ...resetPasswordDto, password: hashedPassword };
         delete updatedUserDto.oldPassword;
-
-
-
-
       }
       updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
 
       await this.prismaService.user.update({
         where: { id: userId },
         data: updatedUserDto,
-
       });
       const emailContent = `Dear ${existingUser.firstName} ${existingUser.lastName},\n\nYour password has been successfully updated. If you did not perform this action, please contact us immediately.`;
-      await this.sendEmail(existingUser.email, 'Password Update Notification', emailContent);
+      await this.sendEmail(
+        existingUser.email,
+        'Password Update Notification',
+        emailContent,
+      );
 
-
-      const passwordUpdateResponse ={
-        action:'Update Password',
+      const passwordUpdateResponse = {
+        action: 'Update Password',
         message: CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
-      }
+      };
 
       return passwordUpdateResponse;
-
-
     } catch (error) {
-
       return {
         success: false,
         message: 'An error occurred while updating the user.',
       };
     }
-
-
-
-
   }
-
-
 
   private async processSingleImage(file: Express.Multer.File): Promise<any> {
     const buffer = await Sharp(file.buffer)
@@ -633,22 +676,21 @@ export class UserService {
       .toBuffer();
     const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
-
     return {
       ...file,
       savedImagePath,
     };
   }
-  
+
   createToken(payload: object, userObj: any) {
     const token = this.jwtService.sign(payload);
     let user = {
       userName: userObj?.firstName + ' ' + userObj?.lastName,
       email: userObj?.email,
       role: userObj?.role,
-    }
-   
-    return {token, user };
+    };
+
+    return { token, user };
   }
   async validateUser(payload: any) {
     const { id } = payload;
@@ -657,7 +699,4 @@ export class UserService {
     });
     return findUser;
   }
-
-
 }
-

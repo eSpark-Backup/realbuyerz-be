@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BiddingService } from './bidding.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,7 +40,7 @@ export class BiddingController {
     }
 
     @Roles('user')
-    @Post("viewProposal/:user_property_id")
+    @Get("viewProposal/:user_property_id")
     async getBidding(@Param("user_property_id") user_property_id: string){
         return await this.biddingService.getBidding(user_property_id);
     }
