@@ -46,7 +46,7 @@ export class BiddingController {
     }
 
     @Roles('agent')
-    @Post("viewAgentProposal/:agent_property_id")
+    @Get("viewAgentProposal/:agent_property_id")
     async getAgentBidding(@Param("agent_property_id") agent_property_id: string){
         return await this.biddingService.getAgentBidding(agent_property_id);
     }
