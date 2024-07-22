@@ -61,7 +61,9 @@ cloudinary.config({
 //  createMessagesInChat("66433c40348963b325b0be74",10)
 
 app.get('/', (req, res) => {
-  res.send('Hello World');
+  
+
+  res.send(`Server is running on port ${req.body}`);
 });
 
 app.use('/user', userRoute);

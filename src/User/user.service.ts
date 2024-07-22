@@ -643,7 +643,7 @@ export class UserService {
         updatedUserDto = { ...resetPasswordDto, password: hashedPassword };
         delete updatedUserDto.oldPassword;
       }
-      updatedUserDto = { ...updatedUserDto, updated_at: new Date() };
+      updatedUserDto = { ...updatedUserDto, updatedAt: new Date() };
 
       await this.prismaService.user.update({
         where: { id: userId },
