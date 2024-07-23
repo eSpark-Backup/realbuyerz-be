@@ -326,7 +326,6 @@ export class UserService {
         const newUser = await this.prismaService.user.create({
           data: userData,
         });
-
         await this.sendEmail(newUser.email, emailSubject, emailContent);
         const token = this.createToken(
           { id: newUser.id, role: newUser.role },
