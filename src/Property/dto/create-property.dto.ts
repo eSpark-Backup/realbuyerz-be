@@ -1,9 +1,19 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { ApiProperty  } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsString, IsOptional, IsNotEmpty, ValidateNested, IsUrl, ArrayMinSize, ArrayMaxSize  } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNotEmpty,
+  ValidateNested,
+  IsUrl,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsUUID,
+  IsArray,
+} from 'class-validator';
 
 class AmenityDto {
   @IsString()
@@ -23,25 +33,16 @@ export class CreatePropertyDto {
   @ApiProperty({ type: String, example: 'Beautiful House' })
   @IsString({ message: 'Property name must be a string' })
   @IsNotEmpty({ message: 'Property name cannot be empty' })
-  
   readonly propertyName: string;
-  
 
- 
-   userId: any;
-
-  
-  @ApiProperty({ type: String, example: 'House' })
-  @IsString({ message: 'Property type must be a string' })
-  @IsNotEmpty({ message: 'Property type cannot be empty' })
-  readonly propertyType: string;
+  userId: any;
 
   readonly propertyBy: string;
-  
-  @ApiProperty({ type: String, example: 'Flat' })
-  @IsString({ message: 'Property  Sub type must be a string' })
-  @IsNotEmpty({ message: 'Property Sub type cannot be empty' })
-  readonly subType: string;
+
+  @ApiProperty({ type: String, example: 'UUID' })
+  @IsUUID()
+  @IsNotEmpty()
+  readonly propertySubTypeId: string;
 
   @ApiProperty({ type: String, example: 500000 })
   @IsString({ message: 'Property price must be a number' })
@@ -50,7 +51,7 @@ export class CreatePropertyDto {
   readonly propertyPrice: any;
 
   @ApiProperty({ type: String, example: 2000 })
-  @IsString( { message: 'Property area must be a string' })
+  @IsString({ message: 'Property area must be a string' })
   @IsOptional()
   // @IsNotEmpty({ message: 'Property area cannot be empty' })
   readonly propertyArea: string;
@@ -72,13 +73,10 @@ export class CreatePropertyDto {
   // @IsNotEmpty({ message: 'Property city cannot be empty' })
   readonly propertyCity: string;
 
-
-
   @ApiProperty({ type: String, example: '12345' })
   @IsString({ message: 'Property zip must be a string' })
   // @IsNotEmpty({ message: 'Property zip cannot be empty' })
   @IsOptional()
-
   readonly propertyZip: string;
 
   @ApiProperty({ type: String, example: 'A wonderful property for sale' })
@@ -86,8 +84,6 @@ export class CreatePropertyDto {
   // @IsNotEmpty({ message: 'Property description cannot be empty' })
   @IsOptional()
   readonly propertyDescription: string;
-
-
 
   @ApiProperty({ type: String, example: '123.456' })
   @IsString({ message: 'Longitude must be a string' })
@@ -103,21 +99,24 @@ export class CreatePropertyDto {
   // @IsNotEmpty({ message: 'Latitude cannot be empty' })
   readonly latitude: string;
 
-
   @ApiProperty({
     type: 'array',
     items: {
       type: 'string',
       format: 'binary',
     },
-    example: ['image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg'],
+    example: [
+      'image1.jpg',
+      'image2.jpg',
+      'image3.jpg',
+      'image4.jpg',
+      'image5.jpg',
+    ],
     required: false,
   })
   @IsOptional()
   @IsNotEmpty({ message: 'At least one image is required' })
   readonly image: any[];
-  
-  
 
   @ApiProperty({
     type: 'array',
@@ -125,39 +124,37 @@ export class CreatePropertyDto {
       type: 'string',
       format: 'url',
     },
-    example: ['https://www.youtube.com/watch?v=yourvideo1', 'https://www.youtube.com/watch?v=yourvideo2'],
+    example: [
+      'https://www.youtube.com/watch?v=yourvideo1',
+      'https://www.youtube.com/watch?v=yourvideo2',
+    ],
     required: false,
   })
   @IsString({ each: true })
   @IsUrl({}, { each: true })
   @IsOptional()
   readonly video?: any[];
+  @ApiProperty({
+    type: 'string',
+    example: 'existing-amenity-id-1,existing-amenity-id-2',
+    required: false,
+  })
+  @IsOptional()
+  readonly amenities?: string | string[];
 
-  
-  @ApiProperty({ type: Boolean, example: 'True ',default:false,required:false })
+  @ApiProperty({
+    type: Boolean,
+    example: 'True ',
+    default: false,
+    required: false,
+  })
   @IsString({ message: 'Property status must be a string' })
   @IsOptional()
 
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
   readonly propertyStatus: boolean;
 
-  @ApiProperty({ type: String, example: 'Swimming Pool ' })
-  @IsString()
-  @IsOptional()
-  readonly amenitiesName: string;
-
-  @ApiProperty({example: '1' })
-  @IsString()
-  @IsOptional()
-  readonly count: any;
-
-  @ApiProperty({ type: String, example: 'Waterfall ' })
-  @IsString()
-  @IsOptional()
-  readonly otherFeatures: string;
-
-  imageKey?:string;
-
+  imageKey?: string;
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
@@ -168,8 +165,3 @@ export class CreatePropertyDto {
   // @Type(() => AmenityDto)
   // readonly property_amenities?: AmenityDto;
 }
-
-
-
-
-

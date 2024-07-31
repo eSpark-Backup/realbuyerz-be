@@ -148,17 +148,26 @@ export class PropertyService {
     if (property.propertyPrice) {
       property.propertyPrice = parseInt(property.propertyPrice);
     }
-    if (property.count) {
-      property.count = parseInt(property.count);
+    console.log(property.amenities);
+    let result = null;
+    let amenitiesArray: string[] = [];
+
+    // Check if `property.amenities` is a string or an array
+    if (typeof property.amenities === 'string') {
+      amenitiesArray = property.amenities
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+    } else if (Array.isArray(property.amenities)) {
+      amenitiesArray = property.amenities
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
     }
 
-    let result = null;
     try {
       const propertyData: Prisma.PropertyCreateInput = {
         user: { connect: { id: user_id } },
         propertyName: property.propertyName,
-        propertyType: property.propertyType,
-        subType: property.subType,
         purpose: property.purpose,
         propertyPrice: property.propertyPrice,
         propertyArea: property.propertyArea,
@@ -169,14 +178,14 @@ export class PropertyService {
         propertyDescription: property.propertyDescription,
         longitude: property.longitude,
         latitude: property.latitude,
+        propertyType: {
+          connect: { id: property.propertySubTypeId },
+        },
         amenities: {
-          create: {
-            amenetiesName: JSON.stringify(property.amenitiesName),
-            count: property.count,
-            otherFeatures: JSON.stringify(property.otherFeatures),
-          },
+          connect: amenitiesArray.map((id) => ({ id })),
         },
       };
+
       result = await this.prismaService.property.create({
         data: propertyData,
       });
@@ -239,6 +248,10 @@ export class PropertyService {
 
       // }
       else {
+        await this.prismaService.property.delete({
+          where: { id: result.id },
+        });
+
         return {
           success: false,
           message: 'No images/Videos provided for property creation.',
@@ -325,20 +338,6 @@ export class PropertyService {
               propertyDescription: property.propertyDescription,
               longitude: property.longitude,
               latitude: property.latitude,
-
-              amenities: {
-                update: {
-                  where: {
-                    id: propert.amenities.id,
-                  },
-                  data: {
-                    amenetiesName: JSON.stringify(property.amenitiesName),
-                    count: property.count,
-                    otherFeatures: JSON.stringify(property.otherFeatures),
-                    updated_at: new Date(),
-                  },
-                },
-              },
             } as Prisma.PropertyUpdateInput,
             select: {
               id: true,
@@ -426,19 +425,6 @@ export class PropertyService {
               propertyDescription: property.propertyDescription,
               longitude: property.longitude,
               latitude: property.latitude,
-
-              amenities: {
-                update: {
-                  where: {
-                    id: propert.amenities.id,
-                  },
-                  data: {
-                    ameneties_name: JSON.stringify(property.amenitiesName),
-                    count: property.count,
-                    otherFeatures: JSON.stringify(property.otherFeatures),
-                  },
-                },
-              },
             } as Prisma.PropertyUpdateInput,
             select: {
               id: true,
@@ -583,6 +569,7 @@ export class PropertyService {
       include: {
         amenities: true,
         PropertyData: true,
+        propertyType: true,
       },
       where,
     });

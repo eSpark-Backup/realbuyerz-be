@@ -116,17 +116,6 @@ export class UserPropertyService {
           longitude: property.longitude,
           latitude: property.latitude,
           propertyStatus: property.propertyStatus,
-
-          amenities: {
-            update: {
-              where: { id: findProperty.amenities.id },
-              data: {
-                amenetiesName: JSON.stringify(property.amenitiesName),
-                count: property.count,
-                otherFeatures: JSON.stringify(property.otherFeatures),
-              },
-            },
-          },
         } as Prisma.PropertyUpdateInput,
         select: {
           id: true,
@@ -193,9 +182,10 @@ export class UserPropertyService {
       }
 
       const deleteAmeneties = await new Promise((resolve, reject) => {
-        this.prismaService.ameneties.deleteMany({
-          where: { Property:{id: id}},
-        })
+        this.prismaService.ameneties
+          .deleteMany({
+            where: { Property: { id: id } },
+          })
           .then((result) => {
             resolve(result);
           })
@@ -211,7 +201,6 @@ export class UserPropertyService {
           error: 'Property deletion failed.',
         };
       }
-       
 
       const result = await this.prismaService.property.delete({
         where: { id: id },

@@ -1,0 +1,36 @@
+// PropertyType model representing the main types of properties
+model PropertyType {
+    id       String            @id @default(uuid())
+    typeName String
+    subTypes PropertySubType[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("property_types")
+}
+
+// PropertySubType model representing the subtypes of properties
+model PropertySubType {
+    id             String       @id @default(uuid())
+    subTypeName    String
+    propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
+    propertyTypeId String
+
+    properties Property[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("property_subtypes")
+}
+
+model Property {
+    id             String          @id @default(uuid())
+    propertyTypeId String // Changed field type to String to reference PropertySubType
+    propertyType   PropertySubType @relation(fields: [propertyTypeId], references: [id]) // Updated relation
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+
+    @@map("properties")
+}

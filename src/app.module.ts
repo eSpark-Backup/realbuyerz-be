@@ -15,11 +15,21 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { GlobalExceptionFilter } from './utils/global-exception-handler/global-exception.filter';
 import { SuccessResponseInterceptor } from './utils/interceptor/success-response.interceptor';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, PropertyModule, UserPropertyModule, BiddingModule,SubscriptionModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    PropertyModule,
+    UserPropertyModule,
+    BiddingModule,
+    SubscriptionModule,
+    AdminModule,
+  ],
   controllers: [AppController],
-  providers: [AppService,
+  providers: [
+    AppService,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
@@ -30,7 +40,4 @@ import { SubscriptionModule } from './subscription/subscription.module';
     },
   ],
 })
-export class AppModule {
-
-}
-
+export class AppModule {}

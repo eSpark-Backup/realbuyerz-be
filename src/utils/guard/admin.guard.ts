@@ -1,22 +1,25 @@
 /* eslint-disable prettier/prettier */
 import {
-    Injectable,
-    CanActivate,
-    ExecutionContext,
-    UnauthorizedException,
-  } from '@nestjs/common';
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-  import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
-  constructor(private reflector: Reflector, private jwtService: JwtService) {}
+  constructor(
+    private reflector: Reflector,
+    private jwtService: JwtService,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    // const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
+    //   context.getHandler(),
+    //   context.getClass(),
+    // ]);
     try {
       const request = context.switchToHttp().getRequest();
       const token = this.extractTokenFromRequest(request);
@@ -25,12 +28,12 @@ export class AdminGuard implements CanActivate {
         throw new UnauthorizedException('Unauthorized');
       }
 
-      if (decodedToken.role === requiredRoles[0] || decodedToken.role === 'admin') {
-      return true;        
-      }
-      else{
-
-      throw new UnauthorizedException('Insufficient privileges to Access Admin Resources');
+      if (decodedToken.role === 'admin') {
+        return true;
+      } else {
+        throw new UnauthorizedException(
+          'Insufficient privileges to Access Admin Resources',
+        );
       }
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
