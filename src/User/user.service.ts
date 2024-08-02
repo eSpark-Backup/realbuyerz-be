@@ -35,6 +35,7 @@ import { saveImageToDisk } from '../utils/function/saveImage';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -52,6 +53,7 @@ export class UserService {
   constructor(
     private jwtService: JwtService,
     private readonly prismaService: PrismaService,
+    private readonly backblazeService: BackblazeService,
   ) {
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -420,6 +422,45 @@ export class UserService {
       };
     }
   }
+  async getUserProfile(userId: string) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          landlineNumber: true,
+          whatsapp: true,
+          country: true,
+          address: true,
+          isVerified: true,
+          socialId: true,
+          profileImage: true,
+          profileVisibility: true,
+        },
+      });
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'User not found',
+        };
+      }
+
+      return {
+        action: 'Get Profile',
+        message: CONSTANT_RESPONSE.GET_ALL,
+        data: user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'An error occurred while fetching the user profile.',
+      };
+    }
+  }
 
   async loginUser(loginUserDto: LoginUserDto) {
     const user = await this.prismaService.user.findUnique({
@@ -528,14 +569,25 @@ export class UserService {
       let updatedUserDto: any = { ...updateUserDto };
 
       if (files.image) {
+        const fileName = path.basename(
+          new URL(existingUser.profileImage).pathname,
+        );
+        await this.backblazeService.deleteFile(fileName, existingUser.imageKey);
+
         const processedImages = await Promise.all(
           files.image.map((file) => this.processSingleImage(file)),
         );
-        const imagePathsString = processedImages
-          .map((image) => image.savedImagePath)
-          .join(', ');
 
-        updatedUserDto = { ...updatedUserDto, profileImage: imagePathsString };
+        updatedUserDto = {
+          ...updatedUserDto,
+          profileImage: processedImages
+            .map((image) => image.uploadResult.url)
+            .join(''),
+
+          imageKey: processedImages
+            .map((image) => image.uploadResult.fileId)
+            .join(''),
+        };
         updatedUserDto = {
           ...updatedUserDto,
           profileVisibility: parsedProfileVisibility,
@@ -670,14 +722,25 @@ export class UserService {
   }
 
   private async processSingleImage(file: Express.Multer.File): Promise<any> {
+    const watermarkPath = 'src/utils/watermark/Quote.png';
+
     const buffer = await Sharp(file.buffer)
       .resize({ width: 600, height: 500, fit: 'cover' })
+      // .composite([
+      //   { input: await readFile(resolve(watermarkPath)), gravity: 'center' },
+      // ])
+      .png()
       .toBuffer();
-    const savedImagePath = await saveImageToDisk(buffer, file.originalname);
+
+    const uploadResult = await this.backblazeService.uploadFileFromBuffer(
+      buffer,
+      file.originalname,
+    );
+    // const savedImagePath = await saveImageToDisk(buffer, file.originalname);
 
     return {
       ...file,
-      savedImagePath,
+      uploadResult,
     };
   }
 

@@ -9,11 +9,10 @@ generator client {
 }
 
 model Property {
-    id                   String           @id @default(uuid())
-    user                 User?            @relation(name: "PropertyToUser", fields: [userId], references: [id])
+    id                   String            @id @default(uuid())
+    user                 User?             @relation(name: "PropertyToUser", fields: [userId], references: [id])
     userId               String?
     propertyName         String
-    subType              String?
     propertyPrice        Int?
     propertyArea         String?
     purpose              String?
@@ -24,17 +23,17 @@ model Property {
     longitude            String?
     latitude             String?
     propertyBy           String?
-    proposalCount        Int?             @default(0)
-    propertyStatus       Boolean?         @default(false)
-    isFeatured           Boolean?         @default(false)
-    amenities            Ameneties[]      @relation(name: "AmenetiesToProperty")
-    propertyTypeId       String // Field to reference PropertySubType
-    propertyType         PropertySubType? @relation(fields: [propertyTypeId], references: [id]) // Updated relation
-    userPropertyBidding  Bidding[]        @relation(name: "UserProperty")
-    agentPropertyBidding Bidding[]        @relation(name: "AgentProperty")
-    createdAt            DateTime         @default(now())
-    updatedAt            DateTime         @updatedAt
-    PropertyData         Porperty_data[]  @relation(name: "Porperty_dataToProperty")
+    proposalCount        Int?              @default(0)
+    propertyStatus       Boolean?          @default(false)
+    isFeatured           Boolean?          @default(false)
+    propertyTypeId       String? // Field to reference PropertySubType
+    propertyType         PropertySubType?  @relation(fields: [propertyTypeId], references: [id]) // Updated relation
+    userPropertyBidding  Bidding[]         @relation(name: "UserProperty")
+    agentPropertyBidding Bidding[]         @relation(name: "AgentProperty")
+    createdAt            DateTime          @default(now())
+    updatedAt            DateTime          @updatedAt
+    PropertyData         Porperty_data[]   @relation(name: "Porperty_dataToProperty")
+    amenities            PropertyAmenity[]
 
     @@map("properties")
 }
@@ -119,18 +118,27 @@ model Bidding {
 }
 
 model Ameneties {
-    id            String    @id @default(uuid())
+    id            String            @id @default(uuid())
     amenetiesName String
     count         Int?
     otherFeatures String?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
+    createdAt     DateTime          @default(now())
+    updatedAt     DateTime          @updatedAt
     url           String?
-    imageKey      String?   @default("NA")
-    Property      Property? @relation(name: "AmenetiesToProperty", fields: [propertyId], references: [id])
-    propertyId    String?
+    imageKey      String?           @default("NA")
+    properties    PropertyAmenity[]
 
     @@map("ameneties")
+}
+
+model PropertyAmenity {
+    propertyId String
+    amenityId  String
+
+    property Property  @relation(fields: [propertyId], references: [id])
+    amenity  Ameneties @relation(fields: [amenityId], references: [id])
+
+    @@id([propertyId, amenityId]) // Composite primary key
 }
 
 model preferences {

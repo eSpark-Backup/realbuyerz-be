@@ -1,7 +1,17 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Param, Post, Put, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -10,7 +20,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { EmailDto } from './dto/reset-email.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { CreateUserDocs, LoginUserDocs, SendEmailDocs, SendOtpDocs, VerifyOtpDocs } from '../utils/decorator/user.decorator';
+import {
+  CreateUserDocs,
+  LoginUserDocs,
+  SendEmailDocs,
+  SendOtpDocs,
+  VerifyOtpDocs,
+} from '../utils/decorator/user.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailLinkDto } from './dto/verify-email-link.dto';
 import { LinkEmailDto } from './dto/reset-link.dto';
@@ -23,11 +39,10 @@ import { UserId } from 'src/utils/decorator/userId.decorator';
 import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/utils/guard';
 
-
 @Controller('user')
 @ApiTags('User')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
   @Post('signup')
   @CreateUserDocs()
   async createUser(@Body() createUserDto: CreateUserDto) {
@@ -40,37 +55,58 @@ export class UserController {
     return this.userService.loginUser(loginUserDto);
   }
 
+  @Get('userProfile')
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  async getUserProfile(@UserId() userId: string) {
+    return this.userService.getUserProfile(userId);
+  }
 
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard)
   @Post('update')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(imageFileInterceptor)
-  async updateUser(@UserId() userId: string,
+  async updateUser(
+    @UserId() userId: string,
     @UploadedFiles()
     files: {
       image?: Express.Multer.File[];
     },
 
-
-    @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.userService.updateUser(userId, files, updateUserDto);
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const updatedUser = await this.userService.updateUser(
+      userId,
+      files,
+      updateUserDto,
+    );
     return updatedUser;
   }
 
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard)
   @Post('reset-password')
-  async resetPassword(@UserId() userId: string, @Body() resetPassword: ResetPasswordDto) {
-    const updatedUser = await this.userService.resetPassword(userId, resetPassword);
+  async resetPassword(
+    @UserId() userId: string,
+    @Body() resetPassword: ResetPasswordDto,
+  ) {
+    const updatedUser = await this.userService.resetPassword(
+      userId,
+      resetPassword,
+    );
     return updatedUser;
   }
 
-
- 
   @Put('password/:token')
-  async resetPasswordwithMail(@Param('token') token: string, @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto) {
-    const updatePassword = await this.userService.resetPasswordwithMail(token, resetPasswordwithMailDto);
+  async resetPasswordwithMail(
+    @Param('token') token: string,
+    @Body() resetPasswordwithMailDto: ResetPasswordwithMailDto,
+  ) {
+    const updatePassword = await this.userService.resetPasswordwithMail(
+      token,
+      resetPasswordwithMailDto,
+    );
     return updatePassword;
   }
 
@@ -78,33 +114,28 @@ export class UserController {
   @SendOtpDocs()
   async sendOtp(@Body() sendOtpDto: SendOtpDto) {
     const OTP = await this.userService.sendOtp(sendOtpDto.phoneNumber);
-    return OTP
+    return OTP;
   }
-
-
-
-
 
   @Post('password-reset-email-link')
   async resetPasswordEmail(@Body() LinkEmailDto: LinkEmailDto) {
-    const sendPwEmail = await this.userService.sendpasswordResetEmail(LinkEmailDto.to);
-    return sendPwEmail
+    const sendPwEmail = await this.userService.sendpasswordResetEmail(
+      LinkEmailDto.to,
+    );
+    return sendPwEmail;
   }
-
 
   @Post('verify-otp')
   @VerifyOtpDocs()
   async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
-
-      const verificationResult = await this.userService.verifyOtp(
-        verifyOtpDto.phoneNumber,
-        verifyOtpDto.otp,
-        verifyOtpDto.hash,
-
-      );
-      return verificationResult;
+    const verificationResult = await this.userService.verifyOtp(
+      verifyOtpDto.phoneNumber,
+      verifyOtpDto.otp,
+      verifyOtpDto.hash,
+    );
+    return verificationResult;
   }
-   // @Post('send-email')
+  // @Post('send-email')
   // @SendEmailDocs()
   // async sendEmail(@Body() emailDto: EmailDto) {
   //   try {
@@ -121,6 +152,4 @@ export class UserController {
   // async googleLogin(@Body('access_token') accessToken: string): Promise<{ token: string }> {
   //   return this.userService.googleLogin(accessToken);
   // }
-
-
 }

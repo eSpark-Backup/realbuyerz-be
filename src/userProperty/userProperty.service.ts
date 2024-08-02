@@ -21,33 +21,34 @@ export class UserPropertyService {
     }
 
     try {
-      const result = await this.prismaService.property.create({
-        data: {
-          user: { connect: { id: property.userId } },
-          propertyName: property.propertyName,
-          propertyType: property.propertyType,
-          subType: property.subType,
-          purpose: property.purpose,
-          propertyPrice: property.propertyPrice,
-          propertyArea: property.propertyArea,
-          propertyCity: property.propertyCity,
-          propertyBy: property.propertyBy,
-          propertyAddress: property.propertyAddress,
-          propertyZip: property.propertyZip,
-          propertyDescription: property.propertyDescription,
-          longitude: property.longitude,
-          latitude: property.latitude,
+      // const result = await this.prismaService.property.create({
+      //   data: {
+      //     user: { connect: { id: property.userId } },
+      //     propertyName: property.propertyName,
+      //     propertyType: property.propertyType,
+      //     subType: property.subType,
+      //     purpose: property.purpose,
+      //     propertyPrice: property.propertyPrice,
+      //     propertyArea: property.propertyArea,
+      //     propertyCity: property.propertyCity,
+      //     propertyBy: property.propertyBy,
+      //     propertyAddress: property.propertyAddress,
+      //     propertyZip: property.propertyZip,
+      //     propertyDescription: property.propertyDescription,
+      //     longitude: property.longitude,
+      //     latitude: property.latitude,
 
-          amenities: {
-            create: {
-              amenetiesName: JSON.stringify(property.amenitiesName),
-              count: property.count,
-              otherFeatures: JSON.stringify(property.otherFeatures),
-            },
-          },
-        } as Prisma.PropertyCreateInput,
-      });
+      //     amenities: {
+      //       create: {
+      //         amenetiesName: JSON.stringify(property.amenitiesName),
+      //         count: property.count,
+      //         otherFeatures: JSON.stringify(property.otherFeatures),
+      //       },
+      //     },
+      //   } as Prisma.PropertyCreateInput,
+      // });
 
+      const result = 0;
       if (result) {
         const propertyResponse = {
           action: 'create',
@@ -100,47 +101,47 @@ export class UserPropertyService {
         };
       }
 
-      const result = await this.prismaService.property.update({
-        where: { id: id },
-        data: {
-          propertyName: property.propertyName,
-          propertyType: property.propertyType,
-          subType: property.subType,
-          purpose: property.purpose,
-          propertyPrice: property.propertyPrice,
-          propertyArea: property.propertyArea,
-          propertyCity: property.propertyCity,
-          propertyAddress: property.propertyAddress,
-          propertyZip: property.propertyZip,
-          propertyDescription: property.propertyDescription,
-          longitude: property.longitude,
-          latitude: property.latitude,
-          propertyStatus: property.propertyStatus,
-        } as Prisma.PropertyUpdateInput,
-        select: {
-          id: true,
-          propertyName: true,
-          propertyType: true,
-          subType: true,
-          purpose: true,
-          propertyPrice: true,
-          propertyArea: true,
-          propertyCity: true,
-          propertyAddress: true,
-          propertyZip: true,
-          propertyDescription: true,
-          longitude: true,
-          latitude: true,
-          propertyStatus: true,
-          amenities: {
-            select: {
-              amenetiesName: true,
-              count: true,
-              otherFeatures: true,
-            },
-          },
-        },
-      });
+      // const result = await this.prismaService.property.update({
+      //   where: { id: id },
+      //   data: {
+      //     propertyName: property.propertyName,
+      //     propertyType: property.propertyType,
+      //     subType: property.subType,
+      //     purpose: property.purpose,
+      //     propertyPrice: property.propertyPrice,
+      //     propertyArea: property.propertyArea,
+      //     propertyCity: property.propertyCity,
+      //     propertyAddress: property.propertyAddress,
+      //     propertyZip: property.propertyZip,
+      //     propertyDescription: property.propertyDescription,
+      //     longitude: property.longitude,
+      //     latitude: property.latitude,
+      //     propertyStatus: property.propertyStatus,
+      //   } as Prisma.PropertyUpdateInput,
+      //   select: {
+      //     id: true,
+      //     propertyName: true,
+      //     propertyType: true,
+      //     purpose: true,
+      //     propertyPrice: true,
+      //     propertyArea: true,
+      //     propertyCity: true,
+      //     propertyAddress: true,
+      //     propertyZip: true,
+      //     propertyDescription: true,
+      //     longitude: true,
+      //     latitude: true,
+      //     propertyStatus: true,
+      //     amenities: {
+      //       select: {
+      //         amenetiesName: true,
+      //         count: true,
+      //         otherFeatures: true,
+      //       },
+      //     },
+      //   },
+      // });
+      const result = 0;
 
       if (result) {
         const propertyResponse = {
@@ -168,66 +169,61 @@ export class UserPropertyService {
   }
 
   async deleteProperty(id: string) {
-    try {
-      const findProperty = await this.prismaService.property.findUnique({
-        where: { id: id },
-      });
-
-      if (!findProperty) {
-        return {
-          success: false,
-          message: 'Failed to delete property.',
-          error: 'Property not found.',
-        };
-      }
-
-      const deleteAmeneties = await new Promise((resolve, reject) => {
-        this.prismaService.ameneties
-          .deleteMany({
-            where: { Property: { id: id } },
-          })
-          .then((result) => {
-            resolve(result);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-
-      if (!deleteAmeneties) {
-        return {
-          success: false,
-          message: 'Failed to delete property.',
-          error: 'Property deletion failed.',
-        };
-      }
-
-      const result = await this.prismaService.property.delete({
-        where: { id: id },
-      });
-
-      if (result) {
-        const propertyResponse = {
-          action: 'delete',
-          success: true,
-          message: 'Property deleted successfully',
-          data: result,
-        };
-
-        return propertyResponse;
-      } else {
-        return {
-          success: false,
-          message: 'Failed to delete property.',
-          error: 'Property deletion failed.',
-        };
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to delete property.',
-        error: error.message,
-      };
-    }
+    //   try {
+    //     const findProperty = await this.prismaService.property.findUnique({
+    //       where: { id: id },
+    //     });
+    //     if (!findProperty) {
+    //       return {
+    //         success: false,
+    //         message: 'Failed to delete property.',
+    //         error: 'Property not found.',
+    //       };
+    //     }
+    //     const deleteAmeneties = await new Promise((resolve, reject) => {
+    //       this.prismaService.ameneties
+    //         .deleteMany({
+    //           where: { properties: { : id } },
+    //         })
+    //         .then((result) => {
+    //           resolve(result);
+    //         })
+    //         .catch((error) => {
+    //           reject(error);
+    //         });
+    //     });
+    //     if (!deleteAmeneties) {
+    //       return {
+    //         success: false,
+    //         message: 'Failed to delete property.',
+    //         error: 'Property deletion failed.',
+    //       };
+    //     }
+    //     const result = await this.prismaService.property.delete({
+    //       where: { id: id },
+    //     });
+    //     if (result) {
+    //       const propertyResponse = {
+    //         action: 'delete',
+    //         success: true,
+    //         message: 'Property deleted successfully',
+    //         data: result,
+    //       };
+    //       return propertyResponse;
+    //     } else {
+    //       return {
+    //         success: false,
+    //         message: 'Failed to delete property.',
+    //         error: 'Property deletion failed.',
+    //       };
+    //     }
+    //   } catch (error) {
+    //     return {
+    //       success: false,
+    //       message: 'Failed to delete property.',
+    //       error: error.message,
+    //     };
+    //   }
+    // }
   }
 }

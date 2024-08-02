@@ -76,6 +76,7 @@ export class PropertyService {
         include: {
           amenities: true,
           PropertyData: true,
+          propertyType: true,
         },
       });
       const data = {
@@ -182,7 +183,9 @@ export class PropertyService {
           connect: { id: property.propertySubTypeId },
         },
         amenities: {
-          connect: amenitiesArray.map((id) => ({ id })),
+          create: amenitiesArray.map((id) => ({
+            amenity: { connect: { id } },
+          })),
         },
       };
 
@@ -282,9 +285,6 @@ export class PropertyService {
     if (property.propertyPrice) {
       property.propertyPrice = parseInt(property.propertyPrice);
     }
-    if (property.count) {
-      property.count = parseInt(property.count);
-    }
 
     if (property.propertyStatus) {
       property.propertyStatus = Boolean(property.propertyStatus);
@@ -311,6 +311,48 @@ export class PropertyService {
         );
       }
     }
+    let amenitiesArray: string[] = [];
+
+    // Check if `property.amenities` is a string or an array
+    if (typeof property.amenities === 'string') {
+      amenitiesArray = property.amenities
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+    } else if (Array.isArray(property.amenities)) {
+      amenitiesArray = property.amenities
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+    }
+    //findameneities with amenitie array
+    const amenities = await this.prismaService.ameneties.findMany({
+      where: {
+        id: {
+          in: amenitiesArray,
+        },
+      },
+    });
+    if (amenities.length !== amenitiesArray.length) {
+      return {
+        success: false,
+        message: 'Failed to update property.',
+        error: 'Amenities not found.',
+      };
+    }
+
+    if (property.propertySubTypeId) {
+      const propertySubType =
+        await this.prismaService.propertySubType.findUnique({
+          where: { id: property.propertySubTypeId },
+        });
+      if (!propertySubType) {
+        return {
+          success: false,
+          message: 'Failed to update property.',
+          error: 'Property Sub Type not found.',
+        };
+      }
+    }
 
     if (files.image) {
       const processedImages = await Promise.all(
@@ -319,15 +361,40 @@ export class PropertyService {
       try {
         const propert = await this.prismaService.property.findUnique({
           where: { id: property_id },
-          include: { amenities: true },
+          include: { amenities: true, propertyType: true },
         });
+
         if (propert) {
+          //delete all amenties from propert
+          await this.prismaService.propertyAmenity.deleteMany({
+            where: {
+              propertyId: property_id,
+              amenityId: {
+                in: propert.amenities.map((amenity) => amenity.amenityId),
+              },
+            },
+          });
+
+          //disconnect the subType from property
+          if (property.propertySubTypeId) {
+            await this.prismaService.property.update({
+              where: { id: property_id },
+              data: {
+                propertyType: {
+                  disconnect: { id: propert.propertyType.id },
+                },
+              },
+            });
+            propert.propertyTypeId = property.propertySubTypeId;
+          }
+
           const result = await this.prismaService.property.update({
             where: { id: property_id },
             data: {
               propertyName: property.propertyName,
-              propertyType: property.propertyType,
-              subType: property.subType,
+              propertyType: {
+                connect: { id: propert.propertyTypeId },
+              },
               purpose: property.purpose,
               propertyPrice: property.propertyPrice,
               propertyArea: property.propertyArea,
@@ -336,6 +403,11 @@ export class PropertyService {
               propertyZip: property.propertyAddress,
               propertyStatus: property.propertyStatus,
               propertyDescription: property.propertyDescription,
+              amenities: {
+                create: amenitiesArray.map((id) => ({
+                  amenity: { connect: { id } },
+                })),
+              },
               longitude: property.longitude,
               latitude: property.latitude,
             } as Prisma.PropertyUpdateInput,
@@ -343,7 +415,6 @@ export class PropertyService {
               id: true,
               propertyName: true,
               propertyType: true,
-              subType: true,
               purpose: true,
               propertyPrice: true,
               propertyArea: true,
@@ -351,6 +422,7 @@ export class PropertyService {
               propertyAddress: true,
               propertyZip: true,
               propertyStatus: true,
+              PropertyData: true,
               propertyDescription: true,
               longitude: true,
               latitude: true,
@@ -409,20 +481,49 @@ export class PropertyService {
           include: { amenities: true },
         });
         if (propert) {
+          //disconnect the subType from property
+          await this.prismaService.propertyAmenity.deleteMany({
+            where: {
+              propertyId: property_id,
+              amenityId: {
+                in: propert.amenities.map((amenity) => amenity.amenityId),
+              },
+            },
+          });
+
+          //disconnect the subType from property
+          if (property.propertySubTypeId) {
+            await this.prismaService.property.update({
+              where: { id: property_id },
+              data: {
+                propertyType: {
+                  disconnect: { id: propert.propertyTypeId },
+                },
+              },
+            });
+            propert.propertyTypeId = property.propertySubTypeId;
+          }
+
           const result = await this.prismaService.property.update({
             where: { id: property_id },
             data: {
               propertyName: property.propertyName,
-              propertyType: property.propertyType,
-              subType: property.subType,
+              propertyType: {
+                connect: { id: propert.propertyTypeId },
+              },
               purpose: property.purpose,
               propertyPrice: property.propertyPrice,
               propertyArea: property.propertyArea,
               propertyCity: property.propertyCity,
               propertyAddress: property.propertyAddress,
+              propertyZip: property.propertyAddress,
               propertyStatus: property.propertyStatus,
-              propertyZip: property.propertyZip,
               propertyDescription: property.propertyDescription,
+              amenities: {
+                create: amenitiesArray.map((id) => ({
+                  amenity: { connect: { id } },
+                })),
+              },
               longitude: property.longitude,
               latitude: property.latitude,
             } as Prisma.PropertyUpdateInput,
@@ -430,15 +531,15 @@ export class PropertyService {
               id: true,
               propertyName: true,
               propertyType: true,
-              subType: true,
               purpose: true,
               propertyPrice: true,
               propertyArea: true,
               propertyCity: true,
               propertyAddress: true,
               propertyZip: true,
-              propertyDescription: true,
               propertyStatus: true,
+              propertyDescription: true,
+              PropertyData: true,
               longitude: true,
               latitude: true,
               amenities: true,

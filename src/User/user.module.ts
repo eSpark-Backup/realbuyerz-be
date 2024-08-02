@@ -9,9 +9,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 @Module({
-  imports: [PrismaModule,
+  imports: [
+    PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.TOKEN_KEY || 'realbuyerzsecretkey',
@@ -19,9 +21,9 @@ import { JwtStrategy } from './jwt.strategy';
         expiresIn: process.env.TOKEN_EXPIRY || '1d',
       },
     }),
-  ], 
-  controllers: [UserController], 
-  providers: [UserService,PrismaService,JwtStrategy], 
-  exports: [UserService], 
+  ],
+  controllers: [UserController],
+  providers: [UserService, PrismaService, JwtStrategy, BackblazeService],
+  exports: [UserService],
 })
 export class UserModule {}
