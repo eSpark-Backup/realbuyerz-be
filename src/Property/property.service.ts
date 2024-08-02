@@ -203,6 +203,36 @@ export class PropertyService {
         .map((id) => id.trim())
         .filter((id) => id.length > 0);
     }
+    const amenities = await this.prismaService.ameneties.findMany({
+      where: {
+        id: {
+          in: amenitiesArray,
+        },
+      },
+    });
+    if (amenities.length !== amenitiesArray.length) {
+      return {
+        success: false,
+        message: 'Failed to Create property.',
+        action: 'Create Property',
+        error: 'Amenities not found.',
+      };
+    }
+
+    if (property.propertySubTypeId) {
+      const propertySubType =
+        await this.prismaService.propertySubType.findUnique({
+          where: { id: property.propertySubTypeId },
+        });
+      if (!propertySubType) {
+        return {
+          success: false,
+          message: 'Failed to Create property.',
+          error: 'Property Sub Type not found.',
+          action: 'Create Property',
+        };
+      }
+    }
 
     try {
       const propertyData: Prisma.PropertyCreateInput = {

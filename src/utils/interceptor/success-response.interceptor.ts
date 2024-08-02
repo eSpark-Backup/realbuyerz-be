@@ -14,21 +14,26 @@ export class SuccessResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data) => {
-        const action = data.hasOwnProperty('action') ? data.action : 'Success';
-        const message = data.hasOwnProperty('message') ? data.message : 'Success';
-        const success = data.hasOwnProperty('success') ? data.success : !!data.data;
+        const action = data?.action || 'Success';
+        const message = data?.message || 'Success';
+        const success =
+          data?.success !== undefined ? data.success : !!data?.data;
+        const error = data?.error || null;
 
         const modifiedResponse = generateResponse(
           action,
           message,
-          data.data ?? null,
-          'data'
+          data?.data ?? null,
+          'data',
         );
-        modifiedResponse.success = success;
 
-        return modifiedResponse;
+        // Manually add the error property
+        return {
+          ...modifiedResponse,
+          success: success,
+          error: error,
+        };
       }),
     );
   }
 }
-
