@@ -28,11 +28,22 @@ export class SuccessResponseInterceptor implements NestInterceptor {
         );
 
         // Manually add the error property
-        return {
+        let response = {
           ...modifiedResponse,
           success: success,
           error: error,
         };
+        if (error) {
+          response = {
+            ...modifiedResponse,
+            success: false,
+            error: error,
+          };
+          return response;
+        }
+        //remove the error from response object
+        delete response.error;
+        return response;
       }),
     );
   }

@@ -110,13 +110,13 @@ export class PropertyService {
           propertyType: true,
         },
       });
-      const modifiedProperties = properties.map((property) => ({
+      const items = properties.map((property) => ({
         ...property,
         amenities: property.amenities.map((amenity) => amenity.amenity),
       }));
 
       const data = {
-        modifiedProperties,
+        items,
         totalCount,
         currentPage: page,
         totalPages: Math.ceil(totalCount / pageSize),
@@ -737,7 +737,7 @@ export class PropertyService {
       },
       where,
     });
-    const modifiedProperties = properties.map((property) => ({
+    const items = properties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
@@ -745,7 +745,7 @@ export class PropertyService {
     const totalCount = await this.prismaService.property.count({ where });
 
     const data = {
-      modifiedProperties,
+      ...items,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
