@@ -103,8 +103,21 @@ export class PropertyController {
   @Roles('user')
   @Get('user')
   @ApiTags('property')
-  async findbyuserId(@UserId() user_id: string) {
-    return this.propertyService.findbyuserId(user_id);
+  async findbyuserId(
+    @UserId() user_id: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query() query: PropertyQueryDto,
+  ) {
+    const filters = {
+      purpose: query.purpose,
+      propertyType: query.propertyType,
+      subType: query.subType,
+      propertyCity: query.propertyCity,
+      propertyBy: query.propertyBy,
+      propertyId: query.propertyId,
+    };
+    return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
   }
 
   // @Roles('user')

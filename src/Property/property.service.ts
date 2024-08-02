@@ -61,18 +61,53 @@ export class PropertyService {
     };
   }
 
-  async findbyuserId(user_id: string) {
+  async findbyuserId(
+    user_id: string,
+    page = 1,
+    pageSize = 50,
+    filters?: {
+      purpose?: string;
+      propertyType?: string;
+      subType?: string;
+      propertyCity?: string;
+      propertyBy?: string;
+      propertyId?: string;
+    },
+  ) {
     try {
-      const totalCount = await this.prismaService.property.count({
-        where: {
-          userId: user_id,
-        },
-      });
+      const skip = (page - 1) * pageSize;
+      const where: any = {};
+      where.userId = user_id;
+
+      if (filters) {
+        if (filters.purpose) {
+          where.purpose = filters.purpose;
+        }
+
+        if (filters.propertyType) {
+          where.propertyType = filters.propertyType;
+        }
+
+        if (filters.subType) {
+          where.subType = filters.subType;
+        }
+
+        if (filters.propertyCity) {
+          where.propertyCity = filters.propertyCity;
+        }
+        if (filters.propertyBy) {
+          where.propertyBy = filters.propertyBy;
+        }
+        if (filters.propertyId) {
+          where.id = filters.propertyId;
+        }
+      }
+      const totalCount = await this.prismaService.property.count({});
 
       const properties = await this.prismaService.property.findMany({
-        where: {
-          userId: user_id,
-        },
+        where,
+        skip,
+        take: pageSize,
         include: {
           amenities: {
             select: {
@@ -91,6 +126,9 @@ export class PropertyService {
       const data = {
         modifiedProperties,
         totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
       };
       return {
         action: 'Get All',
