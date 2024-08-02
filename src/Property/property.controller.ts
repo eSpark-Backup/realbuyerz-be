@@ -111,10 +111,7 @@ export class PropertyController {
   ) {
     const filters = {
       purpose: query.purpose,
-      propertyType: query.propertyType,
-      subType: query.subType,
       propertyCity: query.propertyCity,
-      propertyBy: query.propertyBy,
       propertyId: query.propertyId,
     };
     return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
@@ -135,8 +132,6 @@ export class PropertyController {
   ) {
     const filters = {
       purpose: query.purpose,
-      propertyType: query.propertyType,
-      subType: query.subType,
       propertyCity: query.propertyCity,
       propertyBy: query.propertyBy,
       propertyId: query.propertyId,

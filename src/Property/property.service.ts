@@ -84,14 +84,6 @@ export class PropertyService {
           where.purpose = filters.purpose;
         }
 
-        if (filters.propertyType) {
-          where.propertyType = filters.propertyType;
-        }
-
-        if (filters.subType) {
-          where.subType = filters.subType;
-        }
-
         if (filters.propertyCity) {
           where.propertyCity = filters.propertyCity;
         }
@@ -692,20 +684,10 @@ export class PropertyService {
         where.purpose = filters.purpose;
       }
 
-      if (filters.propertyType) {
-        where.propertyType = filters.propertyType;
-      }
-
-      if (filters.subType) {
-        where.subType = filters.subType;
-      }
-
       if (filters.propertyCity) {
         where.propertyCity = filters.propertyCity;
       }
-      if (filters.propertyBy) {
-        where.propertyBy = filters.propertyBy;
-      }
+
       if (filters.propertyId) {
         where.id = filters.propertyId;
       }
