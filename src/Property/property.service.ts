@@ -745,7 +745,7 @@ export class PropertyService {
     const totalCount = await this.prismaService.property.count({ where });
 
     const data = {
-      ...items,
+      items,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
