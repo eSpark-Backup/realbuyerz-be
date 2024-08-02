@@ -74,13 +74,22 @@ export class PropertyService {
           userId: user_id,
         },
         include: {
-          amenities: true,
+          amenities: {
+            select: {
+              amenity: true, // Include only the name
+            },
+          },
           PropertyData: true,
           propertyType: true,
         },
       });
+      const modifiedProperties = properties.map((property) => ({
+        ...property,
+        amenities: property.amenities.map((amenity) => amenity.amenity),
+      }));
+
       const data = {
-        properties,
+        modifiedProperties,
         totalCount,
       };
       return {
@@ -668,17 +677,25 @@ export class PropertyService {
       skip,
       take: pageSize,
       include: {
-        amenities: true,
+        amenities: {
+          select: {
+            amenity: true, // Include only the name
+          },
+        },
         PropertyData: true,
         propertyType: true,
       },
       where,
     });
+    const modifiedProperties = properties.map((property) => ({
+      ...property,
+      amenities: property.amenities.map((amenity) => amenity.amenity),
+    }));
 
     const totalCount = await this.prismaService.property.count({ where });
 
     const data = {
-      properties,
+      modifiedProperties,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
