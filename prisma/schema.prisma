@@ -135,8 +135,8 @@ model PropertyAmenity {
     propertyId String
     amenityId  String
 
-    property Property  @relation(fields: [propertyId], references: [id])
-    amenity  Ameneties @relation(fields: [amenityId], references: [id])
+    property Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+    amenity  Ameneties @relation(fields: [amenityId], references: [id], onDelete: Cascade)
 
     @@id([propertyId, amenityId]) // Composite primary key
 }
