@@ -569,11 +569,15 @@ export class UserService {
       let updatedUserDto: any = { ...updateUserDto };
 
       if (files.image) {
-        const fileName = path.basename(
-          new URL(existingUser.profileImage).pathname,
-        );
-        await this.backblazeService.deleteFile(fileName, existingUser.imageKey);
-
+        if (existingUser.profileImage) {
+          const fileName = path.basename(
+            new URL(existingUser.profileImage).pathname,
+          );
+          await this.backblazeService.deleteFile(
+            fileName,
+            existingUser.imageKey,
+          );
+        }
         const processedImages = await Promise.all(
           files.image.map((file) => this.processSingleImage(file)),
         );
