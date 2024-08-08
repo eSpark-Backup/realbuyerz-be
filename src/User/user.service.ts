@@ -548,7 +548,6 @@ export class UserService {
       const allowedFields = [
         'firstName',
         'lastName',
-        'email',
         'landlineNumber',
         'country',
         'address',
@@ -556,6 +555,7 @@ export class UserService {
         'whatsapp',
         'socialId',
         'isVerified',
+        'city',
         'profileVisibility',
       ];
       const invalidFields = Object.keys(updateUserDto).filter(
@@ -610,6 +610,7 @@ export class UserService {
             whatsapp: true,
             country: true,
             address: true,
+            city: true,
             isVerified: true,
             socialId: true,
             profileImage: true,
@@ -643,6 +644,7 @@ export class UserService {
             whatsapp: true,
             country: true,
             address: true,
+            city: true,
             isVerified: true,
             socialId: true,
             role: true,

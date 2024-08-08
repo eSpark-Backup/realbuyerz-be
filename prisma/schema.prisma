@@ -60,6 +60,7 @@ model User {
     landlineNumber     String?
     whatsapp           String?
     country            String?
+    city               String?
     address            String?
     password           String?
     isVerified         Boolean      @default(false)
