@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserPropertyDto } from './dto/create-property.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { updateUserPropertyDto } from './dto/update-property.dto';
 
 @Injectable()
 export class UserPropertyService {
@@ -112,15 +113,13 @@ export class UserPropertyService {
     }
   }
 
-  async updateProperty(updateProperty: any, id: string) {
+  async updateProperty(updateProperty: updateUserPropertyDto, id: string) {
     const property = { ...updateProperty };
 
     if (property.propertyPrice) {
       property.propertyPrice = parseInt(property.propertyPrice);
     }
-    if (property.count) {
-      property.count = parseInt(property.count);
-    }
+
     if (property.propertyStatus) {
       property.propertyStatus = Boolean(property.propertyStatus);
     }
@@ -128,7 +127,7 @@ export class UserPropertyService {
     try {
       const findProperty = await this.prismaService.property.findUnique({
         where: { id: id },
-        include: { amenities: true },
+        include: { amenities: true, propertyType: true },
       });
 
       if (!findProperty) {
@@ -138,6 +137,114 @@ export class UserPropertyService {
           error: 'Property not found.',
         };
       }
+
+      let amenitiesArray: string[] = [];
+
+      // Check if `property.amenities` is a string or an array
+      if (typeof property.amenities === 'string') {
+        amenitiesArray = property.amenities
+          .split(',')
+          .map((id) => id.trim())
+          .filter((id) => id.length > 0);
+      } else if (Array.isArray(property.amenities)) {
+        amenitiesArray = property.amenities
+          .map((id) => id.trim())
+          .filter((id) => id.length > 0);
+      }
+      //findameneities with amenitie array
+      const amenities = await this.prismaService.ameneties.findMany({
+        where: {
+          id: {
+            in: amenitiesArray,
+          },
+        },
+      });
+      if (amenities.length !== amenitiesArray.length) {
+        return {
+          success: false,
+          message: 'Failed to update property.',
+          error: 'Amenities not found.',
+        };
+      }
+
+      if (property.propertySubTypeId) {
+        const propertySubType =
+          await this.prismaService.propertySubType.findUnique({
+            where: { id: property.propertySubTypeId },
+          });
+        if (!propertySubType) {
+          return {
+            success: false,
+            message: 'Failed to update property.',
+            error: 'Property Sub Type not found.',
+          };
+        }
+      }
+
+      //disconnect the subType from property
+      await this.prismaService.propertyAmenity.deleteMany({
+        where: {
+          propertyId: id,
+          amenityId: {
+            in: findProperty.amenities.map((amenity) => amenity.amenityId),
+          },
+        },
+      });
+
+      //disconnect the subType from property
+      if (property.propertySubTypeId) {
+        await this.prismaService.property.update({
+          where: { id: id },
+          data: {
+            propertyType: {
+              disconnect: { id: findProperty.propertyTypeId },
+            },
+          },
+        });
+        findProperty.propertyTypeId = property.propertySubTypeId;
+      }
+
+      const result = await this.prismaService.property.update({
+        where: { id: id },
+        data: {
+          propertyName: property.propertyName,
+          propertyType: {
+            connect: { id: findProperty.propertyTypeId },
+          },
+          purpose: property.purpose,
+          propertyPrice: property.propertyPrice,
+          propertyArea: property.property_area,
+          propertyCity: property.propertyCity,
+          propertyAddress: property.propertyAddress,
+          propertyZip: property.propertyAddress,
+          propertyStatus: property.propertyStatus,
+          propertyDescription: property.propertyDescription,
+          amenities: {
+            create: amenitiesArray.map((id) => ({
+              amenity: { connect: { id } },
+            })),
+          },
+          longitude: property.longitude,
+          latitude: property.latitude,
+        } as Prisma.PropertyUpdateInput,
+        select: {
+          id: true,
+          propertyName: true,
+          propertyType: true,
+          purpose: true,
+          propertyPrice: true,
+          propertyArea: true,
+          propertyCity: true,
+          propertyAddress: true,
+          propertyZip: true,
+          propertyStatus: true,
+          propertyDescription: true,
+          PropertyData: true,
+          longitude: true,
+          latitude: true,
+          amenities: true,
+        },
+      });
 
       // const result = await this.prismaService.property.update({
       //   where: { id: id },
@@ -179,7 +286,6 @@ export class UserPropertyService {
       //     },
       //   },
       // });
-      const result = 0;
 
       if (result) {
         const propertyResponse = {
@@ -207,61 +313,42 @@ export class UserPropertyService {
   }
 
   async deleteProperty(id: string) {
-    //   try {
-    //     const findProperty = await this.prismaService.property.findUnique({
-    //       where: { id: id },
-    //     });
-    //     if (!findProperty) {
-    //       return {
-    //         success: false,
-    //         message: 'Failed to delete property.',
-    //         error: 'Property not found.',
-    //       };
-    //     }
-    //     const deleteAmeneties = await new Promise((resolve, reject) => {
-    //       this.prismaService.ameneties
-    //         .deleteMany({
-    //           where: { properties: { : id } },
-    //         })
-    //         .then((result) => {
-    //           resolve(result);
-    //         })
-    //         .catch((error) => {
-    //           reject(error);
-    //         });
-    //     });
-    //     if (!deleteAmeneties) {
-    //       return {
-    //         success: false,
-    //         message: 'Failed to delete property.',
-    //         error: 'Property deletion failed.',
-    //       };
-    //     }
-    //     const result = await this.prismaService.property.delete({
-    //       where: { id: id },
-    //     });
-    //     if (result) {
-    //       const propertyResponse = {
-    //         action: 'delete',
-    //         success: true,
-    //         message: 'Property deleted successfully',
-    //         data: result,
-    //       };
-    //       return propertyResponse;
-    //     } else {
-    //       return {
-    //         success: false,
-    //         message: 'Failed to delete property.',
-    //         error: 'Property deletion failed.',
-    //       };
-    //     }
-    //   } catch (error) {
-    //     return {
-    //       success: false,
-    //       message: 'Failed to delete property.',
-    //       error: error.message,
-    //     };
-    //   }
-    // }
+    try {
+      const findProperty = await this.prismaService.property.findUnique({
+        where: { id: id },
+      });
+      if (!findProperty) {
+        return {
+          success: false,
+          message: 'Failed to delete property.',
+          error: 'Property not found.',
+        };
+      }
+      const result = await this.prismaService.property.delete({
+        where: { id: id },
+      });
+
+      if (result) {
+        const propertyResponse = {
+          action: 'delete',
+          success: true,
+          message: 'Property deleted successfully',
+          data: result,
+        };
+        return propertyResponse;
+      } else {
+        return {
+          success: false,
+          message: 'Failed to delete property.',
+          error: 'Property deletion failed.',
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to delete property.',
+        error: error.message,
+      };
+    }
   }
 }
