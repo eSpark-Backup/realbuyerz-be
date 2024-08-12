@@ -41,7 +41,7 @@ export class UserPropertyController {
   }
 
   @Roles('user')
-  @Put(':id')
+  @Put('/:id')
   async updateProperty(
     @Body() updateProperty: updateUserPropertyDto,
     @Param('id') id: string,
@@ -54,7 +54,7 @@ export class UserPropertyController {
   }
 
   @Roles('user')
-  @Delete(':id')
+  @Delete('/:id')
   async deleteProperty(@Param('id') id: string) {
     const result = await this.userPropertyService.deleteProperty(id);
     return result;
