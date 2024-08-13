@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -100,7 +101,7 @@ export class PropertyController {
     },
     badresponse: { status: 400, description: 'Properties Not Found' },
   })
-  @Roles('user')
+  @Roles('agent')
   @Get('user')
   @ApiTags('property')
   async findbyuserId(
@@ -113,8 +114,16 @@ export class PropertyController {
       purpose: query.purpose,
       propertyCity: query.propertyCity,
       propertyId: query.propertyId,
+      propertyType: query.propertyType,
+      subType: query.subType,
     };
     return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
+  }
+
+  @Delete('/:id')
+  async deleteProperty(@Param('id') id: string, @UserId() user_id: string) {
+    const result = await this.propertyService.deleteProperty(id, user_id);
+    return result;
   }
 
   // @Roles('user')
@@ -133,8 +142,9 @@ export class PropertyController {
     const filters = {
       purpose: query.purpose,
       propertyCity: query.propertyCity,
-      propertyBy: query.propertyBy,
       propertyId: query.propertyId,
+      propertyType: query.propertyType,
+      subType: query.subType,
     };
 
     return this.propertyService.findAll(page, pageSize, filters);

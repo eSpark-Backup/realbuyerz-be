@@ -60,6 +60,49 @@ export class PropertyService {
       uploadResult,
     };
   }
+  async deleteProperty(propertyId: string, userId: string) {
+    try {
+      const findProperty = await this.prismaService.property.findUnique({
+        where: { id: propertyId },
+        select: { userId: true },
+      });
+      if (!findProperty) {
+        return {
+          action: 'Delete Property',
+          message: 'Property not found',
+        };
+      }
+      if (findProperty.userId !== userId) {
+        return {
+          action: 'Delete Property',
+          message: 'You are not authorized to delete this property',
+        };
+      }
+      await this.prismaService.porperty_data.deleteMany({
+        where: {
+          propertyId: propertyId,
+        },
+      });
+
+      await this.prismaService.property.update({
+        where: { id: propertyId },
+        data: {
+          amenities: { set: [] }, // Disconnect amenities
+          propertyType: { disconnect: true }, // Disconnect propertyType
+        },
+      });
+      await this.prismaService.property.delete({
+        where: {
+          id: propertyId,
+        },
+      });
+
+      return {
+        action: 'Delete Property',
+        message: 'Property Deleted Successfully',
+      };
+    } catch (error) {}
+  }
 
   async findbyuserId(
     user_id: string,
@@ -74,68 +117,83 @@ export class PropertyService {
       propertyId?: string;
     },
   ) {
-    try {
-      const skip = (page - 1) * pageSize;
-      const where: any = {};
-      where.userId = user_id;
+    const skip = (page - 1) * pageSize;
 
-      if (filters) {
-        if (filters.purpose) {
-          where.purpose = filters.purpose;
-        }
+    const where: any = {};
 
-        if (filters.propertyCity) {
-          where.propertyCity = filters.propertyCity;
-        }
-        if (filters.propertyBy) {
-          where.propertyBy = filters.propertyBy;
-        }
-        if (filters.propertyId) {
-          where.id = filters.propertyId;
-        }
+    if (filters) {
+      if (filters.purpose) {
+        where.purpose = filters.purpose;
       }
-      const totalCount = await this.prismaService.property.count({});
 
-      const properties = await this.prismaService.property.findMany({
-        where,
-        skip,
-        take: pageSize,
-        include: {
-          amenities: {
-            select: {
-              amenity: true, // Include only the name
-            },
+      if (filters.propertyCity) {
+        where.propertyCity = filters.propertyCity;
+      }
+
+      if (filters.propertyId) {
+        where.id = filters.propertyId;
+      }
+
+      if (filters.propertyType) {
+        where.propertyType = {
+          propertyType: {
+            typeName: filters.propertyType,
           },
-          PropertyData: true,
-          propertyType: true,
-        },
-      });
-      const items = properties.map((property) => ({
-        ...property,
-        amenities: property.amenities.map((amenity) => amenity.amenity),
-      }));
+        };
+      }
 
-      const data = {
-        items,
-        totalCount,
-        currentPage: page,
-        totalPages: Math.ceil(totalCount / pageSize),
-        itemsPerPage: pageSize,
-      };
-      return {
-        action: 'Get All',
-        message: 'All Properties of User',
-        data: data,
-      };
-    } catch (error) {
-      console.error('Error finding properties by user ID:', error.message);
-      return {
-        message: 'Failed to find properties by user ID',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: error.message,
-      };
+      if (filters.subType) {
+        where.propertyType = {
+          ...where.propertyType,
+          subTypeName: filters.subType,
+        };
+      }
     }
+    where.userId = user_id;
+
+    const totalCount = await this.prismaService.property.count({});
+
+    const properties = await this.prismaService.property.findMany({
+      where,
+      skip,
+      take: pageSize,
+      include: {
+        amenities: {
+          select: {
+            amenity: true, // Include only the name
+          },
+        },
+        PropertyData: true,
+        propertyType: true,
+      },
+    });
+    const items = properties.map((property) => ({
+      ...property,
+      amenities: property.amenities.map((amenity) => amenity.amenity),
+    }));
+
+    const data = {
+      items,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      itemsPerPage: pageSize,
+    };
+    return {
+      action: 'Get All',
+      message: 'All Properties of User',
+      data: data,
+    };
   }
+  catch(error) {
+    console.error('Error finding properties by user ID:', error.message);
+    return {
+      message: 'Failed to find properties by user ID',
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      error: error.message,
+    };
+  }
+
   async createPropertyData(propertyData: PropertyDataDTO) {
     try {
       const result = await this.prismaService.porperty_data.create({
@@ -721,7 +779,23 @@ export class PropertyService {
       if (filters.propertyId) {
         where.id = filters.propertyId;
       }
+
+      if (filters.propertyType) {
+        where.propertyType = {
+          propertyType: {
+            typeName: filters.propertyType,
+          },
+        };
+      }
+
+      if (filters.subType) {
+        where.propertyType = {
+          ...where.propertyType,
+          subTypeName: filters.subType,
+        };
+      }
     }
+    where.propertyBy = 'user';
 
     const properties = await this.prismaService.property.findMany({
       skip,
@@ -732,11 +806,15 @@ export class PropertyService {
             amenity: true, // Include only the name
           },
         },
-        PropertyData: true,
-        propertyType: true,
+        propertyType: {
+          include: {
+            propertyType: true, // Include the related PropertyType
+          },
+        },
       },
       where,
     });
+
     const items = properties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),

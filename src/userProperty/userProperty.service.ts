@@ -112,6 +112,173 @@ export class UserPropertyService {
       };
     }
   }
+  async findAll(
+    page = 1,
+    pageSize = 50,
+    filters?: {
+      purpose?: string;
+      propertyType?: string;
+      subType?: string;
+      propertyCity?: string;
+      propertyId?: string;
+    },
+  ) {
+    const skip = (page - 1) * pageSize;
+
+    const where: any = {};
+
+    if (filters) {
+      if (filters.purpose) {
+        where.purpose = filters.purpose;
+      }
+
+      if (filters.propertyCity) {
+        where.propertyCity = filters.propertyCity;
+      }
+
+      if (filters.propertyId) {
+        where.id = filters.propertyId;
+      }
+
+      if (filters.propertyType) {
+        where.propertyType = {
+          propertyType: {
+            typeName: filters.propertyType,
+          },
+        };
+      }
+
+      if (filters.subType) {
+        where.propertyType = {
+          ...where.propertyType,
+          subTypeName: filters.subType,
+        };
+      }
+    }
+    where.propertyBy = 'agent';
+
+    const properties = await this.prismaService.property.findMany({
+      skip,
+      take: pageSize,
+      include: {
+        amenities: {
+          select: {
+            amenity: true, // Include only the name
+          },
+        },
+        PropertyData: true,
+        propertyType: {
+          include: {
+            propertyType: true, // Include the related PropertyType
+          },
+        },
+      },
+      where,
+    });
+
+    const items = properties.map((property) => ({
+      ...property,
+      amenities: property.amenities.map((amenity) => amenity.amenity),
+    }));
+
+    const totalCount = await this.prismaService.property.count({ where });
+
+    const data = {
+      items,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      itemsPerPage: pageSize,
+    };
+
+    return {
+      action: 'Find All Properties',
+      message: 'Properties Found',
+      data,
+    };
+  }
+
+  async findbyuserId(
+    user_id: string,
+    page = 1,
+    pageSize = 50,
+    filters?: {
+      purpose?: string;
+      propertyType?: string;
+      subType?: string;
+      propertyCity?: string;
+      propertyBy?: string;
+      propertyId?: string;
+    },
+  ) {
+    const skip = (page - 1) * pageSize;
+
+    const where: any = {};
+
+    if (filters) {
+      if (filters.purpose) {
+        where.purpose = filters.purpose;
+      }
+
+      if (filters.propertyCity) {
+        where.propertyCity = filters.propertyCity;
+      }
+
+      if (filters.propertyId) {
+        where.id = filters.propertyId;
+      }
+
+      if (filters.propertyType) {
+        where.propertyType = {
+          propertyType: {
+            typeName: filters.propertyType,
+          },
+        };
+      }
+
+      if (filters.subType) {
+        where.propertyType = {
+          ...where.propertyType,
+          subTypeName: filters.subType,
+        };
+      }
+    }
+    where.userId = user_id;
+
+    const totalCount = await this.prismaService.property.count({});
+
+    const properties = await this.prismaService.property.findMany({
+      where,
+      skip,
+      take: pageSize,
+      include: {
+        amenities: {
+          select: {
+            amenity: true, // Include only the name
+          },
+        },
+        PropertyData: true,
+        propertyType: true,
+      },
+    });
+    const items = properties.map((property) => ({
+      ...property,
+      amenities: property.amenities.map((amenity) => amenity.amenity),
+    }));
+
+    const data = {
+      items,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      itemsPerPage: pageSize,
+    };
+    return {
+      action: 'Get All',
+      message: 'All Properties of User',
+      data: data,
+    };
+  }
 
   async updateProperty(updateProperty: updateUserPropertyDto, id: string) {
     const property = { ...updateProperty };
@@ -312,41 +479,46 @@ export class UserPropertyService {
     }
   }
 
-  async deleteProperty(id: string) {
+  async deleteProperty(propertyId: string, userId: string) {
     try {
       const findProperty = await this.prismaService.property.findUnique({
-        where: { id: id },
+        where: { id: propertyId },
+        select: { userId: true },
       });
       if (!findProperty) {
         return {
-          success: false,
-          message: 'Failed to delete property.',
-          error: 'Property not found.',
+          action: 'Delete Property',
+          message: 'Property not found',
         };
       }
-      const result = await this.prismaService.property.delete({
-        where: { id: id },
+      if (findProperty.userId !== userId) {
+        return {
+          action: 'Delete Property',
+          message: 'You are not authorized to delete this property',
+        };
+      }
+
+      await this.prismaService.property.update({
+        where: { id: propertyId },
+        data: {
+          amenities: { set: [] }, // Disconnect amenities
+          propertyType: { disconnect: true }, // Disconnect propertyType
+        },
+      });
+      await this.prismaService.property.delete({
+        where: {
+          id: propertyId,
+        },
       });
 
-      if (result) {
-        const propertyResponse = {
-          action: 'delete',
-          success: true,
-          message: 'Property deleted successfully',
-          data: result,
-        };
-        return propertyResponse;
-      } else {
-        return {
-          success: false,
-          message: 'Failed to delete property.',
-          error: 'Property deletion failed.',
-        };
-      }
+      return {
+        action: 'Delete Property',
+        message: 'Property Deleted Successfully',
+      };
     } catch (error) {
       return {
-        success: false,
-        message: 'Failed to delete property.',
+        action: 'Delete Property',
+        message: 'Failed to delete property',
         error: error.message,
       };
     }
