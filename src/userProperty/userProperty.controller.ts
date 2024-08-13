@@ -37,7 +37,6 @@ export class UserPropertyController {
   constructor(private readonly userPropertyService: UserPropertyService) {}
   @Roles('user')
   @Post()
-  @ApiTags('User Request Property')
   async createProperty(
     @UserId() userId: string,
     @Body() createProperty: CreateUserPropertyDto,
@@ -65,17 +64,16 @@ export class UserPropertyController {
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
-    summary: 'Get all properties of Agent',
+    summary: 'Get all properties of User',
     type: null,
     goodResponse: {
       status: 201,
-      description: 'Find All Properties listed by Agent',
+      description: 'Find All Properties listed by User',
     },
     badresponse: { status: 400, description: 'Properties Not Found' },
   })
   @Roles('user')
   @Get('user')
-  @ApiTags('property')
   async findbyuserId(
     @UserId() user_id: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

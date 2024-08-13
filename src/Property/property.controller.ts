@@ -102,7 +102,7 @@ export class PropertyController {
     badresponse: { status: 400, description: 'Properties Not Found' },
   })
   @Roles('agent')
-  @Get('user')
+  @Get('agent')
   @ApiTags('property')
   async findbyuserId(
     @UserId() user_id: string,
