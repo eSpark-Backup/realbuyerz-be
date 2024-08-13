@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
   ValidateNested,
   IsUUID,
+  IsUrl,
 } from 'class-validator';
 
 class AmenityDto {
@@ -31,12 +32,7 @@ export class CreateBidPropertyDto {
   @IsNotEmpty({ message: 'Property name cannot be empty' })
   readonly propertyName: string;
 
-  userId: string;
-
-  @ApiProperty({ type: String, example: 'UUID' })
-  @IsUUID()
-  @IsNotEmpty()
-  readonly propertyTypeId: string;
+  userId: any;
 
   readonly propertyBy: string;
 
@@ -123,18 +119,25 @@ export class CreateBidPropertyDto {
     type: 'array',
     items: {
       type: 'string',
+      format: 'url',
     },
     example: [
-      'video.com',
-      'youtube.com',
-      'video2/youtube.com',
-      'video3/youtube.com',
-      'video4/youtube.com',
+      'https://www.youtube.com/watch?v=yourvideo1',
+      'https://www.youtube.com/watch?v=yourvideo2',
     ],
     required: false,
   })
+  @IsString({ each: true })
+  @IsUrl({}, { each: true })
   @IsOptional()
-  readonly video: any[];
+  readonly video?: any[];
+  @ApiProperty({
+    type: 'string',
+    example: 'existing-amenity-id-1,existing-amenity-id-2',
+    required: false,
+  })
+  @IsOptional()
+  readonly amenities?: string | string[];
 
   @ApiProperty({
     type: Boolean,
@@ -148,20 +151,7 @@ export class CreateBidPropertyDto {
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
   readonly propertyStatus: boolean;
 
-  @ApiProperty({ type: String, example: 'Swimming Pool ' })
-  @IsString()
-  @IsOptional()
-  readonly amenitiesName: string;
-
-  @ApiProperty({ example: '1' })
-  @IsString()
-  @IsOptional()
-  readonly count: any;
-
-  @ApiProperty({ type: String, example: 'Waterfall ' })
-  @IsString()
-  @IsOptional()
-  readonly otherFeatures: string;
+  imageKey?: string;
 
   @ApiProperty({ type: String, example: 1 })
   @IsNotEmpty({ message: 'User Property ID cannot be empty' })
