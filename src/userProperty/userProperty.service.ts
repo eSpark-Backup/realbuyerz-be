@@ -498,11 +498,16 @@ export class UserPropertyService {
         };
       }
 
+      await this.prismaService.propertyAmenity.deleteMany({
+        where: {
+          propertyId: propertyId,
+        },
+      });
+
       await this.prismaService.property.update({
         where: { id: propertyId },
         data: {
-          amenities: { set: [] }, // Disconnect amenities
-          propertyType: { disconnect: true }, // Disconnect propertyType
+          propertyType: { disconnect: true },
         },
       });
       await this.prismaService.property.delete({
@@ -512,6 +517,7 @@ export class UserPropertyService {
       });
 
       return {
+        status: true,
         action: 'Delete Property',
         message: 'Property Deleted Successfully',
       };

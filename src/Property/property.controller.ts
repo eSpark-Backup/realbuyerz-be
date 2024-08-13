@@ -121,6 +121,9 @@ export class PropertyController {
   }
 
   @Delete('/:id')
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles('agent')
   async deleteProperty(@Param('id') id: string, @UserId() user_id: string) {
     const result = await this.propertyService.deleteProperty(id, user_id);
     return result;
