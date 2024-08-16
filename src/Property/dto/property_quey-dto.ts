@@ -68,5 +68,5 @@ export class PropertyQueryDto {
   })
   @IsOptional()
   @IsString({ message: 'Get Agent Proposals' })
-  readonly proposals?: string;
+  readonly proposals?: boolean;
 }

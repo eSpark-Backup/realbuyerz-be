@@ -126,7 +126,7 @@ export class PropertyService {
       propertyCity?: string;
       propertyBy?: string;
       propertyId?: string;
-      proposals?: string;
+      proposals?: boolean;
     },
   ) {
     const skip = (page - 1) * pageSize;
