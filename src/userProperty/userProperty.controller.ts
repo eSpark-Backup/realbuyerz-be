@@ -27,14 +27,16 @@ import { UserId } from 'src/utils/decorator/userId.decorator';
 import { updateUserPropertyDto } from './dto/update-property.dto';
 import { PropertyQueryDto } from './dto/property_quey-dto';
 import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
+import { UserRoleGuard } from 'src/utils/guard/user.guard';
 
 @Controller('userProperty')
-@ApiBearerAuth()
 @ApiTags('User Property Proposals')
-@ApiBearerAuth('jwt')
-@UseGuards(JwtAuthGuard, RoleGuard)
 export class UserPropertyController {
   constructor(private readonly userPropertyService: UserPropertyService) {}
+
+  @ApiBearerAuth()
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
   @Post()
   async createProperty(
@@ -48,6 +50,9 @@ export class UserPropertyController {
     return result;
   }
 
+  @ApiBearerAuth()
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
   @Put('/:id')
   async updateProperty(
@@ -62,7 +67,7 @@ export class UserPropertyController {
   }
 
   @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
   @swaggerDocs({
     summary: 'Get all properties of User',
     type: null,
@@ -113,6 +118,9 @@ export class UserPropertyController {
     return this.userPropertyService.findAll(page, pageSize, filters);
   }
 
+  @ApiBearerAuth()
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
   @Delete('/:id')
   async deleteProperty(@Param('id') id: string, @UserId() userId: string) {

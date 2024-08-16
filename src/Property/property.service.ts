@@ -126,6 +126,7 @@ export class PropertyService {
       propertyCity?: string;
       propertyBy?: string;
       propertyId?: string;
+      proposals?: string;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -160,24 +161,130 @@ export class PropertyService {
         };
       }
     }
+
     where.userId = user_id;
-
-    const totalCount = await this.prismaService.property.count({});
-
-    const properties = await this.prismaService.property.findMany({
-      where,
-      skip,
-      take: pageSize,
-      include: {
-        amenities: {
-          select: {
-            amenity: true, // Include only the name
-          },
-        },
-        PropertyData: true,
-        propertyType: true,
+    const agentPropertyIds = await this.prismaService.bidding.findMany({
+      select: {
+        agentPropertyId: true,
       },
     });
+
+    const AgentBiddingPropertyIds = agentPropertyIds.map(
+      (bid) => bid.agentPropertyId,
+    );
+
+    if (String(filters.proposals) == 'true') {
+      //from string to bool
+
+      const whereCondition = {
+        AND: [
+          where,
+          {
+            id: {
+              in: AgentBiddingPropertyIds,
+            },
+          },
+        ],
+      };
+      const [properties, totalCount] = await Promise.all([
+        this.prismaService.property.findMany({
+          skip,
+          take: pageSize,
+          include: {
+            amenities: {
+              select: {
+                amenity: true,
+              },
+            },
+            PropertyData: true,
+            propertyType: {
+              select: {
+                id: true,
+                subTypeName: true,
+                url: true,
+                imageKey: true,
+                propertyType: {
+                  select: {
+                    id: true,
+                    typeName: true,
+                    url: true,
+                    imageKey: true,
+                  },
+                },
+              },
+            },
+          },
+          where: whereCondition,
+        }),
+        this.prismaService.property.count({
+          where: whereCondition,
+        }),
+      ]);
+
+      const items = properties.map((property) => ({
+        ...property,
+        amenities: property.amenities.map((amenity) => amenity.amenity),
+      }));
+
+      const data = {
+        items,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
+      };
+      return {
+        action: 'Get All',
+        message: 'All Properties of User',
+        data: data,
+      };
+    }
+
+    const whereCondition = {
+      AND: [
+        where,
+        {
+          id: {
+            notIn: AgentBiddingPropertyIds,
+          },
+        },
+      ],
+    };
+    const [properties, totalCount] = await Promise.all([
+      this.prismaService.property.findMany({
+        skip,
+        take: pageSize,
+        include: {
+          amenities: {
+            select: {
+              amenity: true,
+            },
+          },
+          PropertyData: true,
+          propertyType: {
+            select: {
+              id: true,
+              subTypeName: true,
+              url: true,
+              imageKey: true,
+              propertyType: {
+                select: {
+                  id: true,
+                  typeName: true,
+                  url: true,
+                  imageKey: true,
+                },
+              },
+            },
+          },
+        },
+        where: whereCondition,
+      }),
+      this.prismaService.property.count({
+        where: whereCondition,
+      }),
+    ]);
+
     const items = properties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),

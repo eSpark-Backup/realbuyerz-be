@@ -125,6 +125,16 @@ export class UserPropertyService {
   ) {
     const skip = (page - 1) * pageSize;
 
+    const agentPropertyIds = await this.prismaService.bidding.findMany({
+      select: {
+        agentPropertyId: true,
+      },
+    });
+
+    const excludedAgentPropertyIds = agentPropertyIds.map(
+      (bid) => bid.agentPropertyId,
+    );
+
     const where: any = {};
 
     if (filters) {
@@ -157,31 +167,45 @@ export class UserPropertyService {
     }
     where.propertyBy = 'agent';
 
-    const properties = await this.prismaService.property.findMany({
-      skip,
-      take: pageSize,
-      include: {
-        amenities: {
-          select: {
-            amenity: true, // Include only the name
+    const whereCondition = {
+      AND: [
+        where,
+        {
+          id: {
+            notIn: excludedAgentPropertyIds,
           },
         },
-        PropertyData: true,
-        propertyType: {
-          include: {
-            propertyType: true, // Include the related PropertyType
+      ],
+    };
+
+    const [properties, totalCount] = await Promise.all([
+      this.prismaService.property.findMany({
+        skip,
+        take: pageSize,
+        include: {
+          amenities: {
+            select: {
+              amenity: true,
+            },
+          },
+          PropertyData: true,
+          propertyType: {
+            include: {
+              propertyType: true,
+            },
           },
         },
-      },
-      where,
-    });
+        where: whereCondition,
+      }),
+      this.prismaService.property.count({
+        where: whereCondition,
+      }),
+    ]);
 
     const items = properties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
-
-    const totalCount = await this.prismaService.property.count({ where });
 
     const data = {
       items,

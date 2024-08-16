@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
 
 export class PropertyQueryDto {
   @ApiProperty({ required: false, description: 'The page number', example: 1 })
@@ -61,4 +61,12 @@ export class PropertyQueryDto {
   @IsOptional()
   @IsString({ message: 'Property id must be a string' })
   readonly propertyId?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Get Proposals',
+  })
+  @IsOptional()
+  @IsString({ message: 'Get Agent Proposals' })
+  readonly proposals?: string;
 }
