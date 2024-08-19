@@ -63,15 +63,22 @@ export class BiddingService {
     createProperty: CreateBidPropertyDto,
   ) {
     createProperty.userId = user_id;
+    const property = await this.prismaService.property.findUnique({
+      where: {
+        id: createProperty.userPropertyId,
+      },
+    });
+
+    if (!property) {
+      throw new Error('User Property does not exist');
+    }
 
     const response = await this.propertyService.createProperty(
       user_id,
       files,
       createProperty,
     );
-    function hasData(
-      response: any,
-    ): response is {
+    function hasData(response: any): response is {
       success: boolean;
       action?: string;
       message: string;
@@ -132,12 +139,26 @@ export class BiddingService {
   }
 
   async getBidding(user_property_id: string) {
+    const userProperty = await this.prismaService.property.findUnique({
+      where: { id: user_property_id },
+      include: {
+        amenities: true,
+        propertyType: true,
+      },
+    });
     const result = await this.prismaService.bidding.findMany({
       where: {
         userPropertyId: user_property_id,
       },
       include: {
-        agentProperty: true,
+        agentProperty: {
+          include: {
+            PropertyData: true,
+
+            amenities: true,
+            propertyType: true,
+          },
+        },
       },
     });
     return {
@@ -148,18 +169,37 @@ export class BiddingService {
   }
 
   async getAgentBidding(agent_property_id: string) {
-    const result = await this.prismaService.bidding.findMany({
+    const agentProperty = await this.prismaService.property.findUnique({
+      where: { id: agent_property_id },
+      include: {
+        amenities: true,
+        PropertyData: true,
+        propertyType: true,
+      },
+    });
+
+    const userBiddings = await this.prismaService.bidding.findMany({
       where: {
         agentPropertyId: agent_property_id,
       },
       include: {
-        userProperty: true,
+        userProperty: {
+          include: {
+            amenities: true,
+            propertyType: true,
+          },
+        },
       },
     });
+
     return {
       success: true,
       message: 'Bidding retrieved successfully',
-      data: result,
+
+      data: userBiddings.map((bidding) => ({
+        ...bidding,
+        agentProperty,
+      })),
     };
   }
 
