@@ -88,6 +88,11 @@ export class PropertyService {
           propertyId: propertyId,
         },
       });
+      await this.prismaService.bidding.deleteMany({
+        where: {
+          agentPropertyId: propertyId,
+        },
+      });
 
       await this.prismaService.property.update({
         where: { id: propertyId },

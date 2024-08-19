@@ -527,6 +527,11 @@ export class UserPropertyService {
           propertyId: propertyId,
         },
       });
+      await this.prismaService.bidding.deleteMany({
+        where: {
+          userPropertyId: propertyId,
+        },
+      });
 
       await this.prismaService.property.update({
         where: { id: propertyId },
