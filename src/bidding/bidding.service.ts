@@ -146,7 +146,7 @@ export class BiddingService {
         propertyType: true,
       },
     });
-    const result = await this.prismaService.bidding.findMany({
+    const items = await this.prismaService.bidding.findMany({
       where: {
         userPropertyId: user_property_id,
       },
@@ -164,7 +164,7 @@ export class BiddingService {
     return {
       success: true,
       message: 'Bidding retrieved successfully',
-      data: result,
+      data: { items, userProperty },
     };
   }
 
