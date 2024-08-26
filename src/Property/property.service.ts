@@ -424,6 +424,13 @@ export class PropertyService {
         };
       }
     }
+    if (property.propertyStatus) {
+      if (String(property.propertyStatus) == 'true') {
+        property.propertyStatus = true;
+      } else {
+        property.propertyStatus = false;
+      }
+    }
 
     try {
       const propertyData: Prisma.PropertyCreateInput = {

@@ -24,7 +24,7 @@ model Property {
     latitude             String?
     propertyBy           String?
     proposalCount        Int?              @default(0)
-    propertyStatus       Boolean?          @default(false)
+    propertyStatus       Boolean?          @default(true)
     isFeatured           Boolean?          @default(false)
     propertyTypeId       String? // Field to reference PropertySubType
     propertyType         PropertySubType?  @relation(fields: [propertyTypeId], references: [id]) // Updated relation
@@ -34,8 +34,21 @@ model Property {
     updatedAt            DateTime          @updatedAt
     PropertyData         Porperty_data[]   @relation(name: "Porperty_dataToProperty")
     amenities            PropertyAmenity[]
+    savedByUsers         SavedProperty[]   @relation(name: "PropertyToSavedProperties") // Corrected relation
 
     @@map("properties")
+}
+
+model SavedProperty {
+    id         String   @id @default(uuid())
+    user       User     @relation(fields: [userId], references: [id], name: "UserToSavedProperties")
+    userId     String
+    propertyId String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    property   Property @relation(fields: [propertyId], references: [id], name: "PropertyToSavedProperties")
+
+    @@unique([userId, propertyId])
 }
 
 model Porperty_data {
@@ -52,29 +65,30 @@ model Porperty_data {
 }
 
 model User {
-    id                 String       @id @default(uuid())
+    id                 String          @id @default(uuid())
     firstName          String
     lastName           String
-    email              String       @unique
-    mobileNumber       String       @unique
+    email              String          @unique
+    mobileNumber       String          @unique
     landlineNumber     String?
     whatsapp           String?
     country            String?
     city               String?
     address            String?
     password           String?
-    isVerified         Boolean      @default(false)
+    isVerified         Boolean         @default(false)
     socialId           String?
-    socialLogin        Boolean      @default(false)
-    role               String?      @default("user")
+    socialLogin        Boolean         @default(false)
+    role               String?         @default("user")
     profileImage       String?
     imageKey           String?
-    profileVisibility  Boolean      @default(false)
+    profileVisibility  Boolean         @default(false)
     passwordResetToken String?
-    createdAt          DateTime     @default(now())
-    updatedAt          DateTime     @updatedAt
-    property           Property[]   @relation(name: "PropertyToUser")
-    preferences        preferences? @relation(name: "UserTopreferences")
+    createdAt          DateTime        @default(now())
+    updatedAt          DateTime        @updatedAt
+    property           Property[]      @relation(name: "PropertyToUser")
+    savedProperties    SavedProperty[] @relation(name: "UserToSavedProperties")
+    preferences        preferences?    @relation(name: "UserTopreferences")
 }
 
 model PropertyType {
