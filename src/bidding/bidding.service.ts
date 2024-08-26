@@ -92,7 +92,7 @@ export class BiddingService {
         propertyId = response.data.id;
       }
     } else {
-      console.error('Failed to retrieve property ID from the response.');
+      return response;
     }
 
     if (response) {
@@ -269,8 +269,8 @@ export class BiddingService {
           id: biddingEntry.id,
         },
         data: {
-          agentStatus: 'Archive',
-          userStatus: 'Rejected',
+          agentStatus: 'archive',
+          userStatus: 'rejected',
         },
       });
 

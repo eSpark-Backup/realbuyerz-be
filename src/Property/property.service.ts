@@ -275,12 +275,21 @@ export class PropertyService {
     const agentPropertyIds = await this.prismaService.bidding.findMany({
       select: {
         agentPropertyId: true,
+        agentStatus: true,
+        userStatus: true,
       },
     });
 
     const AgentBiddingPropertyIds = agentPropertyIds.map(
       (bid) => bid.agentPropertyId,
     );
+    const agentStatusMap = new Map<string, string>(); // Map to hold propertyId and agentStatus
+    const userStatusMap = new Map<string, string>(); // Map to hold propertyId and userStatus
+
+    agentPropertyIds.forEach((bid) => {
+      agentStatusMap.set(bid.agentPropertyId, bid.agentStatus);
+      userStatusMap.set(bid.agentPropertyId, bid.userStatus);
+    });
 
     if (String(filters.proposals) == 'true') {
       //from string to bool
@@ -330,21 +339,49 @@ export class PropertyService {
         }),
       ]);
 
-      const items = properties.map((property) => ({
-        ...property,
-        amenities: property.amenities.map((amenity) => amenity.amenity),
-      }));
+      const activeProposals = properties.filter(
+        (property) => agentStatusMap.get(property.id) === 'active',
+      );
+      const archivedProposals = properties.filter(
+        (property) => agentStatusMap.get(property.id) === 'archive',
+      );
+      const rejectedProposals = properties.filter(
+        (property) => userStatusMap.get(property.id) === 'rejected',
+      );
+      const acceptedProposals = properties.filter(
+        (property) => userStatusMap.get(property.id) === 'accepted',
+      );
+      const submittedProposals = properties.filter(
+        (property) => agentStatusMap.get(property.id) === 'submitted',
+      );
+      const pendingProposals = properties.filter(
+        (property) => userStatusMap.get(property.id) === 'pending',
+      );
 
+      // Organize properties with amenities
+      const organizeProperties = (properties) =>
+        properties.map((property) => ({
+          ...property,
+          amenities: property.amenities.map((amenity) => amenity.amenity),
+        }));
+
+      // Prepare response data
       const data = {
-        items,
+        activeProposals: organizeProperties(activeProposals),
+        archivedProposals: organizeProperties(archivedProposals),
+        rejectedProposals: organizeProperties(rejectedProposals),
+        acceptedProposals: organizeProperties(acceptedProposals),
+        submittedProposals: organizeProperties(submittedProposals),
+        pendingProposals: organizeProperties(pendingProposals),
         totalCount,
         currentPage: page,
         totalPages: Math.ceil(totalCount / pageSize),
         itemsPerPage: pageSize,
       };
+
       return {
-        action: 'Get All',
-        message: 'All Properties of User',
+        action: 'Get Properties by User ID',
+        message: 'Properties divided by status',
         data: data,
       };
     }
