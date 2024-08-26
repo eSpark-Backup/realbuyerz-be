@@ -36,6 +36,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 import { BackblazeService } from 'src/utils/function/backblaze';
+import { UpsertPreferencesDto } from './dto/upsert-prefrences.dto';
 
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
@@ -245,6 +246,31 @@ export class UserService {
     }
   }
 
+  async upsertPreferences(
+    upsertPreferencesDto: UpsertPreferencesDto,
+    userId: string,
+  ) {
+    const preferencesData = upsertPreferencesDto;
+
+    const result = await this.prismaService.preferences.upsert({
+      where: { userId },
+      update: preferencesData,
+      create: { ...preferencesData, userId },
+    });
+    if (result) {
+      return {
+        success: true,
+        message: CONSTANT_RESPONSE.UPDATED_SUCCESSFULLY,
+        data: result,
+      };
+    } else {
+      return {
+        success: false,
+        message: CONSTANT_RESPONSE.UPDATE_FAILED,
+      };
+    }
+  }
+
   async sendOtp(phone: string): Promise<string> {
     const otp = otpGenerator.generate(4, {
       lowerCaseAlphabets: false,
@@ -439,6 +465,15 @@ export class UserService {
           socialId: true,
           profileImage: true,
           profileVisibility: true,
+          preferences: {
+            select: {
+              emailNotification: true,
+              newsLetter: true,
+              automatedReport: true,
+              currency: true,
+              areaUnit: true,
+            },
+          },
         },
       });
 

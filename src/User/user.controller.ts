@@ -38,6 +38,8 @@ import { imageFileInterceptor } from 'src/utils/interceptor/userfile.interceptor
 import { UserId } from 'src/utils/decorator/userId.decorator';
 import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/utils/guard';
+import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
+import { UpsertPreferencesDto } from './dto/upsert-prefrences.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -135,6 +137,30 @@ export class UserController {
     );
     return verificationResult;
   }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  @swaggerDocs({
+    summary: 'Upsert preferences of User',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Upsert the User preferences',
+    },
+    badresponse: { status: 400, description: 'User not found' },
+  })
+  @Post('preferences')
+  async upsertPreferences(
+    @Body() upsertPreferences: UpsertPreferencesDto,
+    @UserId() userId: string,
+  ) {
+    const result = await this.userService.upsertPreferences(
+      upsertPreferences,
+      userId,
+    );
+    return result;
+  }
+
   // @Post('send-email')
   // @SendEmailDocs()
   // async sendEmail(@Body() emailDto: EmailDto) {

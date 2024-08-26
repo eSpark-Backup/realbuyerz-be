@@ -145,13 +145,13 @@ model PropertyAmenity {
 model preferences {
     id                String    @id @default(uuid())
     userId            String?   @unique
-    emailNotification Boolean
-    newsLetter        Boolean
-    automatedReport   Boolean
-    currency          String
-    areaUnit          String
+    emailNotification Boolean?
+    newsLetter        Boolean?
+    automatedReport   Boolean?
+    currency          String?
+    areaUnit          String?
     createdAt         DateTime  @default(now())
-    updatedAt         DateTime?
+    updatedAt         DateTime? @updatedAt
     user              User?     @relation(name: "UserTopreferences", fields: [userId], references: [id])
 
     @@map("preference")
