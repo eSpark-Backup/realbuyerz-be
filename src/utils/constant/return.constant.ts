@@ -15,6 +15,7 @@ export const CONSTANT_RESPONSE = {
   INVALID_LOGIN: 'Invalid Login Method',
   SEND_OTP: 'OTP Send Successfully',
   OTP_VARIFIED: 'OTP verified successfully',
+  PROPERTY_NOT_ADDED: 'Property not added to Favourites',
   LOGIN_SUCCESS: 'Login Successfully',
   INVALID_ACCESS_TOKEN: 'Invalid access token',
   TOKEN_EXPIRED: 'Token has Expired',

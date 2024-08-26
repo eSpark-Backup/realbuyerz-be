@@ -524,6 +524,102 @@ export class UserPropertyService {
     }
   }
 
+  async saveOrRemovePropertyRequest(userId: string, propertyId: string) {
+    const checkProperty = await this.prismaService.property.findUnique({
+      where: { id: propertyId },
+    });
+    if (!checkProperty) {
+      return {
+        success: false,
+        message: 'Property not found',
+      };
+    }
+
+    const existingSavedProperty =
+      await this.prismaService.savedProperty.findUnique({
+        where: {
+          userId_propertyId: {
+            userId: userId,
+            propertyId: propertyId,
+          },
+        },
+      });
+
+    if (existingSavedProperty) {
+      await this.prismaService.savedProperty.delete({
+        where: {
+          id: existingSavedProperty.id,
+        },
+      });
+      return {
+        success: true,
+        message: 'Property removed from saved properties',
+      };
+    }
+
+    const newSavedProperty = await this.prismaService.savedProperty.create({
+      data: {
+        userId: userId,
+        propertyId: propertyId,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Property added to saved properties',
+      data: newSavedProperty,
+    };
+  }
+  async getAllSavedProperties(userId: string) {
+    const savedProperties = await this.prismaService.savedProperty.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        property: {
+          include: {
+            PropertyData: true,
+            amenities: {
+              select: {
+                amenity: true,
+              },
+            },
+            propertyType: {
+              select: {
+                id: true,
+                subTypeName: true,
+                url: true,
+                imageKey: true,
+                propertyType: {
+                  select: {
+                    id: true,
+                    typeName: true,
+                    url: true,
+                    imageKey: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!savedProperties.length) {
+      return {
+        success: false,
+        message: 'No saved properties found for this user',
+        data: [],
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Saved properties retrieved successfully',
+      data: savedProperties,
+    };
+  }
+
   async deleteProperty(propertyId: string, userId: string) {
     try {
       const findProperty = await this.prismaService.property.findUnique({

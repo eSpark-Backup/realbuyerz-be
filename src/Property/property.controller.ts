@@ -91,6 +91,53 @@ export class PropertyController {
   }
 
   @ApiBearerAuth('jwt')
+  @Roles('agent')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @swaggerDocs({
+    summary: 'Find All Property Saved Request of Agent ',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Find All Saved Property Request of Agent',
+    },
+    badresponse: { status: 400, description: 'Property Not Added' },
+  })
+  @Get('request')
+  async findPropertyRequest(@UserId() userId: string) {
+    return this.propertyService.getAllSavedProperties(userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @Roles('agent')
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @swaggerDocs({
+    summary: 'Save Property Request of User/Customer to Agent Side',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Add Property Request to Favourites of Agent ',
+    },
+    badresponse: { status: 400, description: 'Property Not Added' },
+  })
+  @Post('/:propertyId')
+  async savePropertyRequest(
+    @UserId() userId: string,
+    @Param('propertyId') propertyId: string,
+  ) {
+    const result = await this.propertyService.saveOrRemovePropertyRequest(
+      userId,
+      propertyId,
+    );
+    if (!result) {
+      throw new HttpException(
+        CONSTANT_RESPONSE.PROPERTY_NOT_ADDED,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return result;
+  }
+  @Roles('agent')
+  @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
     summary: 'Get all properties of Agent',

@@ -7,6 +7,8 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -28,6 +30,7 @@ import { updateUserPropertyDto } from './dto/update-property.dto';
 import { PropertyQueryDto } from './dto/property_quey-dto';
 import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
 import { UserRoleGuard } from 'src/utils/guard/user.guard';
+import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 
 @Controller('userProperty')
 @ApiTags('User Property Proposals')
@@ -126,6 +129,53 @@ export class UserPropertyController {
   @Delete('/:id')
   async deleteProperty(@Param('id') id: string, @UserId() userId: string) {
     const result = await this.userPropertyService.deleteProperty(id, userId);
+    return result;
+  }
+
+  @ApiBearerAuth('jwt')
+  @Roles('agent')
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
+  @swaggerDocs({
+    summary: 'Find All Saved Property  of User/Customer',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Find All Saved Property of User/Customer',
+    },
+    badresponse: { status: 400, description: 'Property Not Added' },
+  })
+  @Get('request')
+  async findPropertyRequest(@UserId() userId: string) {
+    return this.userPropertyService.getAllSavedProperties(userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @Roles('user')
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
+  @swaggerDocs({
+    summary: 'Save Property of Agent to user Favourites',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Add Property Request to Favourites',
+    },
+    badresponse: { status: 400, description: 'Property Not Added' },
+  })
+  @Post('/:propertyId')
+  async savePropertyRequest(
+    @UserId() userId: string,
+    @Param('propertyId') propertyId: string,
+  ) {
+    const result = await this.userPropertyService.saveOrRemovePropertyRequest(
+      userId,
+      propertyId,
+    );
+    if (!result) {
+      throw new HttpException(
+        CONSTANT_RESPONSE.PROPERTY_NOT_ADDED,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return result;
   }
 }
