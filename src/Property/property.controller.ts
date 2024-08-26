@@ -117,6 +117,7 @@ export class PropertyController {
       propertyType: query.propertyType,
       subType: query.subType,
       proposals: query.proposals,
+      status: query.status,
     };
     return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
   }

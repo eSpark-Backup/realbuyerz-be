@@ -132,6 +132,7 @@ export class PropertyService {
       propertyBy?: string;
       propertyId?: string;
       proposals?: boolean;
+      status?: boolean;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -164,6 +165,15 @@ export class PropertyService {
           ...where.propertyType,
           subTypeName: filters.subType,
         };
+      }
+      where.propertyStatus = true;
+
+      if (filters.status) {
+        if (String(filters.status) == 'true') {
+          where.propertyStatus = true;
+        } else {
+          where.propertyStatus = false;
+        }
       }
     }
 
@@ -537,7 +547,11 @@ export class PropertyService {
     }
 
     if (property.propertyStatus) {
-      property.propertyStatus = Boolean(property.propertyStatus);
+      if (String(property.propertyStatus) == 'true') {
+        property.propertyStatus = true;
+      } else {
+        property.propertyStatus = false;
+      }
     }
     if (files.image) {
       const allowedImageTypes = ['.png', '.jpeg', '.jpg'];

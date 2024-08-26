@@ -55,6 +55,14 @@ export class PropertyQueryDto {
 
   @ApiProperty({
     required: false,
+    description: 'Get Proposal Status (Draft or published)',
+  })
+  @IsOptional()
+  @IsString({ message: 'Get User Proposals Status' })
+  readonly status?: boolean;
+
+  @ApiProperty({
+    required: false,
     description: 'The id of the property',
     example: '1',
   })

@@ -91,6 +91,7 @@ export class UserPropertyController {
       propertyId: query.propertyId,
       propertyType: query.propertyType,
       subType: query.subType,
+      status: query.status,
     };
     return this.userPropertyService.findbyuserId(
       user_id,

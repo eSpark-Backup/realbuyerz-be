@@ -233,6 +233,7 @@ export class UserPropertyService {
       propertyCity?: string;
       propertyBy?: string;
       propertyId?: string;
+      status?: boolean;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -258,6 +259,13 @@ export class UserPropertyService {
             typeName: filters.propertyType,
           },
         };
+      }
+      if (filters.status) {
+        if (String(filters.status) === 'true') {
+          where.propertyStatus = true;
+        } else {
+          where.propertyStatus = false;
+        }
       }
 
       if (filters.subType) {
@@ -312,7 +320,11 @@ export class UserPropertyService {
     }
 
     if (property.propertyStatus) {
-      property.propertyStatus = Boolean(property.propertyStatus);
+      if (String(property.propertyStatus) === 'true') {
+        property.propertyStatus = true;
+      } else {
+        property.propertyStatus = false;
+      }
     }
 
     try {
