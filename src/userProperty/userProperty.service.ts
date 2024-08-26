@@ -61,6 +61,14 @@ export class UserPropertyService {
           };
         }
       }
+      property.propertyStatus = true;
+      if (property.propertyStatus) {
+        if (String(property.propertyStatus) == 'true') {
+          property.propertyStatus = true;
+        } else {
+          property.propertyStatus = false;
+        }
+      }
 
       const propertyData: Prisma.PropertyCreateInput = {
         user: { connect: { id: user_id } },
@@ -70,6 +78,7 @@ export class UserPropertyService {
         propertyArea: property.propertyArea,
         propertyCity: property.propertyCity,
         propertyAddress: property.propertyAddress,
+        propertyStatus: property.propertyStatus,
         propertyZip: property.propertyZip,
         propertyBy: property.propertyBy,
         propertyDescription: property.propertyDescription,

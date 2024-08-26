@@ -424,6 +424,7 @@ export class PropertyService {
         };
       }
     }
+    property.propertyStatus = true;
     if (property.propertyStatus) {
       if (String(property.propertyStatus) == 'true') {
         property.propertyStatus = true;
@@ -440,6 +441,7 @@ export class PropertyService {
         propertyPrice: property.propertyPrice,
         propertyArea: property.propertyArea,
         propertyCity: property.propertyCity,
+        propertyStatus: property.propertyStatus,
         propertyAddress: property.propertyAddress,
         propertyZip: property.propertyZip,
         propertyBy: property.propertyBy,

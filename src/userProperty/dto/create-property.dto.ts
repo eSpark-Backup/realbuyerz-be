@@ -80,6 +80,17 @@ export class CreateUserPropertyDto {
   @IsOptional()
   readonly amenities?: string | string[];
 
+  @ApiProperty({
+    type: Boolean,
+    example: 'True ',
+    default: false,
+    required: false,
+  })
+  @IsOptional()
+
+  // @IsNotEmpty({ message: 'Property status cannot be empty' })
+  readonly propertyStatus: boolean;
+
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
   //   "count": "1",

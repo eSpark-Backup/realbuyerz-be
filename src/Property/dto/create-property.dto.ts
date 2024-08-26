@@ -148,7 +148,6 @@ export class CreatePropertyDto {
     default: false,
     required: false,
   })
-  @IsString({ message: 'Property status must be a string' })
   @IsOptional()
 
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
