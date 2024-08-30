@@ -418,7 +418,7 @@ export class UserService {
           data: userData,
         });
 
-        // await this.sendEmail(newUser.email, emailSubject, emailContent);
+        await this.sendEmail(newUser.email, emailSubject, emailContent);
 
         const token = this.createToken(
           { id: newUser.id, role: newUser.role },

@@ -78,38 +78,46 @@ export class PropertyService {
           message: 'You are not authorized to delete this property',
         };
       }
-      await this.prismaService.porperty_data.deleteMany({
-        where: {
-          propertyId: propertyId,
-        },
-      });
-      await this.prismaService.propertyAmenity.deleteMany({
-        where: {
-          propertyId: propertyId,
-        },
-      });
-      await this.prismaService.bidding.deleteMany({
-        where: {
-          agentPropertyId: propertyId,
-        },
-      });
 
+      //sett the isDeleted field to true
       await this.prismaService.property.update({
         where: { id: propertyId },
         data: {
-          propertyType: { disconnect: true },
+          isDeleted: true,
         },
       });
-      await this.prismaService.property.delete({
-        where: {
-          id: propertyId,
-        },
-      });
+      // await this.prismaService.porperty_data.deleteMany({
+      //   where: {
+      //     propertyId: propertyId,
+      //   },
+      // });
+      // await this.prismaService.propertyAmenity.deleteMany({
+      //   where: {
+      //     propertyId: propertyId,
+      //   },
+      // });
+      // await this.prismaService.bidding.deleteMany({
+      //   where: {
+      //     agentPropertyId: propertyId,
+      //   },
+      // });
+
+      // await this.prismaService.property.update({
+      //   where: { id: propertyId },
+      //   data: {
+      //     propertyType: { disconnect: true },
+      //   },
+      // });
+      // await this.prismaService.property.delete({
+      //   where: {
+      //     id: propertyId,
+      //   },
+      // });
 
       return {
-        status: true,
+        success: true,
         action: 'Delete Property',
-        message: 'Property Deleted Successfully',
+        message: 'Property Sent to trash Successfully',
       };
     } catch (error) {
       return {

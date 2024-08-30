@@ -26,6 +26,7 @@ model Property {
     proposalCount        Int?              @default(0)
     propertyStatus       Boolean?          @default(true)
     isFeatured           Boolean?          @default(false)
+    isDeleted            Boolean?          @default(false)
     propertyTypeId       String? // Field to reference PropertySubType
     propertyType         PropertySubType?  @relation(fields: [propertyTypeId], references: [id]) // Updated relation
     userPropertyBidding  Bidding[]         @relation(name: "UserProperty")
