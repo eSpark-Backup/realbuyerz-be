@@ -639,31 +639,38 @@ export class UserPropertyService {
         };
       }
 
-      await this.prismaService.propertyAmenity.deleteMany({
-        where: {
-          propertyId: propertyId,
-        },
-      });
-      await this.prismaService.bidding.deleteMany({
-        where: {
-          userPropertyId: propertyId,
-        },
-      });
-
       await this.prismaService.property.update({
         where: { id: propertyId },
         data: {
-          propertyType: { disconnect: true },
-        },
-      });
-      await this.prismaService.property.delete({
-        where: {
-          id: propertyId,
+          isDeleted: true,
         },
       });
 
+      // await this.prismaService.propertyAmenity.deleteMany({
+      //   where: {
+      //     propertyId: propertyId,
+      //   },
+      // });
+      // await this.prismaService.bidding.deleteMany({
+      //   where: {
+      //     userPropertyId: propertyId,
+      //   },
+      // });
+
+      // await this.prismaService.property.update({
+      //   where: { id: propertyId },
+      //   data: {
+      //     propertyType: { disconnect: true },
+      //   },
+      // });
+      // await this.prismaService.property.delete({
+      //   where: {
+      //     id: propertyId,
+      //   },
+      // });
+
       return {
-        status: true,
+        success: true,
         action: 'Delete Property',
         message: 'Property Deleted Successfully',
       };
