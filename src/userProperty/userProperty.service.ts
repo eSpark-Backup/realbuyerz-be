@@ -643,6 +643,7 @@ export class UserPropertyService {
         where: { id: propertyId },
         data: {
           isDeleted: true,
+          propertyStatus: false,
         },
       });
 

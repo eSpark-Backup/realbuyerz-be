@@ -70,7 +70,7 @@ model User {
     firstName          String
     lastName           String
     email              String          @unique
-    mobileNumber       String          @unique
+    mobileNumber       String?         @unique
     landlineNumber     String?
     whatsapp           String?
     country            String?

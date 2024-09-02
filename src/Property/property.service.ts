@@ -84,6 +84,7 @@ export class PropertyService {
         where: { id: propertyId },
         data: {
           isDeleted: true,
+          propertyStatus: false,
         },
       });
       // await this.prismaService.porperty_data.deleteMany({
