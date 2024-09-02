@@ -269,15 +269,15 @@ export class PropertyService {
           subTypeName: filters.subType,
         };
       }
-      where.propertyStatus = true;
+      // where.propertyStatus = true;
 
-      if (filters.status) {
-        if (String(filters.status) == 'true') {
-          where.propertyStatus = true;
-        } else {
-          where.propertyStatus = false;
-        }
-      }
+      // if (filters.status) {
+      //   if (String(filters.status) == 'true') {
+      //     where.propertyStatus = true;
+      //   } else {
+      //     where.propertyStatus = false;
+      //   }
+      // }
     }
 
     where.userId = user_id;
@@ -375,7 +375,7 @@ export class PropertyService {
         }));
 
       // Prepare response data
-      const data = {
+      const items = {
         activeProposals: organizeProperties(activeProposals),
         archivedProposals: organizeProperties(archivedProposals),
         rejectedProposals: organizeProperties(rejectedProposals),
@@ -391,7 +391,7 @@ export class PropertyService {
       return {
         action: 'Get Properties by User ID',
         message: 'Properties divided by status',
-        data: data,
+        data: items,
       };
     }
 
@@ -445,8 +445,25 @@ export class PropertyService {
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
 
+    const activeProperties = items.filter(
+      (property) =>
+        property.propertyStatus === true && property.isDeleted !== true,
+    );
+
+    const draftProperties = items.filter(
+      (property) =>
+        property.propertyStatus === false && property.isDeleted !== true,
+    );
+
+    const trashProperties = items.filter(
+      (property) => property.isDeleted === true,
+    );
+
+    // Prepare the data object with categorized properties
     const data = {
-      items,
+      active: activeProperties,
+      draft: draftProperties,
+      trash: trashProperties,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
