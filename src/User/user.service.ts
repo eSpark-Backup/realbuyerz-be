@@ -411,6 +411,13 @@ export class UserService {
           };
         }
 
+        if (createUserDto.mobileNumber == null) {
+          return {
+            success: false,
+            message: 'Mobile Number is required',
+          };
+        }
+
         const hashedPassword = await this.hashPassword(createUserDto.password);
         const userData = { ...createUserDto, password: hashedPassword };
 
