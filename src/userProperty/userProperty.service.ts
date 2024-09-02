@@ -61,7 +61,6 @@ export class UserPropertyService {
           };
         }
       }
-      property.propertyStatus = true;
       if (property.propertyStatus) {
         if (String(property.propertyStatus) == 'true') {
           property.propertyStatus = true;
