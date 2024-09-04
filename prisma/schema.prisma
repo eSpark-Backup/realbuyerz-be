@@ -72,6 +72,7 @@ model User {
     email              String          @unique
     mobileNumber       String?         @unique
     landlineNumber     String?
+    bio                String?
     whatsapp           String?
     country            String?
     city               String?

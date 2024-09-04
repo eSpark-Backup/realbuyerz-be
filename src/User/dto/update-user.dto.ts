@@ -30,6 +30,11 @@ export class UpdateUserDto {
   @IsOptional()
   readonly lastName: string;
 
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'Bio be a string' })
+  @IsOptional()
+  readonly bio: string;
+
   //   @ApiProperty({ type: String, default: 'ahsan@mail.com', required: false })
   //   @IsEmail({}, { message: 'Invalid email format' })
   //   @IsOptional()
