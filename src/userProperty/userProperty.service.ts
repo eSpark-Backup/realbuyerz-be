@@ -346,28 +346,40 @@ export class UserPropertyService {
         where: whereCondition,
       }),
     ]);
+    const activeProposals = [];
+    const archivedProposals = [];
+    const rejectedProposals = [];
+    const acceptedProposals = [];
+    const submittedProposals = [];
+    const pendingProposals = [];
+    const trashProperties = [];
 
-    const activeProposals = properties.filter(
-      (property) => agentStatusMap.get(property.id) === 'active',
-    );
-    const archivedProposals = properties.filter(
-      (property) => agentStatusMap.get(property.id) === 'archive',
-    );
-    const rejectedProposals = properties.filter(
-      (property) => userStatusMap.get(property.id) === 'rejected',
-    );
-    const acceptedProposals = properties.filter(
-      (property) => userStatusMap.get(property.id) === 'accepted',
-    );
-    const submittedProposals = properties.filter(
-      (property) => agentStatusMap.get(property.id) === 'submitted',
-    );
-    const pendingProposals = properties.filter(
-      (property) => userStatusMap.get(property.id) === 'pending',
-    );
-    const trashProperties = properties.filter(
-      (properties) => properties.isDeleted === true,
-    );
+    properties.forEach((property) => {
+      if (property.isDeleted) {
+        // Push to trash if deleted
+        trashProperties.push(property);
+      } else {
+        // Otherwise, organize by status
+        if (agentStatusMap.get(property.id) === 'active') {
+          activeProposals.push(property);
+        }
+        if (agentStatusMap.get(property.id) === 'archive') {
+          archivedProposals.push(property);
+        }
+        if (userStatusMap.get(property.id) === 'rejected') {
+          rejectedProposals.push(property);
+        }
+        if (userStatusMap.get(property.id) === 'accepted') {
+          acceptedProposals.push(property);
+        }
+        if (agentStatusMap.get(property.id) === 'submitted') {
+          submittedProposals.push(property);
+        }
+        if (userStatusMap.get(property.id) === 'pending') {
+          pendingProposals.push(property);
+        }
+      }
+    });
     const organizeProperties = (properties) =>
       properties.map((property) => ({
         ...property,
