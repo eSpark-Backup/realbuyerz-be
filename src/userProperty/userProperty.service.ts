@@ -284,39 +284,113 @@ export class UserPropertyService {
       }
     }
     where.userId = user_id;
-
-    const totalCount = await this.prismaService.property.count({});
-
-    const properties = await this.prismaService.property.findMany({
-      where,
-      skip,
-      take: pageSize,
-      include: {
-        amenities: {
-          select: {
-            amenity: true, // Include only the name
-          },
-        },
-        PropertyData: true,
-        propertyType: true,
+    const userPropertyIds = await this.prismaService.bidding.findMany({
+      select: {
+        userPropertyId: true,
+        agentStatus: true,
+        userStatus: true,
       },
     });
-    const items = properties.map((property) => ({
-      ...property,
-      amenities: property.amenities.map((amenity) => amenity.amenity),
-    }));
+    const UserBiddingPropertyIds = userPropertyIds.map(
+      (bid) => bid.userPropertyId,
+    );
+    const agentStatusMap = new Map<string, string>(); // Map to hold propertyId and agentStatus
+    const userStatusMap = new Map<string, string>(); // Map to hold propertyId and userStatus
 
-    const data = {
-      items,
+    userPropertyIds.forEach((bid) => {
+      agentStatusMap.set(bid.userPropertyId, bid.agentStatus);
+      userStatusMap.set(bid.userPropertyId, bid.userStatus);
+    });
+
+    const whereCondition = {
+      AND: [
+        where,
+        {
+          id: {
+            in: UserBiddingPropertyIds,
+          },
+        },
+      ],
+    };
+
+    const [properties, totalCount] = await Promise.all([
+      this.prismaService.property.findMany({
+        skip,
+        take: pageSize,
+        include: {
+          amenities: {
+            select: {
+              amenity: true,
+            },
+          },
+          propertyType: {
+            select: {
+              id: true,
+              subTypeName: true,
+              url: true,
+              imageKey: true,
+              propertyType: {
+                select: {
+                  id: true,
+                  typeName: true,
+                  url: true,
+                  imageKey: true,
+                },
+              },
+            },
+          },
+        },
+        where: whereCondition,
+      }),
+      this.prismaService.property.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    const activeProposals = properties.filter(
+      (property) => agentStatusMap.get(property.id) === 'active',
+    );
+    const archivedProposals = properties.filter(
+      (property) => agentStatusMap.get(property.id) === 'archive',
+    );
+    const rejectedProposals = properties.filter(
+      (property) => userStatusMap.get(property.id) === 'rejected',
+    );
+    const acceptedProposals = properties.filter(
+      (property) => userStatusMap.get(property.id) === 'accepted',
+    );
+    const submittedProposals = properties.filter(
+      (property) => agentStatusMap.get(property.id) === 'submitted',
+    );
+    const pendingProposals = properties.filter(
+      (property) => userStatusMap.get(property.id) === 'pending',
+    );
+    const trashProperties = properties.filter(
+      (properties) => properties.isDeleted === true,
+    );
+    const organizeProperties = (properties) =>
+      properties.map((property) => ({
+        ...property,
+        amenities: property.amenities.map((amenity) => amenity.amenity),
+      }));
+    const items = {
+      activeProposals: organizeProperties(activeProposals),
+      archivedProposals: organizeProperties(archivedProposals),
+      rejectedProposals: organizeProperties(rejectedProposals),
+      acceptedProposals: organizeProperties(acceptedProposals),
+      submittedProposals: organizeProperties(submittedProposals),
+      pendingProposals: organizeProperties(pendingProposals),
+      trashProperties: organizeProperties(trashProperties),
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
       itemsPerPage: pageSize,
     };
+
     return {
-      action: 'Get All',
-      message: 'All Properties of User',
-      data: data,
+      action: 'Get Properties by User ID',
+      message: 'Properties divided by status',
+      data: items,
     };
   }
 
