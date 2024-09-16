@@ -346,53 +346,30 @@ export class UserPropertyService {
         where: whereCondition,
       }),
     ]);
-    const activeProposals = [];
-    const archivedProposals = [];
-    const rejectedProposals = [];
-    const acceptedProposals = [];
-    const submittedProposals = [];
-    const pendingProposals = [];
-    const trashProperties = [];
+    const items = properties.map((property) => ({
+      ...property,
+      amenities: property.amenities.map((amenity) => amenity.amenity),
+    }));
 
-    properties.forEach((property) => {
-      if (property.isDeleted) {
-        // Push to trash if deleted
-        trashProperties.push(property);
-      } else {
-        // Otherwise, organize by status
-        if (agentStatusMap.get(property.id) === 'active') {
-          activeProposals.push(property);
-        }
-        if (agentStatusMap.get(property.id) === 'archive') {
-          archivedProposals.push(property);
-        }
-        if (userStatusMap.get(property.id) === 'rejected') {
-          rejectedProposals.push(property);
-        }
-        if (userStatusMap.get(property.id) === 'accepted') {
-          acceptedProposals.push(property);
-        }
-        if (agentStatusMap.get(property.id) === 'submitted') {
-          submittedProposals.push(property);
-        }
-        if (userStatusMap.get(property.id) === 'pending') {
-          pendingProposals.push(property);
-        }
-      }
-    });
-    const organizeProperties = (properties) =>
-      properties.map((property) => ({
-        ...property,
-        amenities: property.amenities.map((amenity) => amenity.amenity),
-      }));
-    const items = {
-      activeProposals: organizeProperties(activeProposals),
-      archivedProposals: organizeProperties(archivedProposals),
-      rejectedProposals: organizeProperties(rejectedProposals),
-      acceptedProposals: organizeProperties(acceptedProposals),
-      submittedProposals: organizeProperties(submittedProposals),
-      pendingProposals: organizeProperties(pendingProposals),
-      trashProperties: organizeProperties(trashProperties),
+    const activeProperties = items.filter(
+      (property) =>
+        property.propertyStatus === true && property.isDeleted !== true,
+    );
+
+    const draftProperties = items.filter(
+      (property) =>
+        property.propertyStatus === false && property.isDeleted !== true,
+    );
+
+    const trashProperties = items.filter(
+      (property) => property.isDeleted === true,
+    );
+
+    // Prepare the data object with categorized properties
+    const data = {
+      active: activeProperties,
+      draft: draftProperties,
+      trash: trashProperties,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
@@ -402,7 +379,7 @@ export class UserPropertyService {
     return {
       action: 'Get Properties by User ID',
       message: 'Properties divided by status',
-      data: items,
+      data: data,
     };
   }
 

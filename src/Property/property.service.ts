@@ -351,32 +351,32 @@ export class PropertyService {
       const activeProposals = properties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'active' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const archivedProposals = properties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'archive' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const rejectedProposals = properties.filter(
         (property) =>
           userStatusMap.get(property.id) === 'rejected' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const acceptedProposals = properties.filter(
         (property) =>
           userStatusMap.get(property.id) === 'accepted' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const submittedProposals = properties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'submitted' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const pendingProposals = properties.filter(
         (property) =>
           userStatusMap.get(property.id) === 'pending' &&
-          property.isDeleted !== false,
+          property.isDeleted == false,
       );
       const trashProperties = properties.filter(
         (property) => property.isDeleted === true,
@@ -1114,6 +1114,7 @@ export class PropertyService {
       }
     }
     where.propertyBy = 'user';
+    where.isDeleted = false;
 
     const properties = await this.prismaService.property.findMany({
       skip,
