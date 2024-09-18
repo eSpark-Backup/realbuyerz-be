@@ -284,102 +284,49 @@ export class UserPropertyService {
       }
     }
     where.userId = user_id;
-    const userPropertyIds = await this.prismaService.bidding.findMany({
-      select: {
-        userPropertyId: true,
-        agentStatus: true,
-        userStatus: true,
+
+    const totalCount = await this.prismaService.property.count({});
+
+    const properties = await this.prismaService.property.findMany({
+      where,
+      skip,
+      take: pageSize,
+      include: {
+        amenities: {
+          select: {
+            amenity: true, // Include only the name
+          },
+        },
+        propertyType: true,
       },
     });
-    const UserBiddingPropertyIds = userPropertyIds.map(
-      (bid) => bid.userPropertyId,
+    const active = properties.filter(
+      (property) => property.propertyStatus === true,
     );
-    const agentStatusMap = new Map<string, string>(); // Map to hold propertyId and agentStatus
-    const userStatusMap = new Map<string, string>(); // Map to hold propertyId and userStatus
-
-    userPropertyIds.forEach((bid) => {
-      agentStatusMap.set(bid.userPropertyId, bid.agentStatus);
-      userStatusMap.set(bid.userPropertyId, bid.userStatus);
-    });
-
-    const whereCondition = {
-      AND: [
-        where,
-        {
-          id: {
-            in: UserBiddingPropertyIds,
-          },
-        },
-      ],
-    };
-
-    const [properties, totalCount] = await Promise.all([
-      this.prismaService.property.findMany({
-        skip,
-        take: pageSize,
-        include: {
-          amenities: {
-            select: {
-              amenity: true,
-            },
-          },
-          propertyType: {
-            select: {
-              id: true,
-              subTypeName: true,
-              url: true,
-              imageKey: true,
-              propertyType: {
-                select: {
-                  id: true,
-                  typeName: true,
-                  url: true,
-                  imageKey: true,
-                },
-              },
-            },
-          },
-        },
-        where: whereCondition,
-      }),
-      this.prismaService.property.count({
-        where: whereCondition,
-      }),
-    ]);
-    const items = properties.map((property) => ({
-      ...property,
-      amenities: property.amenities.map((amenity) => amenity.amenity),
-    }));
-
-    const activeProperties = items.filter(
-      (property) =>
-        property.propertyStatus === true && property.isDeleted !== true,
+    const draft = properties.filter(
+      (property) => property.propertyStatus === false,
     );
+    const trash = properties.filter((property) => property.isDeleted === true);
 
-    const draftProperties = items.filter(
-      (property) =>
-        property.propertyStatus === false && property.isDeleted !== true,
-    );
+    const organizeProperties = (properties) =>
+      properties.map((property) => ({
+        ...property,
+        amenities: property.amenities.map((amenity) => amenity.amenity),
+      }));
 
-    const trashProperties = items.filter(
-      (property) => property.isDeleted === true,
-    );
-
-    // Prepare the data object with categorized properties
-    const data = {
-      active: activeProperties,
-      draft: draftProperties,
-      trash: trashProperties,
+    const items = {
+      active: organizeProperties(active),
+      draft: organizeProperties(draft),
+      trash: organizeProperties(trash),
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / pageSize),
       itemsPerPage: pageSize,
     };
-
     return {
-      action: 'Get Properties by User ID',
-      message: 'Properties divided by status',
-      data: data,
+      action: 'Get All',
+      message: 'All Properties of User',
+      data: items,
     };
   }
 
