@@ -20,7 +20,10 @@ const connectDbWithRetries = async (uri, options = {}) => {
       await mongoose.connect(uri); // Remove options here
       console.log('Connected to the database');
     } catch (err) {
-      console.error(`Database connection failed (attempt ${numTries + 1}):`, err);
+      console.error(
+        `Database connection failed (attempt ${numTries + 1}):`,
+        err,
+      );
       numTries++;
 
       if (numTries < reconnectTries) {
@@ -34,9 +37,6 @@ const connectDbWithRetries = async (uri, options = {}) => {
 
   await connect(); // Initial connection attempt
 };
-
-
-
 
 const sendToken = (res, user, code, message) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -54,7 +54,7 @@ const emitEvent = (req, event, users, data) => {
 
 const uploadFilesToCloudinary = async (files = []) => {
   if (files.length === 0) {
-    throw new Error("Missing required parameter - files");
+    throw new Error('Missing required parameter - files');
   }
 
   const uploadPromises = files.map((file) => {
@@ -91,9 +91,8 @@ const uploadFilesToCloudinary = async (files = []) => {
 const deleteFilesFromCloudinary = async (public_ids) => {
   // delete files from cloudinary
   if (public_ids.length === 0) {
-    throw new Error("Missing required parameter - public_ids");
-  }
-  else{
+    throw new Error('Missing required parameter - public_ids');
+  } else {
     const deletePromises = public_ids.map((public_id) => {
       return new Promise((resolve, reject) => {
         cloudinary.uploader.destroy(public_id, (err, result) => {
@@ -110,7 +109,6 @@ const deleteFilesFromCloudinary = async (public_ids) => {
     } catch (err) {
       throw new Error(`Error deleting files: ${err.message}`);
     }
-  
   }
 };
 export {
@@ -119,5 +117,5 @@ export {
   emitEvent,
   deleteFilesFromCloudinary,
   uploadFilesToCloudinary,
-  connectDbWithRetries
+  connectDbWithRetries,
 };

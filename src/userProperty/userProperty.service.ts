@@ -301,10 +301,12 @@ export class UserPropertyService {
       },
     });
     const active = properties.filter(
-      (property) => property.propertyStatus === true,
+      (property) =>
+        property.propertyStatus === true && property.isDeleted === false,
     );
     const draft = properties.filter(
-      (property) => property.propertyStatus === false,
+      (property) =>
+        property.propertyStatus === false && property.isDeleted === false,
     );
     const trash = properties.filter((property) => property.isDeleted === true);
 

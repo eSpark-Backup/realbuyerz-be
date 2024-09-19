@@ -465,6 +465,7 @@ export class UserService {
           lastName: true,
           email: true,
           landlineNumber: true,
+          city: true,
           bio: true,
           whatsapp: true,
           country: true,
