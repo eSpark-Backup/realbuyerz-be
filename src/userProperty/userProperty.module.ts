@@ -6,12 +6,12 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { UserPropertyController } from './userProperty.controller';
 import { UserPropertyService } from './userProperty.service';
 import { JwtService } from '@nestjs/jwt';
-
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 @Module({
-  imports: [PrismaModule], 
+  imports: [PrismaModule],
   controllers: [UserPropertyController],
-  providers: [UserPropertyService,PrismaService,JwtService],
+  providers: [UserPropertyService, PrismaService, JwtService, BackblazeService],
   exports: [UserPropertyService],
 })
 export class UserPropertyModule {}

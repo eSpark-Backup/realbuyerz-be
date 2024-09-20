@@ -4,10 +4,14 @@ import { CreateUserPropertyDto } from './dto/create-property.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { updateUserPropertyDto } from './dto/update-property.dto';
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 @Injectable()
 export class UserPropertyService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly backblazeService: BackblazeService,
+  ) {}
 
   async createProperty(user_id: string, createProperty: CreateUserPropertyDto) {
     const property = { ...createProperty };
@@ -209,6 +213,45 @@ export class UserPropertyService {
         where: whereCondition,
       }),
     ]);
+
+    await Promise.all(
+      properties.map(async (property) => {
+        await Promise.all(
+          property.PropertyData.map(async (data) => {
+            if (data.type === 'image') {
+              try {
+                // Log the current data.url to debug
+
+                // Extract the fileName from the URL
+                const fileName = data.url.split(
+                  `${process.env.BUCKET_NAME}/`,
+                )[1];
+
+                // Log the extracted fileName for debugging
+
+                if (!fileName) {
+                  return;
+                }
+
+                // Generate a signed URL for the image
+                const signedUrl =
+                  await this.backblazeService.generateSignedUrl(fileName);
+
+                // Log the signed URL to confirm it’s being generated
+
+                // Replace the original URL with the signed URL
+                data.url = signedUrl;
+              } catch (error) {
+                console.error(
+                  'Error during URL generation or file name extraction:',
+                  error.message,
+                );
+              }
+            }
+          }),
+        );
+      }),
+    );
 
     const items = properties.map((property) => ({
       ...property,
@@ -623,6 +666,44 @@ export class UserPropertyService {
         data: [],
       };
     }
+    await Promise.all(
+      savedProperties.map(async (property) => {
+        await Promise.all(
+          property.property.PropertyData.map(async (data) => {
+            if (data.type === 'image') {
+              try {
+                // Log the current data.url to debug
+
+                // Extract the fileName from the URL
+                const fileName = data.url.split(
+                  `${process.env.BUCKET_NAME}/`,
+                )[1];
+
+                // Log the extracted fileName for debugging
+
+                if (!fileName) {
+                  return;
+                }
+
+                // Generate a signed URL for the image
+                const signedUrl =
+                  await this.backblazeService.generateSignedUrl(fileName);
+
+                // Log the signed URL to confirm it’s being generated
+
+                // Replace the original URL with the signed URL
+                data.url = signedUrl;
+              } catch (error) {
+                console.error(
+                  'Error during URL generation or file name extraction:',
+                  error.message,
+                );
+              }
+            }
+          }),
+        );
+      }),
+    );
 
     return {
       success: true,

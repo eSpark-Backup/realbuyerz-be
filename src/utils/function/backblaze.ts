@@ -15,38 +15,72 @@ export class BackblazeService {
     });
   }
 
-  async uploadFileFromBuffer(fileBuffer: Buffer, fileOrgName: string): Promise<B2.Response<B2.UploadFileResponse>> {
+  async uploadFileFromBuffer(
+    fileBuffer: Buffer,
+    fileOrgName: string,
+  ): Promise<B2.Response<B2.UploadFileResponse>> {
     try {
-      const { data: { downloadUrl } } = await this.b2.authorize();
-      const { data: { authorizationToken, uploadUrl } } = await this.b2.getUploadUrl({
-        bucketId: process.env.BUCKET_ID
+      const {
+        data: { downloadUrl },
+      } = await this.b2.authorize();
+      const {
+        data: { authorizationToken, uploadUrl },
+      } = await this.b2.getUploadUrl({
+        bucketId: process.env.BUCKET_ID,
       });
-      const { data: { fileName ,fileId} } = await this.b2.uploadFile({
+      const {
+        data: { fileName, fileId },
+      } = await this.b2.uploadFile({
         uploadUrl,
         uploadAuthToken: authorizationToken,
         filename: `${new Date().getTime()}${fileOrgName.replace(/\s/g, '')}`,
         data: fileBuffer,
       });
-      return { 
-        url: `${downloadUrl}/file/${process.env.BUCKET_NAME}/${fileName}` ,
-        fileId
+      return {
+        url: `${downloadUrl}/file/${process.env.BUCKET_NAME}/${fileName}`,
+        fileId,
       };
     } catch (error) {
       console.error('Error during file upload:', error.message);
     }
   }
 
-  async deleteFile(fileName: string,fileId:string){
-    try { 
-    await this.b2.authorize();
-    const fileDeleteRes = await this.b2.deleteFileVersion({
-      fileName,
-      fileId,
-      bucketName: process.env.BUCKET_NAME,
-    });
-    return fileDeleteRes;
-    }catch (error) {
+  async deleteFile(fileName: string, fileId: string) {
+    try {
+      await this.b2.authorize();
+      const fileDeleteRes = await this.b2.deleteFileVersion({
+        fileName,
+        fileId,
+        bucketName: process.env.BUCKET_NAME,
+      });
+      return fileDeleteRes;
+    } catch (error) {
       console.error('Error during file delete:', error.message);
+    }
+  }
+
+  async generateSignedUrl(fileName: string): Promise<string> {
+    try {
+      // Authorize to get the download URL
+      const {
+        data: { downloadUrl },
+      } = await this.b2.authorize();
+
+      // Generate a download authorization (signed URL)
+      const validityDurationInSeconds = 3600; // URL valid for 1 hour (3600 seconds)
+      const {
+        data: { authorizationToken },
+      } = await this.b2.getDownloadAuthorization({
+        bucketId: process.env.BUCKET_ID,
+        fileNamePrefix: fileName,
+        validDurationInSeconds: validityDurationInSeconds,
+      });
+
+      // Return the signed URL for the requested file
+      return `${downloadUrl}/file/${process.env.BUCKET_NAME}/${fileName}?Authorization=${authorizationToken}`;
+    } catch (error) {
+      console.error('Error generating signed URL:', error.message);
+      throw error;
     }
   }
 }

@@ -347,6 +347,44 @@ export class PropertyService {
           where: whereCondition,
         }),
       ]);
+      await Promise.all(
+        properties.map(async (property) => {
+          await Promise.all(
+            property.PropertyData.map(async (data) => {
+              if (data.type === 'image') {
+                try {
+                  // Log the current data.url to debug
+
+                  // Extract the fileName from the URL
+                  const fileName = data.url.split(
+                    `${process.env.BUCKET_NAME}/`,
+                  )[1];
+
+                  // Log the extracted fileName for debugging
+
+                  if (!fileName) {
+                    return;
+                  }
+
+                  // Generate a signed URL for the image
+                  const signedUrl =
+                    await this.backblazeService.generateSignedUrl(fileName);
+
+                  // Log the signed URL to confirm it’s being generated
+
+                  // Replace the original URL with the signed URL
+                  data.url = signedUrl;
+                } catch (error) {
+                  console.error(
+                    'Error during URL generation or file name extraction:',
+                    error.message,
+                  );
+                }
+              }
+            }),
+          );
+        }),
+      );
 
       const activeProposals = properties.filter(
         (property) =>
@@ -451,10 +489,49 @@ export class PropertyService {
         },
         where: whereCondition,
       }),
+
       this.prismaService.property.count({
         where: whereCondition,
       }),
     ]);
+    await Promise.all(
+      properties.map(async (property) => {
+        await Promise.all(
+          property.PropertyData.map(async (data) => {
+            if (data.type === 'image') {
+              try {
+                // Log the current data.url to debug
+
+                // Extract the fileName from the URL
+                const fileName = data.url.split(
+                  `${process.env.BUCKET_NAME}/`,
+                )[1];
+
+                // Log the extracted fileName for debugging
+
+                if (!fileName) {
+                  return;
+                }
+
+                // Generate a signed URL for the image
+                const signedUrl =
+                  await this.backblazeService.generateSignedUrl(fileName);
+
+                // Log the signed URL to confirm it’s being generated
+
+                // Replace the original URL with the signed URL
+                data.url = signedUrl;
+              } catch (error) {
+                console.error(
+                  'Error during URL generation or file name extraction:',
+                  error.message,
+                );
+              }
+            }
+          }),
+        );
+      }),
+    );
 
     const items = properties.map((property) => ({
       ...property,
@@ -1046,8 +1123,20 @@ export class PropertyService {
         const { url: propertyImage, imageKey } = image;
 
         const fileName = path.basename(new URL(propertyImage).pathname);
+        //check if it is from the same bucket
+        const imageBucketName = propertyImage.split('/file/')[1]?.split('/')[0];
 
-        await this.backblazeService.deleteFile(fileName, imageKey);
+        // Compare with your current bucket
+        if (imageBucketName === process.env.BUCKET_NAME) {
+          // If the image is from the same bucket, delete the file
+          await this.backblazeService.deleteFile(fileName, imageKey);
+        } else {
+          // If the image is not from the same bucket, continue to the next image
+          console.log(
+            `Skipping file: ${fileName} as it is not from the current bucket.`,
+          );
+          continue;
+        }
       }
     } catch (error) {
       console.error('Error deleting images:', error);
@@ -1169,6 +1258,39 @@ export class PropertyService {
       if (!property) {
         throw new NotFoundException('Property not found');
       }
+
+      await Promise.all(
+        property.PropertyData.map(async (data) => {
+          if (data.type === 'image') {
+            try {
+              // Log the current data.url to debug
+
+              // Extract the fileName from the URL
+              const fileName = data.url.split(`${process.env.BUCKET_NAME}/`)[1];
+
+              // Log the extracted fileName for debugging
+
+              if (!fileName) {
+                return;
+              }
+
+              // Generate a signed URL for the image
+              const signedUrl =
+                await this.backblazeService.generateSignedUrl(fileName);
+
+              // Log the signed URL to confirm it’s being generated
+
+              // Replace the original URL with the signed URL
+              data.url = signedUrl;
+            } catch (error) {
+              console.error(
+                'Error during URL generation or file name extraction:',
+                error.message,
+              );
+            }
+          }
+        }),
+      );
 
       return { message: 'Property Fetched', success: true, property };
     } catch (error) {
