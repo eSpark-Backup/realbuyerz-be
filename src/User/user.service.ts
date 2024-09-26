@@ -486,15 +486,18 @@ export class UserService {
         },
       });
 
-      const fileName = user.profileImage.split(
-        `${process.env.BUCKET_NAME}/`,
-      )[1];
-      // Generate a signed URL for the image
-      const signedUrl = await this.backblazeService.generateSignedUrl(fileName);
+      if (user.profileImage) {
+        const fileName = user.profileImage.split(
+          `${process.env.BUCKET_NAME}/`,
+        )[1];
 
-      // Replace the public URL with the signed URL
-      user.profileImage = signedUrl;
+        // Generate a signed URL for the image
+        const signedUrl =
+          await this.backblazeService.generateSignedUrl(fileName);
 
+        // Replace the public URL with the signed URL
+        user.profileImage = signedUrl;
+      }
       if (!user) {
         return {
           success: false,
