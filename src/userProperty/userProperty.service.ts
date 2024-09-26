@@ -330,10 +330,15 @@ export class UserPropertyService {
 
     const totalCount = await this.prismaService.property.count({});
 
+    //find the latest properties
+
     const properties = await this.prismaService.property.findMany({
       where,
       skip,
       take: pageSize,
+      orderBy: {
+        createdAt: 'desc', // Sort by the latest properties
+      },
       include: {
         amenities: {
           select: {
