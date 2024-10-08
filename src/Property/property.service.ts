@@ -401,21 +401,13 @@ export class PropertyService {
           userStatusMap.get(property.id) === 'rejected' &&
           property.isDeleted == false,
       );
-      const acceptedProposals = properties.filter(
-        (property) =>
-          userStatusMap.get(property.id) === 'accepted' &&
-          property.isDeleted == false,
-      );
+
       const submittedProposals = properties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'submitted' &&
           property.isDeleted == false,
       );
-      const pendingProposals = properties.filter(
-        (property) =>
-          userStatusMap.get(property.id) === 'pending' &&
-          property.isDeleted == false,
-      );
+
       const trashProperties = properties.filter(
         (property) => property.isDeleted === true,
       );
@@ -432,9 +424,7 @@ export class PropertyService {
         activeProposals: organizeProperties(activeProposals),
         archivedProposals: organizeProperties(archivedProposals),
         rejectedProposals: organizeProperties(rejectedProposals),
-        acceptedProposals: organizeProperties(acceptedProposals),
         submittedProposals: organizeProperties(submittedProposals),
-        pendingProposals: organizeProperties(pendingProposals),
         trashProperties: organizeProperties(trashProperties),
         totalCount,
         currentPage: page,

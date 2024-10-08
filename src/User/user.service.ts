@@ -486,7 +486,7 @@ export class UserService {
         },
       });
 
-      if (user.profileImage) {
+      if (user.profileImage && !user.socialId) {
         const fileName = user.profileImage.split(
           `${process.env.BUCKET_NAME}/`,
         )[1];

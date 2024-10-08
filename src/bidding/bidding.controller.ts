@@ -80,4 +80,10 @@ export class BiddingController {
   async rejectProposal(@Param('id') id: string) {
     return await this.biddingService.rejectProposal(id);
   }
+  @UseGuards(JwtAuthGuard, UserRoleGuard)
+  @Roles('user')
+  @Post('archiveProposal/:id')
+  async archiveProposal(@Param('id') id: string) {
+    return await this.biddingService.archiveProposal(id);
+  }
 }

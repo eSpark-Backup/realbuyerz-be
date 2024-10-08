@@ -241,7 +241,7 @@ export class BiddingService {
           },
           data: {
             userStatus: 'rejected',
-            agentStatus: 'archive',
+            agentStatus: 'rejected',
           },
         });
       }
@@ -269,14 +269,42 @@ export class BiddingService {
           id: biddingEntry.id,
         },
         data: {
-          agentStatus: 'archive',
           userStatus: 'rejected',
+          agentStatus: 'rejected',
         },
       });
 
       return updatedBiddingEntry;
     } catch (error) {
       throw new Error(`Error accepting proposal: ${error.message}`);
+    }
+  }
+
+  async archiveProposal(id: string) {
+    try {
+      const biddingEntry = await this.prismaService.bidding.findFirst({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!biddingEntry) {
+        throw new Error('Bidding entry not found');
+      }
+
+      const updatedBiddingEntry = await this.prismaService.bidding.update({
+        where: {
+          id: biddingEntry.id,
+        },
+        data: {
+          agentStatus: 'archive',
+          userStatus: 'archive',
+        },
+      });
+
+      return updatedBiddingEntry;
+    } catch (error) {
+      throw new Error(`Error archiving proposal: ${error.message}`);
     }
   }
 }
