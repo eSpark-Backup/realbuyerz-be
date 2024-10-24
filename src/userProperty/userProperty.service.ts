@@ -200,6 +200,16 @@ export class UserPropertyService {
               amenity: true,
             },
           },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              address: true,
+              profileImage: true,
+              socialId: true,
+            },
+          },
           PropertyData: true,
           propertyType: {
             include: {
@@ -213,33 +223,54 @@ export class UserPropertyService {
         where: whereCondition,
       }),
     ]);
+    const modifiedProperties = properties.map((property) => {
+      const subTypes = {
+        id: property.propertyType.id || null, // SubType ID
+        typeName: property.propertyType.subTypeName || null, // SubType Name
+        url: property.propertyType.url || null, // SubType URL
+        imageKey: property.propertyType.imageKey || null, // SubType Image Key
+        createdAt: property.propertyType.createdAt || null,
+        updatedAt: property.propertyType.updatedAt || null,
+      };
+      const parentType = property.propertyType?.propertyType || null; // SubType
+
+      return {
+        ...property,
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
 
     await Promise.all(
       properties.map(async (property) => {
+        if (
+          property.user.profileImage &&
+          (!property.user.socialId || property.user.socialId == 'string')
+        ) {
+          const fileName = property.user.profileImage.split(
+            `${process.env.BUCKET_NAME}/`,
+          )[1];
+          const signedUrl =
+            await this.backblazeService.generateSignedUrl(fileName);
+          property.user.profileImage = signedUrl;
+        }
         await Promise.all(
           property.PropertyData.map(async (data) => {
             if (data.type === 'image') {
               try {
-                // Log the current data.url to debug
-
-                // Extract the fileName from the URL
                 const fileName = data.url.split(
                   `${process.env.BUCKET_NAME}/`,
                 )[1];
-
-                // Log the extracted fileName for debugging
 
                 if (!fileName) {
                   return;
                 }
 
-                // Generate a signed URL for the image
                 const signedUrl =
                   await this.backblazeService.generateSignedUrl(fileName);
 
-                // Log the signed URL to confirm it’s being generated
-
-                // Replace the original URL with the signed URL
                 data.url = signedUrl;
               } catch (error) {
                 console.error(
@@ -253,7 +284,7 @@ export class UserPropertyService {
       }),
     );
 
-    const items = properties.map((property) => ({
+    const items = modifiedProperties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
@@ -345,18 +376,44 @@ export class UserPropertyService {
             amenity: true, // Include only the name
           },
         },
-        propertyType: true,
+        propertyType: {
+          include: {
+            propertyType: true,
+          },
+        },
       },
     });
-    const active = properties.filter(
+    const modifiedProperties = properties.map((property) => {
+      const subTypes = {
+        id: property.propertyType.id || null, // SubType ID
+        typeName: property.propertyType.subTypeName || null, // SubType Name
+        url: property.propertyType.url || null, // SubType URL
+        imageKey: property.propertyType.imageKey || null, // SubType Image Key
+        createdAt: property.propertyType.createdAt || null,
+        updatedAt: property.propertyType.updatedAt || null,
+      };
+      const parentType = property.propertyType?.propertyType || null; // SubType
+
+      return {
+        ...property,
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
+
+    const active = modifiedProperties.filter(
       (property) =>
         property.propertyStatus === true && property.isDeleted === false,
     );
-    const draft = properties.filter(
+    const draft = modifiedProperties.filter(
       (property) =>
         property.propertyStatus === false && property.isDeleted === false,
     );
-    const trash = properties.filter((property) => property.isDeleted === true);
+    const trash = modifiedProperties.filter(
+      (property) => property.isDeleted === true,
+    );
 
     const organizeProperties = (properties) =>
       properties.map((property) => ({
@@ -645,18 +702,7 @@ export class UserPropertyService {
             },
             propertyType: {
               select: {
-                id: true,
-                subTypeName: true,
-                url: true,
-                imageKey: true,
-                propertyType: {
-                  select: {
-                    id: true,
-                    typeName: true,
-                    url: true,
-                    imageKey: true,
-                  },
-                },
+                propertyType: true,
               },
             },
           },
@@ -671,6 +717,7 @@ export class UserPropertyService {
         data: [],
       };
     }
+
     await Promise.all(
       savedProperties.map(async (property) => {
         await Promise.all(
@@ -709,11 +756,33 @@ export class UserPropertyService {
         );
       }),
     );
+    const modifiedProperties = savedProperties.map((property) => {
+      const subTypes = {
+        id: property.property.propertyType.propertyType.id || null, // SubType ID
+        typeName: property.property.propertyType.propertyType.typeName || null, // SubType Name
+        url: property.property.propertyType.propertyType.url || null, // SubType URL
+        imageKey: property.property.propertyType.propertyType.imageKey || null, // SubType Image Key
+        createdAt:
+          property.property.propertyType.propertyType.createdAt || null,
+        updatedAt:
+          property.property.propertyType.propertyType.updatedAt || null,
+      };
+      const parentType = property.property.propertyType?.propertyType || null; // SubType
+      delete property.property.propertyType;
+      return {
+        ...property,
+
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
 
     return {
       success: true,
       message: 'Saved properties retrieved successfully',
-      data: savedProperties,
+      data: modifiedProperties,
     };
   }
 

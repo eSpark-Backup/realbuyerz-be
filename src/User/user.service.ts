@@ -465,6 +465,7 @@ export class UserService {
           lastName: true,
           email: true,
           landlineNumber: true,
+          mobileNumber: true,
           city: true,
           bio: true,
           whatsapp: true,
@@ -486,7 +487,7 @@ export class UserService {
         },
       });
 
-      if (user.profileImage && !user.socialId) {
+      if (user.profileImage && (!user.socialId || user.socialId == 'string')) {
         const fileName = user.profileImage.split(
           `${process.env.BUCKET_NAME}/`,
         )[1];

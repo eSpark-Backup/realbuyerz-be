@@ -143,18 +143,7 @@ export class PropertyService {
             },
             propertyType: {
               select: {
-                id: true,
-                subTypeName: true,
-                url: true,
-                imageKey: true,
-                propertyType: {
-                  select: {
-                    id: true,
-                    typeName: true,
-                    url: true,
-                    imageKey: true,
-                  },
-                },
+                propertyType: true,
               },
             },
           },
@@ -170,10 +159,33 @@ export class PropertyService {
       };
     }
 
+    const modifiedProperties = savedProperties.map((property) => {
+      const subTypes = {
+        id: property.property.propertyType.propertyType.id || null, // SubType ID
+        typeName: property.property.propertyType.propertyType.typeName || null, // SubType Name
+        url: property.property.propertyType.propertyType.url || null, // SubType URL
+        imageKey: property.property.propertyType.propertyType.imageKey || null, // SubType Image Key
+        createdAt:
+          property.property.propertyType.propertyType.createdAt || null,
+        updatedAt:
+          property.property.propertyType.propertyType.updatedAt || null,
+      };
+      const parentType = property.property.propertyType?.propertyType || null; // SubType
+      delete property.property.propertyType;
+
+      return {
+        ...property,
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
+
     return {
       success: true,
       message: 'Saved properties retrieved successfully',
-      data: savedProperties,
+      data: modifiedProperties,
     };
   }
 
@@ -330,12 +342,16 @@ export class PropertyService {
                 subTypeName: true,
                 url: true,
                 imageKey: true,
+                createdAt: true,
+                updatedAt: true,
                 propertyType: {
                   select: {
                     id: true,
                     typeName: true,
                     url: true,
                     imageKey: true,
+                    createdAt: true,
+                    updatedAt: true,
                   },
                 },
               },
@@ -347,8 +363,29 @@ export class PropertyService {
           where: whereCondition,
         }),
       ]);
+
+      const modifiedProperties = properties.map((property) => {
+        const subTypes = {
+          id: property.propertyType.id || null, // SubType ID
+          typeName: property.propertyType.subTypeName || null, // SubType Name
+          url: property.propertyType.url || null, // SubType URL
+          imageKey: property.propertyType.imageKey || null, // SubType Image Key
+          createdAt: property.propertyType.createdAt || null,
+          updatedAt: property.propertyType.updatedAt || null,
+        };
+        const parentType = property.propertyType?.propertyType || null; // SubType
+
+        return {
+          ...property,
+          propertyType: {
+            ...parentType,
+            subTypes,
+          },
+        };
+      });
+
       await Promise.all(
-        properties.map(async (property) => {
+        modifiedProperties.map(async (property) => {
           await Promise.all(
             property.PropertyData.map(async (data) => {
               if (data.type === 'image') {
@@ -386,29 +423,29 @@ export class PropertyService {
         }),
       );
 
-      const activeProposals = properties.filter(
+      const activeProposals = modifiedProperties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'active' &&
           property.isDeleted == false,
       );
-      const archivedProposals = properties.filter(
+      const archivedProposals = modifiedProperties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'archive' &&
           property.isDeleted == false,
       );
-      const rejectedProposals = properties.filter(
+      const rejectedProposals = modifiedProperties.filter(
         (property) =>
           userStatusMap.get(property.id) === 'rejected' &&
           property.isDeleted == false,
       );
 
-      const submittedProposals = properties.filter(
+      const submittedProposals = modifiedProperties.filter(
         (property) =>
           agentStatusMap.get(property.id) === 'submitted' &&
           property.isDeleted == false,
       );
 
-      const trashProperties = properties.filter(
+      const trashProperties = modifiedProperties.filter(
         (property) => property.isDeleted === true,
       );
 
@@ -466,12 +503,16 @@ export class PropertyService {
               subTypeName: true,
               url: true,
               imageKey: true,
+              createdAt: true,
+              updatedAt: true,
               propertyType: {
                 select: {
                   id: true,
                   typeName: true,
                   url: true,
                   imageKey: true,
+                  createdAt: true,
+                  updatedAt: true,
                 },
               },
             },
@@ -484,6 +525,7 @@ export class PropertyService {
         where: whereCondition,
       }),
     ]);
+
     await Promise.all(
       properties.map(async (property) => {
         await Promise.all(
@@ -522,8 +564,27 @@ export class PropertyService {
         );
       }),
     );
+    const modifiedProperties = properties.map((property) => {
+      const subTypes = {
+        id: property.propertyType.id || null, // SubType ID
+        typeName: property.propertyType.subTypeName || null, // SubType Name
+        url: property.propertyType.url || null, // SubType URL
+        imageKey: property.propertyType.imageKey || null, // SubType Image Key
+        createdAt: property.propertyType.createdAt || null,
+        updatedAt: property.propertyType.updatedAt || null,
+      };
+      const parentType = property.propertyType?.propertyType || null; // SubType
 
-    const items = properties.map((property) => ({
+      return {
+        ...property,
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
+
+    const items = modifiedProperties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
@@ -1212,8 +1273,27 @@ export class PropertyService {
       },
       where,
     });
+    const modifiedProperties = properties.map((property) => {
+      const subTypes = {
+        id: property.propertyType.id || null, // SubType ID
+        typeName: property.propertyType.subTypeName || null, // SubType Name
+        url: property.propertyType.url || null, // SubType URL
+        imageKey: property.propertyType.imageKey || null, // SubType Image Key
+        createdAt: property.propertyType.createdAt || null,
+        updatedAt: property.propertyType.updatedAt || null,
+      };
+      const parentType = property.propertyType?.propertyType || null; // SubType
 
-    const items = properties.map((property) => ({
+      return {
+        ...property,
+        propertyType: {
+          ...parentType,
+          subTypes,
+        },
+      };
+    });
+
+    const items = modifiedProperties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
