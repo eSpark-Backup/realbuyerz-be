@@ -80,11 +80,18 @@ export class AdminService {
           },
         },
       });
+      const transformedPropertyTypes = propertyTypes.map((property) => ({
+        ...property,
+        subTypes: property.subTypes.map(({ subTypeName, ...rest }) => ({
+          ...rest,
+          typeName: subTypeName, // replace subTypeName with typeName
+        })),
+      }));
 
       return {
         status: 200,
         message: 'Property Type fetched successfully',
-        data: propertyTypes,
+        data: transformedPropertyTypes,
       };
     } catch (error) {
       return {
