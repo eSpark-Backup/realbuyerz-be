@@ -14,6 +14,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserPropertyDto } from './dto/create-property.dto';
@@ -31,6 +32,7 @@ import { PropertyQueryDto } from './dto/property_quey-dto';
 import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
 import { UserRoleGuard } from 'src/utils/guard/user.guard';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
+import { OptionalRoleGuard } from 'src/utils/guard/optional.role.guard.';
 
 @Controller('userProperty')
 export class UserPropertyController {
@@ -108,8 +110,11 @@ export class UserPropertyController {
 
   @Get()
   @FindAllApiDocs()
+  @ApiBearerAuth('jwt')
+  @UseGuards(OptionalRoleGuard)
   @ApiTags('Find All Properties Listed by Agent')
   async findAll(
+    @Req() req,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
     @Query() query: PropertyQueryDto,
@@ -122,7 +127,7 @@ export class UserPropertyController {
       subType: query.subType,
     };
 
-    return this.userPropertyService.findAll(page, pageSize, filters);
+    return this.userPropertyService.findAll(req, page, pageSize, filters);
   }
 
   @ApiBearerAuth()

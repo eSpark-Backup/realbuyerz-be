@@ -16,11 +16,6 @@ export class OptionalRoleGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromRequest(request);
     if (!token) {
@@ -31,7 +26,7 @@ export class OptionalRoleGuard implements CanActivate {
     if (!decodedToken || !decodedToken.role) {
       throw new UnauthorizedException('Unauthorized');
     }
-    if (decodedToken.role === 'agent') {
+    if (decodedToken.role) {
       const jwtService = new JwtService();
       const decodedToken = jwtService.decode(token);
       const userId = decodedToken.id;
@@ -39,7 +34,7 @@ export class OptionalRoleGuard implements CanActivate {
 
       return true;
     } else {
-      throw new UnauthorizedException('this route is only for agent role');
+      throw new UnauthorizedException('Invalid Token Role');
     }
   }
 
