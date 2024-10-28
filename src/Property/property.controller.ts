@@ -9,11 +9,13 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Optional,
   Param,
   ParseIntPipe,
   Post,
   Put,
   Query,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -36,9 +38,9 @@ import { Roles } from 'src/utils/decorator/role.decorator';
 import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 import { UserId } from 'src/utils/decorator/userId.decorator';
+import { OptionalRoleGuard } from 'src/utils/guard/optional.role.guard.';
 
 @Controller('property')
-@ApiTags('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
@@ -46,7 +48,7 @@ export class PropertyController {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles('agent')
   @Post()
-  @ApiTags('property')
+  @ApiTags('Agent Section')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(propertyImageFileInterceptor)
   @CreateApiDocs()
@@ -70,7 +72,7 @@ export class PropertyController {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles('agent')
   @Put('/:id')
-  @ApiTags('property')
+  @ApiTags('Agent Section')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(propertyImageFileInterceptor)
   @UpdateApiDocs()
@@ -92,13 +94,14 @@ export class PropertyController {
 
   @ApiBearerAuth('jwt')
   @Roles('agent')
+  @ApiTags('Agent Section')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
-    summary: 'Find All Property Saved Request of Agent ',
+    summary: 'Find All Request of User/Customer which is saved by Agent',
     type: null,
     goodResponse: {
       status: 201,
-      description: 'Find All Saved Property Request of Agent',
+      description: 'Find All Saved Request of User/Customer by Agent',
     },
     badresponse: { status: 400, description: 'Property Not Added' },
   })
@@ -109,9 +112,10 @@ export class PropertyController {
 
   @ApiBearerAuth('jwt')
   @Roles('agent')
+  @ApiTags('Agent Section')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
-    summary: 'Save Property Request of User/Customer to Agent Side',
+    summary: 'Save Request of User/Customer to Agent Side',
     type: null,
     goodResponse: {
       status: 201,
@@ -137,6 +141,7 @@ export class PropertyController {
     return result;
   }
   @Roles('agent')
+  @ApiTags('Agent Section')
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @swaggerDocs({
@@ -150,7 +155,7 @@ export class PropertyController {
   })
   @Roles('agent')
   @Get('agent')
-  @ApiTags('property')
+  @ApiTags('Agent Section')
   async findbyuserId(
     @UserId() user_id: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -172,6 +177,7 @@ export class PropertyController {
   @Delete('/:id')
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
+  @ApiTags('Agent Section')
   @Roles('agent')
   async deleteProperty(@Param('id') id: string, @UserId() user_id: string) {
     const result = await this.propertyService.deleteProperty(id, user_id);
@@ -186,7 +192,20 @@ export class PropertyController {
 
   @Get()
   @FindAllApiDocs()
+  @ApiBearerAuth('jwt')
+  @UseGuards(OptionalRoleGuard)
+  @swaggerDocs({
+    summary: 'Find All request of User/Customer including Saved Leads',
+    type: null,
+    goodResponse: {
+      status: 201,
+      description: 'Find All Request listed by Customer including Saved Leads',
+    },
+    badresponse: { status: 400, description: 'Properties Not Found' },
+  })
+  @ApiTags('Find All Request listed by Customer/User')
   async findAll(
+    @Req() req,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
     @Query() query: PropertyQueryDto,
@@ -199,6 +218,6 @@ export class PropertyController {
       subType: query.subType,
     };
 
-    return this.propertyService.findAll(page, pageSize, filters);
+    return this.propertyService.findAll(req, page, pageSize, filters);
   }
 }

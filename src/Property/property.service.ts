@@ -1210,6 +1210,7 @@ export class PropertyService {
   }
 
   async findAll(
+    req: any,
     page = 1,
     pageSize = 50,
     filters?: {
@@ -1307,6 +1308,83 @@ export class PropertyService {
       totalPages: Math.ceil(totalCount / pageSize),
       itemsPerPage: pageSize,
     };
+    if (req.userId) {
+      let savedLeadItems = [];
+      const savedProperties = await this.prismaService.savedProperty.findMany({
+        where: {
+          userId: req.userId,
+        },
+        include: {
+          property: {
+            include: {
+              amenities: {
+                select: {
+                  amenity: true,
+                },
+              },
+              propertyType: {
+                select: {
+                  propertyType: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      let data = {
+        items,
+        savedLeadItems,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
+      };
+      if (!savedProperties.length) {
+        return {
+          action: 'Find All Properties',
+          message: 'Properties Found',
+          data,
+        };
+      }
+
+      savedLeadItems = savedProperties.map((property) => {
+        const subTypes = {
+          id: property.property.propertyType.propertyType.id || null, // SubType ID
+          typeName:
+            property.property.propertyType.propertyType.typeName || null, // SubType Name
+          url: property.property.propertyType.propertyType.url || null, // SubType URL
+          imageKey:
+            property.property.propertyType.propertyType.imageKey || null, // SubType Image Key
+          createdAt:
+            property.property.propertyType.propertyType.createdAt || null,
+          updatedAt:
+            property.property.propertyType.propertyType.updatedAt || null,
+        };
+        const parentType = property.property.propertyType?.propertyType || null; // SubType
+        delete property.property.propertyType;
+        return {
+          ...property,
+          propertyType: {
+            ...parentType,
+            subTypes,
+          },
+        };
+      });
+
+      data = {
+        items,
+        savedLeadItems,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
+      };
+      return {
+        action: 'Find All Properties',
+        message: 'Properties Found',
+        data,
+      };
+    }
 
     return {
       action: 'Find All Properties',

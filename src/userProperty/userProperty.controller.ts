@@ -33,7 +33,6 @@ import { UserRoleGuard } from 'src/utils/guard/user.guard';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 
 @Controller('userProperty')
-@ApiTags('User Property Proposals')
 export class UserPropertyController {
   constructor(private readonly userPropertyService: UserPropertyService) {}
 
@@ -41,6 +40,7 @@ export class UserPropertyController {
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
+  @ApiTags('User Request Section')
   @Post()
   async createProperty(
     @UserId() userId: string,
@@ -55,6 +55,7 @@ export class UserPropertyController {
 
   @ApiBearerAuth()
   @ApiBearerAuth('jwt')
+  @ApiTags('User Request Section')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
   @Put('/:id')
@@ -70,9 +71,10 @@ export class UserPropertyController {
   }
 
   @ApiBearerAuth('jwt')
+  @ApiTags('User Request Section')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @swaggerDocs({
-    summary: 'Get all properties of User',
+    summary: 'Get all Request listed By User',
     type: null,
     goodResponse: {
       status: 201,
@@ -106,6 +108,7 @@ export class UserPropertyController {
 
   @Get()
   @FindAllApiDocs()
+  @ApiTags('Find All Properties Listed by Agent')
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
@@ -123,6 +126,7 @@ export class UserPropertyController {
   }
 
   @ApiBearerAuth()
+  @ApiTags('User Request Section')
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @Roles('user')
@@ -134,9 +138,10 @@ export class UserPropertyController {
 
   @ApiBearerAuth('jwt')
   @Roles('agent')
+  @ApiTags('User Request Section')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @swaggerDocs({
-    summary: 'Find All Saved Property  of User/Customer',
+    summary: 'Find All  Properties  saved By User/Customer',
     type: null,
     goodResponse: {
       status: 201,
@@ -151,6 +156,7 @@ export class UserPropertyController {
 
   @ApiBearerAuth('jwt')
   @Roles('user')
+  @ApiTags('User Request Section')
   @UseGuards(JwtAuthGuard, UserRoleGuard)
   @swaggerDocs({
     summary: 'Save Property of Agent to user Favourites',
