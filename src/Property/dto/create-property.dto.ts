@@ -14,6 +14,7 @@ import {
   IsUUID,
   IsArray,
 } from 'class-validator';
+import { json } from 'stream/consumers';
 class AmenityDto {
   @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
   name: string;
@@ -154,9 +155,23 @@ export class CreatePropertyDto {
 
   @ApiProperty({
     description: 'List of amenities available in the property',
-    type: [AmenityDto],
+    type: 'array',
+    example: [
+      { name: 'Bedroom', count: 1, imageUrl: 'http://example.com/image.jpg' },
+      { name: 'Bathroom', count: 2, imageUrl: 'http://example.com/image.jpg' },
+      { name: 'Balcony', count: 1, imageUrl: 'http://example.com/image.jpg' },
+      { name: 'Parking', count: 2, imageUrl: 'http://example.com/image.jpg' },
+    ],
+    items: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Bedroom' },
+        count: { type: 'number', example: 1 },
+        imageUrl: { type: 'string', example: 'http://example.com/image.jpg' },
+      },
+    },
   })
-  amenity: AmenityDto[];
+  amenity: { name: string; count: number; imageUrl: string }[];
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",

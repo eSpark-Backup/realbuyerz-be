@@ -22,6 +22,7 @@ import { saveImageToDisk } from '../utils/function/saveImage';
 import { generateResponse } from 'src/utils/function/response';
 import { BackblazeService } from 'src/utils/function/backblaze';
 import { url } from 'inspector';
+import { plainToInstance } from 'class-transformer';
 
 function isValidUrl(url: string): boolean {
   try {
@@ -732,6 +733,7 @@ export class PropertyService {
         property.propertyStatus = false;
       }
     }
+    const propertyAmenities = plainToInstance(Object, property.amenity || []);
 
     try {
       const propertyData: Prisma.PropertyCreateInput = {
@@ -739,7 +741,7 @@ export class PropertyService {
         propertyName: property.propertyName,
         purpose: property.purpose,
         propertyPrice: property.propertyPrice,
-        amenity: JSON.parse(JSON.stringify(property.amenity || [])), // Convert to JSON
+        amenity: propertyAmenities,
         propertyArea: property.propertyArea,
         propertyCity: property.propertyCity,
         propertyStatus: property.propertyStatus,
