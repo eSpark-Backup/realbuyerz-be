@@ -1261,6 +1261,15 @@ export class PropertyService {
       skip,
       take: pageSize,
       include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            address: true,
+            profileImage: true,
+          },
+        },
         amenities: {
           select: {
             amenity: true, // Include only the name
