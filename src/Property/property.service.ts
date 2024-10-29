@@ -733,7 +733,6 @@ export class PropertyService {
         property.propertyStatus = false;
       }
     }
-    const propertyAmenities = plainToInstance(Object, property.amenity || []);
 
     try {
       const propertyData: Prisma.PropertyCreateInput = {
@@ -741,7 +740,6 @@ export class PropertyService {
         propertyName: property.propertyName,
         purpose: property.purpose,
         propertyPrice: property.propertyPrice,
-        amenity: propertyAmenities,
         propertyArea: property.propertyArea,
         propertyCity: property.propertyCity,
         propertyStatus: property.propertyStatus,
@@ -754,6 +752,7 @@ export class PropertyService {
         propertyType: {
           connect: { id: property.propertySubTypeId },
         },
+
         amenities: {
           create: amenitiesArray.map((id) => ({
             amenity: { connect: { id } },
