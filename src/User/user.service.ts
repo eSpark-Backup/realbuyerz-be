@@ -264,7 +264,12 @@ export class UserService {
     return emailPattern.test(input);
   }
 
-  async verifyOtp(emailPhone: string, otp: string, hash: string): Promise<any> {
+  async verifyOtp(
+    emailPhone: string,
+    otp: string,
+    hash: string,
+    password: string,
+  ): Promise<any> {
     try {
       const [hashValue, expires] = hash.split('.');
       const now = Date.now();
@@ -293,10 +298,12 @@ export class UserService {
             response: user,
           };
         } else {
+          const hashedPassword = await this.hashPassword(password);
           const user = await this.prismaService.user.update({
             where: { mobileNumber: emailPhone },
             data: {
               isVerified: true,
+              password: hashedPassword,
             },
           });
           return {

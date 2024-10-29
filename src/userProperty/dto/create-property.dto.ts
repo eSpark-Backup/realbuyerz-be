@@ -91,6 +91,20 @@ export class CreateUserPropertyDto {
   // @IsNotEmpty({ message: 'Property status cannot be empty' })
   readonly propertyStatus: boolean;
 
+  @ApiProperty({
+    description: 'List of amenities available in the property',
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Bedroom' },
+        count: { type: 'number', example: 1 },
+        imageUrl: { type: 'string', example: 'http://example.com/image.jpg' },
+      },
+    },
+  })
+  amenity: any;
+
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
   //   "count": "1",

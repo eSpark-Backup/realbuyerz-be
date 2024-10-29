@@ -14,6 +14,16 @@ export class UserPropertyService {
   ) {}
 
   async createProperty(user_id: string, createProperty: CreateUserPropertyDto) {
+    const { amenity, ...propertyDetails } = createProperty;
+    const amenityArray = JSON.parse(amenity);
+
+    // Convert to Prisma-compatible JSON format
+    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+      name: item.name,
+      count: item.count,
+      imageUrl: item.imageUrl,
+    }));
+
     const property = { ...createProperty };
     property.userId = user_id;
     property.propertyBy = 'user';
@@ -86,6 +96,7 @@ export class UserPropertyService {
         propertyBy: property.propertyBy,
         propertyDescription: property.propertyDescription,
         longitude: property.longitude,
+        amenity: amenitiesJson,
         latitude: property.latitude,
         propertyType: {
           connect: { id: property.propertySubTypeId },
@@ -521,6 +532,16 @@ export class UserPropertyService {
   async updateProperty(updateProperty: updateUserPropertyDto, id: string) {
     const property = { ...updateProperty };
 
+    const { amenity, ...propertyDetails } = updateProperty;
+    const amenityArray = JSON.parse(amenity);
+
+    // Convert to Prisma-compatible JSON format
+    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+      name: item.name,
+      count: item.count,
+      imageUrl: item.imageUrl,
+    }));
+
     if (property.propertyPrice) {
       property.propertyPrice = parseInt(property.propertyPrice);
     }
@@ -624,6 +645,7 @@ export class UserPropertyService {
           propertyPrice: property.propertyPrice,
           propertyArea: property.property_area,
           propertyCity: property.propertyCity,
+          amenity: amenitiesJson,
           propertyAddress: property.propertyAddress,
           propertyZip: property.propertyAddress,
           propertyStatus: property.propertyStatus,
@@ -645,6 +667,7 @@ export class UserPropertyService {
           propertyArea: true,
           propertyCity: true,
           propertyAddress: true,
+          amenity: true,
           propertyZip: true,
           propertyStatus: true,
           propertyDescription: true,

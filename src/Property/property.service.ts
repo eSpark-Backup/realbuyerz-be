@@ -650,6 +650,16 @@ export class PropertyService {
     files: { image?: Express.Multer.File[] },
     createProperty: CreatePropertyDto,
   ) {
+    const { amenity, ...propertyDetails } = createProperty;
+    const amenityArray = JSON.parse(amenity);
+
+    // Convert to Prisma-compatible JSON format
+    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+      name: item.name,
+      count: item.count,
+      imageUrl: item.imageUrl,
+    }));
+
     createProperty.userId = user_id;
     if (files.image) {
       const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
@@ -749,6 +759,7 @@ export class PropertyService {
         propertyDescription: property.propertyDescription,
         longitude: property.longitude,
         latitude: property.latitude,
+        amenity: amenitiesJson,
         propertyType: {
           connect: { id: property.propertySubTypeId },
         },
@@ -852,6 +863,16 @@ export class PropertyService {
     updateProperty: updatedPropertyDto,
   ) {
     const property = { ...updateProperty };
+
+    const { amenity, ...propertyDetails } = updateProperty;
+    const amenityArray = JSON.parse(amenity);
+
+    // Convert to Prisma-compatible JSON format
+    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+      name: item.name,
+      count: item.count,
+      imageUrl: item.imageUrl,
+    }));
 
     if (property.propertyPrice) {
       property.propertyPrice = parseInt(property.propertyPrice);
@@ -972,9 +993,9 @@ export class PropertyService {
               },
               purpose: property.purpose,
               propertyPrice: property.propertyPrice,
-              amenity: JSON.parse(JSON.stringify(property.amenity || [])),
               propertyArea: property.propertyArea,
               propertyCity: property.propertyCity,
+              amenity: amenitiesJson,
               propertyAddress: property.propertyAddress,
               propertyZip: property.propertyAddress,
               propertyStatus: property.propertyStatus,
@@ -996,6 +1017,7 @@ export class PropertyService {
               propertyArea: true,
               propertyCity: true,
               propertyAddress: true,
+              amenity: true,
               propertyZip: true,
               propertyStatus: true,
               PropertyData: true,

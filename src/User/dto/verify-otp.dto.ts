@@ -19,4 +19,9 @@ export class VerifyOtpDto {
   @IsNotEmpty()
   @IsString()
   readonly hash: string;
+
+  @ApiProperty({ description: 'Password' })
+  @IsNotEmpty()
+  @IsString()
+  readonly password: string;
 }

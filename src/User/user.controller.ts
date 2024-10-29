@@ -136,6 +136,7 @@ export class UserController {
       verifyOtpDto.emailPhone,
       verifyOtpDto.otp,
       verifyOtpDto.hash,
+      verifyOtpDto.password,
     );
     return verificationResult;
   }

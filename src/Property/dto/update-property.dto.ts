@@ -154,9 +154,17 @@ export class updatedPropertyDto {
 
   @ApiProperty({
     description: 'List of amenities available in the property',
-    type: [AmenityDto],
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Bedroom' },
+        count: { type: 'number', example: 1 },
+        imageUrl: { type: 'string', example: 'http://example.com/image.jpg' },
+      },
+    },
   })
-  amenity: AmenityDto[];
+  amenity: any;
 
   //   @ApiProperty({ type: Object, example:  {
   //     "amenities_name": "Swimming Pool",

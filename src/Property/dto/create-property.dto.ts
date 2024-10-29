@@ -16,15 +16,17 @@ import {
 } from 'class-validator';
 import { json } from 'stream/consumers';
 class AmenityDto {
-  @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
+  @ApiProperty({ description: 'Name of the amenity', example: 'Bedroom' })
   name: string;
 
+  @ApiProperty({ description: 'Count of this amenity', example: 1 })
+  count: number;
+
   @ApiProperty({
-    description: 'The count of the amenity, if applicable',
-    example: 1,
-    required: false,
+    description: 'Image URL for the amenity',
+    example: 'http://example.com/image.jpg',
   })
-  count?: number;
+  imageUrl: string;
 }
 
 export class CreatePropertyDto {
@@ -156,12 +158,6 @@ export class CreatePropertyDto {
   @ApiProperty({
     description: 'List of amenities available in the property',
     type: 'array',
-    example: [
-      { name: 'Bedroom', count: 1, imageUrl: 'http://example.com/image.jpg' },
-      { name: 'Bathroom', count: 2, imageUrl: 'http://example.com/image.jpg' },
-      { name: 'Balcony', count: 1, imageUrl: 'http://example.com/image.jpg' },
-      { name: 'Parking', count: 2, imageUrl: 'http://example.com/image.jpg' },
-    ],
     items: {
       type: 'object',
       properties: {
@@ -171,7 +167,7 @@ export class CreatePropertyDto {
       },
     },
   })
-  amenity: { name: string; count: number; imageUrl: string }[];
+  amenity: any;
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
