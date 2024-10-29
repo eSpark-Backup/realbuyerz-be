@@ -14,19 +14,16 @@ import {
   IsUUID,
   IsArray,
 } from 'class-validator';
-
 class AmenityDto {
-  @IsString()
-  @IsOptional()
-  readonly amenitiesName: string;
+  @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
+  name: string;
 
-  @IsString()
-  @IsOptional()
-  readonly count: any;
-
-  @IsString()
-  @IsOptional()
-  readonly otherFeatures: string;
+  @ApiProperty({
+    description: 'The count of the amenity, if applicable',
+    example: 1,
+    required: false,
+  })
+  count?: number;
 }
 
 export class CreatePropertyDto {
@@ -154,6 +151,12 @@ export class CreatePropertyDto {
   readonly propertyStatus: boolean;
 
   imageKey?: string;
+
+  @ApiProperty({
+    description: 'List of amenities available in the property',
+    type: [AmenityDto],
+  })
+  amenity: AmenityDto[];
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",

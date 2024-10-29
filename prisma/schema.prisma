@@ -23,6 +23,7 @@ model Property {
     longitude            String?
     latitude             String?
     propertyBy           String?
+    amenity              Json?
     proposalCount        Int?              @default(0)
     propertyStatus       Boolean?          @default(true)
     isFeatured           Boolean?          @default(false)

@@ -7,7 +7,17 @@ import {
   IsUrl,
   IsUUID,
 } from 'class-validator';
+class AmenityDto {
+  @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
+  name: string;
 
+  @ApiProperty({
+    description: 'The count of the amenity, if applicable',
+    example: 1,
+    required: false,
+  })
+  count?: number;
+}
 export class updatedPropertyDto {
   @ApiProperty({ type: String, example: 'Beautiful House', required: false })
   @IsString({ message: 'Property name must be a string' })
@@ -141,6 +151,12 @@ export class updatedPropertyDto {
   })
   @IsOptional()
   readonly amenities?: string | string[];
+
+  @ApiProperty({
+    description: 'List of amenities available in the property',
+    type: [AmenityDto],
+  })
+  amenity: AmenityDto[];
 
   //   @ApiProperty({ type: Object, example:  {
   //     "amenities_name": "Swimming Pool",

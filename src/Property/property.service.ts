@@ -739,6 +739,7 @@ export class PropertyService {
         propertyName: property.propertyName,
         purpose: property.purpose,
         propertyPrice: property.propertyPrice,
+        amenity: JSON.parse(JSON.stringify(property.amenity || [])), // Convert to JSON
         propertyArea: property.propertyArea,
         propertyCity: property.propertyCity,
         propertyStatus: property.propertyStatus,
@@ -970,6 +971,7 @@ export class PropertyService {
               },
               purpose: property.purpose,
               propertyPrice: property.propertyPrice,
+              amenity: JSON.parse(JSON.stringify(property.amenity || [])),
               propertyArea: property.propertyArea,
               propertyCity: property.propertyCity,
               propertyAddress: property.propertyAddress,
@@ -1103,6 +1105,7 @@ export class PropertyService {
             select: {
               id: true,
               propertyName: true,
+              amenity: true,
               propertyType: true,
               purpose: true,
               propertyPrice: true,

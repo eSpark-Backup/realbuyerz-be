@@ -13,17 +13,15 @@ import {
 } from 'class-validator';
 
 class AmenityDto {
-  @IsString()
-  @IsOptional()
-  readonly amenities_name: string;
+  @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
+  name: string;
 
-  @IsString()
-  @IsOptional()
-  readonly count: any;
-
-  @IsString()
-  @IsOptional()
-  readonly other_features: string;
+  @ApiProperty({
+    description: 'The count of the amenity, if applicable',
+    example: 1,
+    required: false,
+  })
+  count?: number;
 }
 
 export class CreateBidPropertyDto {
@@ -156,6 +154,12 @@ export class CreateBidPropertyDto {
   @ApiProperty({ type: String, example: 1 })
   @IsNotEmpty({ message: 'User Property ID cannot be empty' })
   readonly userPropertyId: any;
+
+  @ApiProperty({
+    description: 'List of amenities available in the property',
+    type: [AmenityDto],
+  })
+  amenity: AmenityDto[];
 
   // @ApiProperty({ type: Object, example: {
   //   "amenities_name": "Swimming Pool",
