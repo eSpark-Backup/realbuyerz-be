@@ -1,15 +1,14 @@
 /* eslint-disable prettier/prettier */
 // src/user/dto/verify-otp.dto.ts
 
-import { IsNotEmpty, IsString, IsPhoneNumber } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class VerifyOtpDto {
-  @ApiProperty({ description: 'Phone number for which OTP was sent' })
+  @ApiProperty({ description: 'Phone/Email for which OTP was sent' })
   @IsNotEmpty()
   @IsString()
-  @IsPhoneNumber('PK', { message: 'Invalid phone number' })
-  readonly phoneNumber: string;
+  readonly emailPhone: string;
 
   @ApiProperty({ description: 'OTP to be verified' })
   @IsNotEmpty()

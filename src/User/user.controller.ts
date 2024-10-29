@@ -40,6 +40,8 @@ import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/utils/guard';
 import { swaggerDocs } from 'src/utils/decorator/swagger.decorator';
 import { UpsertPreferencesDto } from './dto/upsert-prefrences.dto';
+import { resendEmailDto } from './dto/resendEmail.dto';
+import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 
 @Controller('user')
 @ApiTags('User')
@@ -131,11 +133,26 @@ export class UserController {
   @VerifyOtpDocs()
   async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     const verificationResult = await this.userService.verifyOtp(
-      verifyOtpDto.phoneNumber,
+      verifyOtpDto.emailPhone,
       verifyOtpDto.otp,
       verifyOtpDto.hash,
     );
     return verificationResult;
+  }
+
+  @Post('resetPassword')
+  @swaggerDocs({
+    summary: 'Send Reset Password OTP to User Email',
+    type: resendEmailDto,
+    goodResponse: {
+      status: 201,
+      description: CONSTANT_RESPONSE.PASSWORD_RESET,
+    },
+    badresponse: { status: 400, description: 'Bad Request' },
+  })
+  async resetPasswordWithOtp(@Body() sendOtpDto: resendEmailDto) {
+    const OTP = await this.userService.passwordReset(sendOtpDto.email);
+    return OTP;
   }
 
   @ApiBearerAuth('jwt')

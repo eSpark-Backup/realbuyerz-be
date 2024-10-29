@@ -37,7 +37,10 @@ import { User } from '@prisma/client';
 import { CONSTANT_RESPONSE } from 'src/utils/constant/return.constant';
 import { BackblazeService } from 'src/utils/function/backblaze';
 import { UpsertPreferencesDto } from './dto/upsert-prefrences.dto';
-
+import { resendEmailTemplate } from 'src/utils/Static html/resendEmail';
+import { emailTemplate } from 'src/utils/Static html/resetPassword';
+const TTL = process.env.OTP_TTL;
+const OTP_KEY = process.env.OTP_KEY;
 const TOKEN_KEY = process.env.TOKEN_KEY;
 const key = process.env.OTP_KEY;
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -210,7 +213,58 @@ export class UserService {
   //   }
   // }
 
-  async verifyOtp(phone: string, otp: string, hash: string): Promise<any> {
+  async generateOtp(phoneEmail: string, fun: Function) {
+    const otp = otpGenerator.generate(6, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    //bahir s sett
+    const ttl = TTL;
+    const expires = Date.now() + ttl;
+    const data = `${phoneEmail}.${otp}.${expires}`;
+    const hash = crypto
+      .createHmac('sha256', OTP_KEY)
+      .update(data)
+      .digest('hex');
+    const fullHash = `${hash}.${expires}`;
+    const otpp = `${otp}`;
+
+    await fun(otpp);
+    return fullHash;
+  }
+
+  async passwordReset(email: any) {
+    const userFind = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (userFind) {
+      const otphash = await this.generateOtp(email, async (otp: any) => {
+        const modifiedTemplate = emailTemplate
+          .replace(/\${name}/g, `${userFind.firstName} ${userFind.lastName}`)
+          .replace(/\${otp}/g, otp);
+        await this.sendEmail(
+          email,
+          'Reset Password Email OTP',
+          modifiedTemplate,
+        );
+      });
+      return {
+        data: { otphash },
+        message: "Email sent successfully,Please check your email's inbox",
+      };
+    } else {
+      throw new NotFoundException('User not Exist with that Email');
+    }
+  }
+  isEmail(input: any) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(input);
+  }
+
+  async verifyOtp(emailPhone: string, otp: string, hash: string): Promise<any> {
     try {
       const [hashValue, expires] = hash.split('.');
       const now = Date.now();
@@ -219,25 +273,38 @@ export class UserService {
         throw new Error('OTP Expired');
       }
 
-      const data = `${phone}.${otp}.${expires}`;
+      const data = `${emailPhone}.${otp}.${expires}`;
       const newCalculateHash = crypto
         .createHmac('sha256', key)
         .update(data)
         .digest('hex');
 
       if (newCalculateHash === hashValue) {
-        const user = await this.prismaService.user.update({
-          where: { mobileNumber: phone },
-          data: {
-            isVerified: true,
-          },
-        });
-
-        return {
-          success: true,
-          message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
-          response: user,
-        };
+        if (this.isEmail(emailPhone)) {
+          const user = await this.prismaService.user.update({
+            where: { email: emailPhone },
+            data: {
+              isVerified: true,
+            },
+          });
+          return {
+            success: true,
+            message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
+            response: user,
+          };
+        } else {
+          const user = await this.prismaService.user.update({
+            where: { mobileNumber: emailPhone },
+            data: {
+              isVerified: true,
+            },
+          });
+          return {
+            success: true,
+            message: CONSTANT_RESPONSE.VERIFIED_SUCCESSFULLY,
+            response: user,
+          };
+        }
       }
 
       throw new Error('Invalid OTP');
