@@ -1335,7 +1335,7 @@ export class PropertyService {
       };
     });
 
-    const items = modifiedProperties.map((property) => ({
+    let items = modifiedProperties.map((property) => ({
       ...property,
       amenities: property.amenities.map((amenity) => amenity.amenity),
     }));
@@ -1372,6 +1372,16 @@ export class PropertyService {
           },
         },
       });
+      if (savedProperties.length > 0) {
+        const savedPropertyIds = new Set(
+          savedProperties.map((property) => property.propertyId),
+        );
+        items = items.map((property) => ({
+          ...property,
+          isFavourite: savedPropertyIds.has(property.id), // `true` if matched, `false` otherwise
+        }));
+      }
+
       let data = {
         items,
         savedLeadItems,
