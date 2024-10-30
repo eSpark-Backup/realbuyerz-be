@@ -5,7 +5,7 @@ import { IsOptional, IsNotEmpty, IsString } from 'class-validator';
 export class PropertyQueryDto {
   @ApiProperty({ required: false, description: 'The page number', example: 1 })
   @IsOptional()
-  readonly page: number = 1;
+  readonly page?: number = 1;
 
   @ApiProperty({
     required: false,
@@ -13,7 +13,15 @@ export class PropertyQueryDto {
     example: 10,
   })
   @IsOptional()
-  readonly pageSize: number = 10;
+  readonly pageSize?: number = 10;
+
+  @ApiProperty({
+    required: false,
+    description: 'The name of the property',
+    example: 'Beautiful House',
+  })
+  @IsOptional()
+  readonly propertyName?: string;
 
   @ApiProperty({
     required: false,
@@ -59,7 +67,7 @@ export class PropertyQueryDto {
   })
   @IsOptional()
   @IsString({ message: 'Get User Proposals Status' })
-  readonly status?: boolean;
+  readonly propertyStatus?: boolean;
 
   @ApiProperty({
     required: false,

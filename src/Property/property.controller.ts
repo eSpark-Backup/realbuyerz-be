@@ -169,7 +169,7 @@ export class PropertyController {
       propertyType: query.propertyType,
       subType: query.subType,
       proposals: query.proposals,
-      status: query.status,
+      status: query.propertyStatus,
     };
     return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
   }
@@ -211,6 +211,7 @@ export class PropertyController {
     @Query() query: PropertyQueryDto,
   ) {
     const filters = {
+      propertyName: query.propertyName,
       purpose: query.purpose,
       propertyCity: query.propertyCity,
       propertyId: query.propertyId,

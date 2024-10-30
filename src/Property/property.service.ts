@@ -1240,6 +1240,7 @@ export class PropertyService {
     page = 1,
     pageSize = 50,
     filters?: {
+      propertyName?: string;
       purpose?: string;
       propertyType?: string;
       subType?: string;
@@ -1256,7 +1257,12 @@ export class PropertyService {
       if (filters.purpose) {
         where.purpose = filters.purpose;
       }
-
+      if (filters.propertyName) {
+        where.propertyName = {
+          contains: filters.propertyName,
+          mode: 'insensitive',
+        };
+      }
       if (filters.propertyCity) {
         where.propertyCity = filters.propertyCity;
       }

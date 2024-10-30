@@ -98,7 +98,7 @@ export class UserPropertyController {
       propertyId: query.propertyId,
       propertyType: query.propertyType,
       subType: query.subType,
-      status: query.status,
+      status: query.propertyStatus,
     };
     return this.userPropertyService.findbyuserId(
       user_id,
@@ -120,6 +120,7 @@ export class UserPropertyController {
     @Query() query: PropertyQueryDto,
   ) {
     const filters = {
+      propertyName: query.propertyName,
       purpose: query.purpose,
       propertyCity: query.propertyCity,
       propertyId: query.propertyId,
