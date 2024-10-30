@@ -158,6 +158,18 @@ export class AdminService {
           // propertyId: false, // This line is not necessary as we omit it in select
         },
       });
+      //do a map on amenities to change the url to signedUrl i have function to id
+      await Promise.all(
+        amenities.map(async (amenity) => {
+          const fileName = amenity.url.split(`${process.env.BUCKET_NAME}/`)[1];
+          if (!fileName) {
+            return;
+          }
+          const signedUrl =
+            await this.backblazeService.generateSignedUrl(fileName);
+          amenity.url = signedUrl;
+        }),
+      );
 
       return {
         status: 200,
@@ -165,11 +177,10 @@ export class AdminService {
         data: amenities,
       };
     } catch (error) {
-      return {
-        status: 400,
-        message: 'Something went wrong',
-        data: error,
-      };
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
   async createAmenities(
