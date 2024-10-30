@@ -68,11 +68,12 @@ export class PropertyController {
     return result;
   }
 
-  // @ApiTags('Agent Details')
-  // async agentDetails(@Param('id') agentId: string) {
-  //   const result = await this.propertyService.agentDetils(agentId);
-  //   return result;
-  // }
+  @Get('agent/:id')
+  @ApiTags('Agent Details')
+  async agentDetails(@Param('id') agentId: string) {
+    const result = await this.propertyService.agentDetails(agentId);
+    return result;
+  }
 
   @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)

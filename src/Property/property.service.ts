@@ -856,6 +856,105 @@ export class PropertyService {
       }
     }
   }
+  async agentDetails(agentId: string) {
+    try {
+      const agent = await this.prismaService.user.findUnique({
+        where: { id: agentId },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          address: true,
+          email: true,
+          bio: true,
+          profileImage: true,
+        },
+      });
+      if (!agent) {
+        return {
+          success: false,
+          message: 'Agent not found',
+        };
+      }
+      const properties = await this.prismaService.property.findMany({
+        where: {
+          user: agent,
+        },
+        include: {
+          propertyType: {
+            select: {
+              id: true,
+              subTypeName: true,
+              url: true,
+              imageKey: true,
+              createdAt: true,
+              updatedAt: true,
+              propertyType: {
+                select: {
+                  id: true,
+                  typeName: true,
+                  url: true,
+                  imageKey: true,
+                  createdAt: true,
+                  updatedAt: true,
+                },
+              },
+            },
+          },
+          PropertyData: true,
+        },
+      });
+      const organizedProperties = {
+        Rent: { count: 0 },
+        Sale: { count: 0 },
+      };
+
+      properties.forEach((property) => {
+        const { purpose, propertyType } = property;
+
+        if (purpose && propertyType) {
+          const section =
+            purpose === 'Rent'
+              ? organizedProperties.Rent
+              : organizedProperties.Sale;
+
+          section.count += 1;
+
+          const typeName = propertyType.propertyType.typeName;
+
+          if (!section[typeName]) {
+            section[typeName] = { count: 0 };
+          }
+          section[typeName].count += 1;
+
+          const subTypeName = propertyType.subTypeName || 'Other';
+
+          if (!section[typeName][subTypeName]) {
+            section[typeName][subTypeName] = { count: 0, properties: [] };
+          }
+
+          section[typeName][subTypeName].count += 1;
+          section[typeName][subTypeName].properties.push(property);
+        }
+      });
+      const items = {
+        agent,
+        organizedProperties,
+      };
+
+      return {
+        success: true,
+        message: 'Agent details retrieved successfully',
+        data: items,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve agent details',
+        error: error.message,
+      };
+    }
+  }
 
   async updateProperty(
     property_id: string,
