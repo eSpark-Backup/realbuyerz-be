@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PropertyService } from 'src/Property/property.service';
 import { PropertyModule } from 'src/Property/property.module';
@@ -10,12 +10,17 @@ import { CreateAmenityDto } from './dto/create.amenities.dto';
 import { Prisma } from '@prisma/client';
 import { PropertyTypeDto } from './dto/create.property.type.dto';
 import { PropertySubTypeDto } from './dto/create.property-subType.dto';
+import { extname } from 'path';
+import { BackblazeService } from 'src/utils/function/backblaze';
 
 @Injectable()
 export class AdminService {
   private readonly propertyService: PropertyService;
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly backblazeService: BackblazeService,
+  ) {}
   async createPropertySubType(
     user_id: string,
     files: { image?: Express.Multer.File[] },
@@ -127,6 +132,19 @@ export class AdminService {
       };
     }
   }
+  private async processSingleImage(file: Express.Multer.File): Promise<any> {
+    const uploadResult = await this.backblazeService.uploadFileFromBuffer(
+      file.buffer,
+      file.originalname,
+    );
+
+    // const savedImagePath = await saveImageToDisk(buffer, file.originalname);
+
+    return {
+      ...file,
+      uploadResult,
+    };
+  }
 
   async getAllAmenities() {
     try {
@@ -134,7 +152,7 @@ export class AdminService {
         select: {
           id: true,
           amenetiesName: true,
-          otherFeatures: true,
+          url: true,
           createdAt: true,
           updatedAt: true,
           // propertyId: false, // This line is not necessary as we omit it in select
@@ -160,14 +178,46 @@ export class AdminService {
     createAmenity: CreateAmenityDto,
   ) {
     try {
-      const { amenitiesName, otherFeatures } = createAmenity;
-      const ameneties = await this.prismaService.ameneties.create({
-        data: {
-          amenetiesName: amenitiesName,
-          otherFeatures,
-          url: 'https://example.com/pool',
-        } as Prisma.AmenetiesCreateInput,
+      if (files.image) {
+        const allowedImageTypes = ['.png', '.jpeg', '.jpg'];
+        for (const file of files.image) {
+          const ext = extname(file.originalname);
+          if (!allowedImageTypes.includes(ext)) {
+            throw new HttpException(
+              'Invalid image file type.',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+        }
+      }
+
+      const maxFileSize = 4 * 1024 * 1024;
+      for (const file of [...(files.image || [])]) {
+        if (file.size > maxFileSize) {
+          throw new HttpException(
+            'File size exceeds the limit.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+      const { amenitiesName } = createAmenity;
+
+      const processedImages = await Promise.all(
+        files.image.map((file) => this.processSingleImage(file)),
+      );
+
+      const amenetiesArray = processedImages.map((image) => ({
+        amenetiesName: amenitiesName, // Corrected the field name here
+        url: image.uploadResult.url,
+        imageKey: image.uploadResult.fileId,
+      }));
+
+      const amenetiesData = [...amenetiesArray];
+
+      const ameneties = await this.prismaService.ameneties.createMany({
+        data: amenetiesData,
       });
+
       return {
         status: 200,
         message: 'Amenity created successfully',

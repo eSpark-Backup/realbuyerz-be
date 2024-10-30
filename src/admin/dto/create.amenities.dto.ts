@@ -24,31 +24,26 @@ export class CreateAmenityDto {
   // @IsOptional()
   // readonly count: any;
 
-  @ApiProperty({ type: String, example: 'Waterfall' })
-  @IsString()
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      format: 'binary',
+    },
+    example: [
+      'image1.jpg',
+      'image2.jpg',
+      'image3.jpg',
+      'image4.jpg',
+      'image5.jpg',
+    ],
+    required: false,
+  })
   @IsOptional()
-  readonly otherFeatures: string;
+  @IsNotEmpty({ message: 'At least one image is required' })
+  readonly image: any[];
 
-  // @ApiProperty({
-  //   type: 'array',
-  //   items: {
-  //     type: 'string',
-  //     format: 'binary',
-  //   },
-  //   example: [
-  //     'image1.jpg',
-  //     'image2.jpg',
-  //     'image3.jpg',
-  //     'image4.jpg',
-  //     'image5.jpg',
-  //   ],
-  //   required: false,
-  // })
-  // @IsOptional()
-  // @IsNotEmpty({ message: 'At least one image is required' })
-  // readonly image: any[];
-
-  // imageKey?: string;
+  imageKey?: string;
 }
 
 // @ApiProperty({ type: Object, example: {
