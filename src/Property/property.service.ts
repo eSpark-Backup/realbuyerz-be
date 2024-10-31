@@ -904,6 +904,10 @@ export class PropertyService {
           PropertyData: true,
         },
       });
+
+      const recentProperties = properties
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 5);
       const organizedProperties = {
         Rent: { count: 0 },
         Sale: { count: 0 },
@@ -940,6 +944,7 @@ export class PropertyService {
       const items = {
         agent,
         organizedProperties,
+        recentProperties,
       };
 
       return {

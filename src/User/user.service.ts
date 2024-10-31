@@ -285,11 +285,14 @@ export class UserService {
         .digest('hex');
 
       if (newCalculateHash === hashValue) {
+        const hashedPassword = await this.hashPassword(password);
+
         if (this.isEmail(emailPhone)) {
           const user = await this.prismaService.user.update({
             where: { email: emailPhone },
             data: {
               isVerified: true,
+              password: hashedPassword,
             },
           });
           return {
@@ -298,7 +301,6 @@ export class UserService {
             response: user,
           };
         } else {
-          const hashedPassword = await this.hashPassword(password);
           const user = await this.prismaService.user.update({
             where: { mobileNumber: emailPhone },
             data: {
