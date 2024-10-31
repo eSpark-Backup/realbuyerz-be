@@ -1396,6 +1396,9 @@ export class PropertyService {
     const properties = await this.prismaService.property.findMany({
       skip,
       take: pageSize,
+      orderBy: {
+        createdAt: 'desc', // Sort by 'createdAt' to get the latest properties
+      },
       include: {
         user: {
           select: {

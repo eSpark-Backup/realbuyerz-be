@@ -213,6 +213,9 @@ export class UserPropertyService {
       this.prismaService.property.findMany({
         skip,
         take: pageSize,
+        orderBy: {
+          createdAt: 'desc', // Sort by 'createdAt' to get the latest properties
+        },
         include: {
           amenities: {
             select: {
