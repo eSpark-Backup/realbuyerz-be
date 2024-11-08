@@ -15,10 +15,9 @@ export class UserPropertyService {
 
   async createProperty(user_id: string, createProperty: CreateUserPropertyDto) {
     const { amenity, ...propertyDetails } = createProperty;
-    const amenityArray = JSON.parse(amenity);
 
     // Convert to Prisma-compatible JSON format
-    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+    const amenitiesJson: Prisma.InputJsonValue = amenity.map((item) => ({
       name: item.name,
       count: item.count,
       imageUrl: item.imageUrl,
