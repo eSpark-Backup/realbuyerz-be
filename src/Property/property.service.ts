@@ -809,14 +809,23 @@ export class PropertyService {
         await this.prismaService.porperty_data.createMany({
           data: propertyData,
         });
-
-        const propertyResponse = {
-          success: true,
-          action: 'Create Property',
-          message: 'PropertyCreated Successfully',
-          data: result,
-        };
-        return propertyResponse;
+        if (property.propertyStatus === false) {
+          const propertyResponse = {
+            success: true,
+            action: 'Create Property',
+            message: 'Property Saved as Draft Successfully',
+            data: result,
+          };
+          return propertyResponse;
+        } else {
+          const propertyResponse = {
+            success: true,
+            action: 'Create Property',
+            message: 'Property Created Successfully',
+            data: result,
+          };
+          return propertyResponse;
+        }
       }
 
       // else if(files.video && !files.image){
