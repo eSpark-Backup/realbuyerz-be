@@ -1020,34 +1020,34 @@ export class PropertyService {
         );
       }
     }
-    let amenitiesArray: string[] = [];
+    // let amenitiesArray: string[] = [];
 
-    // Check if `property.amenities` is a string or an array
-    if (typeof property.amenities === 'string') {
-      amenitiesArray = property.amenities
-        .split(',')
-        .map((id) => id.trim())
-        .filter((id) => id.length > 0);
-    } else if (Array.isArray(property.amenities)) {
-      amenitiesArray = property.amenities
-        .map((id) => id.trim())
-        .filter((id) => id.length > 0);
-    }
-    //findameneities with amenitie array
-    const amenities = await this.prismaService.ameneties.findMany({
-      where: {
-        id: {
-          in: amenitiesArray,
-        },
-      },
-    });
-    if (amenities.length !== amenitiesArray.length) {
-      return {
-        success: false,
-        message: 'Failed to update property.',
-        error: 'Amenities not found.',
-      };
-    }
+    // // Check if `property.amenities` is a string or an array
+    // if (typeof property.amenities === 'string') {
+    //   amenitiesArray = property.amenities
+    //     .split(',')
+    //     .map((id) => id.trim())
+    //     .filter((id) => id.length > 0);
+    // } else if (Array.isArray(property.amenities)) {
+    //   amenitiesArray = property.amenities
+    //     .map((id) => id.trim())
+    //     .filter((id) => id.length > 0);
+    // }
+    // //findameneities with amenitie array
+    // const amenities = await this.prismaService.ameneties.findMany({
+    //   where: {
+    //     id: {
+    //       in: amenitiesArray,
+    //     },
+    //   },
+    // });
+    // if (amenities.length !== amenitiesArray.length) {
+    //   return {
+    //     success: false,
+    //     message: 'Failed to update property.',
+    //     error: 'Amenities not found.',
+    //   };
+    // }
 
     if (property.propertySubTypeId) {
       const propertySubType =
@@ -1070,19 +1070,19 @@ export class PropertyService {
       try {
         const propert = await this.prismaService.property.findUnique({
           where: { id: property_id },
-          include: { amenities: true, propertyType: true },
+          include: { propertyType: true },
         });
 
         if (propert) {
           //delete all amenties from propert
-          await this.prismaService.propertyAmenity.deleteMany({
-            where: {
-              propertyId: property_id,
-              amenityId: {
-                in: propert.amenities.map((amenity) => amenity.amenityId),
-              },
-            },
-          });
+          // await this.prismaService.propertyAmenity.deleteMany({
+          //   where: {
+          //     propertyId: property_id,
+          //     amenityId: {
+          //       in: propert.amenities.map((amenity) => amenity.amenityId),
+          //     },
+          //   },
+          // });
 
           //disconnect the subType from property
           if (property.propertySubTypeId) {
@@ -1113,11 +1113,11 @@ export class PropertyService {
               propertyZip: property.propertyAddress,
               propertyStatus: property.propertyStatus,
               propertyDescription: property.propertyDescription,
-              amenities: {
-                create: amenitiesArray.map((id) => ({
-                  amenity: { connect: { id } },
-                })),
-              },
+              // amenities: {
+              //   create: amenitiesArray.map((id) => ({
+              //     amenity: { connect: { id } },
+              //   })),
+              // },
               longitude: property.longitude,
               latitude: property.latitude,
             } as Prisma.PropertyUpdateInput,
@@ -1137,12 +1137,15 @@ export class PropertyService {
               propertyDescription: true,
               longitude: true,
               latitude: true,
-              amenities: true,
+              // amenities: true,
             },
           });
 
           try {
-            await this.deleteImagesForProperty(property_id);
+            await this.deleteImagesForProperty(
+              property_id,
+              updateProperty.imageKeys as any,
+            );
             await this.deleteVideosForProperty(property_id);
           } catch (error) {
             return {
@@ -1189,18 +1192,17 @@ export class PropertyService {
       try {
         const propert = await this.prismaService.property.findUnique({
           where: { id: property_id },
-          include: { amenities: true },
         });
         if (propert) {
           //disconnect the subType from property
-          await this.prismaService.propertyAmenity.deleteMany({
-            where: {
-              propertyId: property_id,
-              amenityId: {
-                in: propert.amenities.map((amenity) => amenity.amenityId),
-              },
-            },
-          });
+          // await this.prismaService.propertyAmenity.deleteMany({
+          //   where: {
+          //     propertyId: property_id,
+          //     amenityId: {
+          //       in: propert.amenities.map((amenity) => amenity.amenityId),
+          //     },
+          //   },
+          // });
 
           //disconnect the subType from property
           if (property.propertySubTypeId) {
@@ -1230,11 +1232,11 @@ export class PropertyService {
               propertyZip: property.propertyAddress,
               propertyStatus: property.propertyStatus,
               propertyDescription: property.propertyDescription,
-              amenities: {
-                create: amenitiesArray.map((id) => ({
-                  amenity: { connect: { id } },
-                })),
-              },
+              // amenities: {
+              //   create: amenitiesArray.map((id) => ({
+              //     amenity: { connect: { id } },
+              //   })),
+              // },
               longitude: property.longitude,
               latitude: property.latitude,
             } as Prisma.PropertyUpdateInput,
@@ -1254,7 +1256,7 @@ export class PropertyService {
               PropertyData: true,
               longitude: true,
               latitude: true,
-              amenities: true,
+              // amenities: true,
             },
           });
 
@@ -1294,26 +1296,46 @@ export class PropertyService {
     return videoData;
   }
 
-  async deleteImagesForProperty(propertyId: string) {
+  async deleteImagesForProperty(
+    propertyId: string,
+    imageKeys: string | string[],
+  ) {
     try {
+      const excludeImageKeys = Array.isArray(imageKeys)
+        ? imageKeys
+        : imageKeys
+          ? imageKeys.split(',')
+          : [];
+
       const images = await this.prismaService.porperty_data.findMany({
         where: {
           propertyId: propertyId,
           type: 'image',
         },
       });
-      await this.prismaService.porperty_data.deleteMany({
-        where: {
-          propertyId: propertyId,
-          type: 'image',
-        },
-      });
 
-      for (const image of images) {
+      // Filter out images whose imageKey is in the excludeImageKeys array
+      const imagesToDelete = images.filter(
+        (image) => !excludeImageKeys.includes(image.imageKey),
+      );
+
+      // Delete filtered images from the database
+      const idsToDelete = imagesToDelete.map((image) => image.id);
+
+      // Delete filtered images from the database
+      if (idsToDelete.length > 0) {
+        await this.prismaService.porperty_data.deleteMany({
+          where: {
+            id: { in: idsToDelete },
+          },
+        });
+      }
+
+      for (const image of imagesToDelete) {
         const { url: propertyImage, imageKey } = image;
 
         const fileName = path.basename(new URL(propertyImage).pathname);
-        //check if it is from the same bucket
+        // Check if it is from the same bucket
         const imageBucketName = propertyImage.split('/file/')[1]?.split('/')[0];
 
         // Compare with your current bucket

@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsUrl,
   IsUUID,
+  IsArray,
 } from 'class-validator';
 class AmenityDto {
   @ApiProperty({ description: 'The name of the amenity', example: 'Bedroom' })
@@ -145,12 +146,26 @@ export class updatedPropertyDto {
   readonly video?: any[];
 
   @ApiProperty({
-    type: 'string',
-    example: 'existing-amenity-id-1,existing-amenity-id-2',
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+    example: [
+      '4_z5dd8159e24980ba992280117_f103bfe305c750225_d20240930_m110108_c005_v0501025_t0017_u01727694068103',
+    ],
     required: false,
   })
+  @IsString({ each: true })
   @IsOptional()
-  readonly amenities?: string | string[];
+  readonly imageKeys?: any[];
+
+  // @ApiProperty({
+  //   type: 'string',
+  //   example: 'existing-amenity-id-1,existing-amenity-id-2',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // readonly amenities?: string | string[];
 
   @ApiProperty({
     description: 'List of amenities available in the property',

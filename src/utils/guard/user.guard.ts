@@ -4,6 +4,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -34,7 +35,7 @@ export class UserRoleGuard implements CanActivate {
     ) {
       return true;
     } else {
-      throw new UnauthorizedException('this route is only for User role');
+      throw new ForbiddenException('this route is only for User role');
     }
   }
 

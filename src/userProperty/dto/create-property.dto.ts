@@ -72,13 +72,13 @@ export class CreateUserPropertyDto {
   // @IsNotEmpty({ message: 'Latitude cannot be empty' })
   readonly latitude: string;
 
-  @ApiProperty({
-    type: 'string',
-    example: 'existing-amenity-id-1,existing-amenity-id-2',
-    required: false,
-  })
-  @IsOptional()
-  readonly amenities?: string | string[];
+  // @ApiProperty({
+  //   type: 'string',
+  //   example: 'existing-amenity-id-1,existing-amenity-id-2',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // readonly amenities?: string | string[];
 
   @ApiProperty({
     type: Boolean,

@@ -33,32 +33,32 @@ export class UserPropertyService {
 
     try {
       let result = null;
-      let amenitiesArray: string[] = [];
-      if (typeof property.amenities === 'string') {
-        amenitiesArray = property.amenities
-          .split(',')
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0);
-      } else if (Array.isArray(property.amenities)) {
-        amenitiesArray = property.amenities
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0);
-      }
-      const amenities = await this.prismaService.ameneties.findMany({
-        where: {
-          id: {
-            in: amenitiesArray,
-          },
-        },
-      });
-      if (amenities.length !== amenitiesArray.length) {
-        return {
-          success: false,
-          message: 'Failed to Create property.',
-          action: 'Create Property',
-          error: 'Amenities not found.',
-        };
-      }
+      // let amenitiesArray: string[] = [];
+      // if (typeof property.amenities === 'string') {
+      //   amenitiesArray = property.amenities
+      //     .split(',')
+      //     .map((id) => id.trim())
+      //     .filter((id) => id.length > 0);
+      // } else if (Array.isArray(property.amenities)) {
+      //   amenitiesArray = property.amenities
+      //     .map((id) => id.trim())
+      //     .filter((id) => id.length > 0);
+      // }
+      // const amenities = await this.prismaService.ameneties.findMany({
+      //   where: {
+      //     id: {
+      //       in: amenitiesArray,
+      //     },
+      //   },
+      // });
+      // if (amenities.length !== amenitiesArray.length) {
+      //   return {
+      //     success: false,
+      //     message: 'Failed to Create property.',
+      //     action: 'Create Property',
+      //     error: 'Amenities not found.',
+      //   };
+      // }
 
       if (property.propertySubTypeId) {
         const propertySubType =
@@ -100,11 +100,11 @@ export class UserPropertyService {
         propertyType: {
           connect: { id: property.propertySubTypeId },
         },
-        amenities: {
-          create: amenitiesArray.map((id) => ({
-            amenity: { connect: { id } },
-          })),
-        },
+        // amenities: {
+        //   create: amenitiesArray.map((id) => ({
+        //     amenity: { connect: { id } },
+        //   })),
+        // },
       };
       result = await this.prismaService.property.create({
         data: propertyData,
@@ -229,6 +229,7 @@ export class UserPropertyService {
               address: true,
               profileImage: true,
               socialId: true,
+              bio: true,
             },
           },
           PropertyData: true,
@@ -551,10 +552,9 @@ export class UserPropertyService {
     const property = { ...updateProperty };
 
     const { amenity, ...propertyDetails } = updateProperty;
-    const amenityArray = JSON.parse(amenity);
 
     // Convert to Prisma-compatible JSON format
-    const amenitiesJson: Prisma.InputJsonValue = amenityArray.map((item) => ({
+    const amenitiesJson: Prisma.InputJsonValue = amenity.map((item) => ({
       name: item.name,
       count: item.count,
       imageUrl: item.imageUrl,
@@ -589,31 +589,31 @@ export class UserPropertyService {
       let amenitiesArray: string[] = [];
 
       // Check if `property.amenities` is a string or an array
-      if (typeof property.amenities === 'string') {
-        amenitiesArray = property.amenities
-          .split(',')
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0);
-      } else if (Array.isArray(property.amenities)) {
-        amenitiesArray = property.amenities
-          .map((id) => id.trim())
-          .filter((id) => id.length > 0);
-      }
-      //findameneities with amenitie array
-      const amenities = await this.prismaService.ameneties.findMany({
-        where: {
-          id: {
-            in: amenitiesArray,
-          },
-        },
-      });
-      if (amenities.length !== amenitiesArray.length) {
-        return {
-          success: false,
-          message: 'Failed to update property.',
-          error: 'Amenities not found.',
-        };
-      }
+      // if (typeof property.amenities === 'string') {
+      //   amenitiesArray = property.amenities
+      //     .split(',')
+      //     .map((id) => id.trim())
+      //     .filter((id) => id.length > 0);
+      // } else if (Array.isArray(property.amenities)) {
+      //   amenitiesArray = property.amenities
+      //     .map((id) => id.trim())
+      //     .filter((id) => id.length > 0);
+      // }
+      // //findameneities with amenitie array
+      // const amenities = await this.prismaService.ameneties.findMany({
+      //   where: {
+      //     id: {
+      //       in: amenitiesArray,
+      //     },
+      //   },
+      // });
+      // if (amenities.length !== amenitiesArray.length) {
+      //   return {
+      //     success: false,
+      //     message: 'Failed to update property.',
+      //     error: 'Amenities not found.',
+      //   };
+      // }
 
       if (property.propertySubTypeId) {
         const propertySubType =
@@ -668,11 +668,11 @@ export class UserPropertyService {
           propertyZip: property.propertyAddress,
           propertyStatus: property.propertyStatus,
           propertyDescription: property.propertyDescription,
-          amenities: {
-            create: amenitiesArray.map((id) => ({
-              amenity: { connect: { id } },
-            })),
-          },
+          // amenities: {
+          //   create: amenitiesArray.map((id) => ({
+          //     amenity: { connect: { id } },
+          //   })),
+          // },
           longitude: property.longitude,
           latitude: property.latitude,
         } as Prisma.PropertyUpdateInput,
@@ -692,7 +692,7 @@ export class UserPropertyService {
           PropertyData: true,
           longitude: true,
           latitude: true,
-          amenities: true,
+          // amenities: true,
         },
       });
 

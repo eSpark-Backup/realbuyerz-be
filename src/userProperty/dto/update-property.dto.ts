@@ -106,13 +106,13 @@ export class updateUserPropertyDto {
   })
   amenity: any;
 
-  @ApiProperty({
-    type: 'string',
-    example: 'existing-amenity-id-1,existing-amenity-id-2',
-    required: false,
-  })
-  @IsOptional()
-  readonly amenities?: string | string[];
+  // @ApiProperty({
+  //   type: 'string',
+  //   example: 'existing-amenity-id-1,existing-amenity-id-2',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // readonly amenities?: string | string[];
 
   //   @ApiProperty({ type: Object, example:  {
   //     "amenities_name": "Swimming Pool",
