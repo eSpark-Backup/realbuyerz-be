@@ -1393,6 +1393,8 @@ export class PropertyService {
       propertyCity?: string;
       propertyBy?: string;
       propertyId?: string;
+      price1?: string;
+      price2?: string;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -1424,7 +1426,12 @@ export class PropertyService {
           },
         };
       }
-
+      if (filters.price1 && filters.price2) {
+        where.propertyPrice = {
+          gte: parseInt(filters.price1),
+          lte: parseInt(filters.price2),
+        };
+      }
       if (filters.subType) {
         where.propertyType = {
           ...where.propertyType,

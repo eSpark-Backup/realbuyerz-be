@@ -224,6 +224,8 @@ export class PropertyController {
       propertyId: query.propertyId,
       propertyType: query.propertyType,
       subType: query.subType,
+      price1: query.price1,
+      price2: query.price2,
     };
 
     return this.propertyService.findAll(req, page, pageSize, filters);
