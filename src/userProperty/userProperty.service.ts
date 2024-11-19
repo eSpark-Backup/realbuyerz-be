@@ -328,6 +328,17 @@ export class UserPropertyService {
         include: {
           property: {
             include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  address: true,
+                  profileImage: true,
+                  socialId: true,
+                  bio: true,
+                },
+              },
               PropertyData: true,
               amenities: {
                 select: {
@@ -816,6 +827,17 @@ export class UserPropertyService {
       include: {
         property: {
           include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                profileImage: true,
+                socialId: true,
+                bio: true,
+              },
+            },
             PropertyData: true,
             amenities: {
               select: {

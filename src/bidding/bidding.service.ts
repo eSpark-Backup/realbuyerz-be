@@ -154,7 +154,17 @@ export class BiddingService {
         agentProperty: {
           include: {
             PropertyData: true,
-            user: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                profileImage: true,
+                socialId: true,
+                bio: true,
+              },
+            },
             amenities: true,
             propertyType: true,
           },
@@ -185,7 +195,17 @@ export class BiddingService {
       include: {
         userProperty: {
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                profileImage: true,
+                socialId: true,
+                bio: true,
+              },
+            },
             amenities: true,
             propertyType: true,
           },

@@ -137,6 +137,17 @@ export class PropertyService {
       include: {
         property: {
           include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                profileImage: true,
+                socialId: true,
+                bio: true,
+              },
+            },
             amenities: {
               select: {
                 amenity: true,
@@ -1438,6 +1449,8 @@ export class PropertyService {
             lastName: true,
             address: true,
             profileImage: true,
+            socialId: true,
+            bio: true,
           },
         },
         amenities: {
@@ -1494,6 +1507,17 @@ export class PropertyService {
           userId: req.userId,
         },
         include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              address: true,
+              profileImage: true,
+              socialId: true,
+              bio: true,
+            },
+          },
           property: {
             include: {
               amenities: {
@@ -1586,7 +1610,19 @@ export class PropertyService {
     try {
       const property = await this.prismaService.property.findUnique({
         where: { id: propertyId },
+
         include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              address: true,
+              profileImage: true,
+              socialId: true,
+              bio: true,
+            },
+          },
           amenities: true,
           PropertyData: true,
         },
