@@ -99,6 +99,10 @@ export class UserPropertyController {
       propertyType: query.propertyType,
       subType: query.subType,
       status: query.propertyStatus,
+      price1: query.price1,
+      price2: query.price2,
+      area1: query.area1,
+      area2: query.area2,
     };
     return this.userPropertyService.findbyuserId(
       user_id,
@@ -126,6 +130,10 @@ export class UserPropertyController {
       propertyId: query.propertyId,
       propertyType: query.propertyType,
       subType: query.subType,
+      price1: query.price1,
+      price2: query.price2,
+      area1: query.area1,
+      area2: query.area2,
     };
 
     return this.userPropertyService.findAll(req, page, pageSize, filters);

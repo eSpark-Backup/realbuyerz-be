@@ -260,6 +260,10 @@ export class PropertyService {
       propertyId?: string;
       proposals?: boolean;
       status?: boolean;
+      price1?: string;
+      price2?: string;
+      area1?: string;
+      area2?: string;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -291,6 +295,18 @@ export class PropertyService {
         where.propertyType = {
           ...where.propertyType,
           subTypeName: filters.subType,
+        };
+      }
+      if (filters.price1 && filters.price2) {
+        where.propertyPrice = {
+          gte: parseInt(filters.price1),
+          lte: parseInt(filters.price2),
+        };
+      }
+      if (filters.area1 && filters.area2) {
+        where.propertyArea = {
+          gte: filters.area1,
+          lte: filters.area2,
         };
       }
       // where.propertyStatus = true;
@@ -1395,6 +1411,8 @@ export class PropertyService {
       propertyId?: string;
       price1?: string;
       price2?: string;
+      area1?: string;
+      area2?: string;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -1430,6 +1448,12 @@ export class PropertyService {
         where.propertyPrice = {
           gte: parseInt(filters.price1),
           lte: parseInt(filters.price2),
+        };
+      }
+      if (filters.area1 && filters.area2) {
+        where.propertyArea = {
+          gte: filters.area1,
+          lte: filters.area2,
         };
       }
       if (filters.subType) {

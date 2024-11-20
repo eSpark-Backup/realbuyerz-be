@@ -177,6 +177,10 @@ export class PropertyController {
       subType: query.subType,
       proposals: query.proposals,
       status: query.propertyStatus,
+      price1: query.price1,
+      price2: query.price2,
+      area1: query.area1,
+      area2: query.area2,
     };
     return this.propertyService.findbyuserId(user_id, page, pageSize, filters);
   }
@@ -226,6 +230,8 @@ export class PropertyController {
       subType: query.subType,
       price1: query.price1,
       price2: query.price2,
+      area1: query.area1,
+      area2: query.area2,
     };
 
     return this.propertyService.findAll(req, page, pageSize, filters);

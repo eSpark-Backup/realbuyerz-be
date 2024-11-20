@@ -63,6 +63,46 @@ export class PropertyQueryDto {
 
   @ApiProperty({
     required: false,
+    description: 'The Price of the property',
+    example: '120',
+  })
+  @IsOptional()
+  @IsString({ message: 'Area must be a string' })
+  @IsNotEmpty({ message: 'Area cannot be empty' })
+  readonly area1?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The Area of the property',
+    example: '500',
+  })
+  @IsOptional()
+  @IsString({ message: 'Area must be a string' })
+  @IsNotEmpty({ message: 'Area cannot be empty' })
+  readonly area2?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The Price of the property',
+    example: '1000',
+  })
+  @IsOptional()
+  @IsString({ message: 'Price must be a string' })
+  @IsNotEmpty({ message: 'Price cannot be empty' })
+  readonly price1?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The Price of the property',
+    example: '2000',
+  })
+  @IsOptional()
+  @IsString({ message: 'Price must be a string' })
+  @IsNotEmpty({ message: 'Price cannot be empty' })
+  readonly price2?: string;
+
+  @ApiProperty({
+    required: false,
     description: 'Get Proposal Status (Draft or published)',
   })
   @IsOptional()
