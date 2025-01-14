@@ -149,6 +149,7 @@ export class UserPropertyService {
       price2?: string;
       area1?: string;
       area2?: string;
+      agentId?: string;
     },
   ) {
     const skip = (page - 1) * pageSize;
@@ -182,6 +183,9 @@ export class UserPropertyService {
 
       if (filters.propertyId) {
         where.id = filters.propertyId;
+      }
+      if (filters.agentId) {
+        where.userId = filters.agentId;
       }
 
       if (filters.propertyType) {

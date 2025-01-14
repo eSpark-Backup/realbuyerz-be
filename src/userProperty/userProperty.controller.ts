@@ -134,6 +134,7 @@ export class UserPropertyController {
       price2: query.price2,
       area1: query.area1,
       area2: query.area2,
+      agentId: query.agentId,
     };
 
     return this.userPropertyService.findAll(req, page, pageSize, filters);

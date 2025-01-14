@@ -117,4 +117,13 @@ export class PropertyQueryDto {
   @IsOptional()
   @IsString({ message: 'Property id must be a string' })
   readonly propertyId?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The id of the Agent',
+    example: '1',
+  })
+  @IsOptional()
+  @IsString({ message: 'Agent id must be a string' })
+  readonly agentId?: string;
 }
