@@ -544,6 +544,7 @@ export class UserService {
           mobileNumber: true,
           city: true,
           bio: true,
+          socialLogin: true,
           whatsapp: true,
           country: true,
           address: true,
