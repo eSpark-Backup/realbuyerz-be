@@ -15,24 +15,26 @@ import { socketAuthenticator } from './middlewares/auth.js';
 const app = express();
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import {v2 as cloudinary} from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import { v4 as uuid } from 'uuid';
 import { errorMiddleware } from './middlewares/error.js';
-import http from 'http'
+import http from 'http';
 import {
   createMessage,
   createMessagesInChat,
   createSingleChats,
   createUSer,
 } from './seeder/user.js';
+import redisAdapter from 'socket.io-redis';
+import Redis from 'ioredis'; // Import the default export
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: corsOptions
-
+  cors: corsOptions,
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -40,29 +42,26 @@ app.use(cors(corsOptions));
 
 dotenv.config();
 
-
-
 const userSocketIds = new Map();
 // connectDb(process.env.URI);
 const options = { reconnectTries: 3, reconnectTimeout: 10000 }; // 3 retries, 10 seconds between retries
 
 connectDbWithRetries(process.env.URI, options)
   .then(() => console.log('Database connection established with retries'))
-  .catch((err) => console.error('Failed to connect to database after retries:', err));
+  .catch((err) =>
+    console.error('Failed to connect to database after retries:', err),
+  );
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET,
-  
-})
+});
 //seeders
 // createMessage(10);
 //  createMessagesInChat("66433c40348963b325b0be74",10)
 
 app.get('/', (req, res) => {
-  
-
   res.send(`Server is running on port ${req.body}`);
 });
 
@@ -70,22 +69,22 @@ app.use('/user', userRoute);
 app.use('/chat', chatRoute);
 app.use('/admin', adminRoute);
 
+const pubClient = new Redis();
+const subClient = new Redis();
+
+io.adapter(redisAdapter({ pubClient, subClient }));
+
 io.use((socket, next) => {
-
-  const cookie = socket.handshake.headers.cookie;
-
-  cookieParser()(socket.request, socket.request.res, async (err) => {
-    console.log(socket.request.cookies['badami']);
-    await socketAuthenticator(err, socket, next);
-  });
+  const req = socket.request;
+  cookieParser()(
+    req,
+    req.res,
+    async (error) => await socketAuthenticator(error, socket, next),
+  );
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected', socket.id);
-  const user = {
-    _id: 'fasfasf',
-    name: 'John Doe',
-  };
+  const user = socket.user;
   userSocketIds.set(user._id.toString(), socket.id);
   console.log(userSocketIds);
 

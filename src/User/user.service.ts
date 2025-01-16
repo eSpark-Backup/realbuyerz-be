@@ -39,6 +39,9 @@ import { BackblazeService } from 'src/utils/function/backblaze';
 import { UpsertPreferencesDto } from './dto/upsert-prefrences.dto';
 import { resendEmailTemplate } from 'src/utils/Static html/resendEmail';
 import { emailTemplate } from 'src/utils/Static html/resetPassword';
+import { InjectModel } from '@nestjs/mongoose';
+import { ChatUser } from 'src/models/user';
+import { Model } from 'mongoose';
 const TTL = process.env.OTP_TTL;
 const OTP_KEY = process.env.OTP_KEY;
 const TOKEN_KEY = process.env.TOKEN_KEY;
@@ -58,6 +61,7 @@ export class UserService {
     private jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly backblazeService: BackblazeService,
+    @InjectModel('User') private readonly userModel: Model<typeof ChatUser>,
   ) {
     this.client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -411,8 +415,17 @@ export class UserService {
         });
 
         if (existingUser) {
+          let rbChat;
+          if (existingUser.chatId) {
+            rbChat = await this.userModel.findById(existingUser.chatId);
+          }
+
           const token = this.createToken(
-            { id: existingUser.id, role: existingUser.role },
+            {
+              id: existingUser.id,
+              role: existingUser.role,
+              chatId: rbChat._id,
+            },
             existingUser,
           );
           return {
@@ -430,11 +443,30 @@ export class UserService {
         const newUser = await this.prismaService.user.create({
           data: userData,
         });
+
         await this.sendEmail(newUser.email, emailSubject, emailContent);
+        const rbChat = new this.userModel({
+          mainAccountId: newUser.id,
+          name: `${newUser.firstName} ${newUser.lastName}`,
+          username: newUser.email,
+          email: newUser.email,
+          avatar: {
+            public_id: 'string',
+            url: newUser.profileImage,
+          },
+        });
+        const newChatUser = await rbChat.save();
+        newUser.chatId = newChatUser._id.toString();
+        await this.prismaService.user.update({
+          where: { id: newUser.id },
+          data: { chatId: newChatUser._id.toString() },
+        });
+
         const token = this.createToken(
-          { id: newUser.id, role: newUser.role },
+          { id: newUser.id, role: newUser.role, chatId: newChatUser._id },
           newUser,
         );
+
         const signUpResponse = {
           action: 'Socially Signed Up',
           message: CONSTANT_RESPONSE.CREATED_SUCCESSFULLY,
@@ -503,8 +535,21 @@ export class UserService {
 
         await this.sendEmail(newUser.email, emailSubject, emailContent);
 
+        const rbChat = new this.userModel({
+          mainAccountId: newUser.id,
+          name: `${newUser.firstName} ${newUser.lastName}`,
+          username: newUser.email,
+          email: newUser.email,
+        });
+        const newChatUser = await rbChat.save();
+        newUser.chatId = newChatUser._id.toString();
+        await this.prismaService.user.update({
+          where: { id: newUser.id },
+          data: { chatId: newChatUser._id.toString() },
+        });
+
         const token = this.createToken(
-          { id: newUser.id, role: newUser.role },
+          { id: newUser.id, role: newUser.role, chatId: newChatUser._id },
           newUser,
         );
 
@@ -616,7 +661,19 @@ export class UserService {
     if (!passwordMatch) {
       return { success: false, message: 'Invalid password' };
     }
-    const token = this.createToken({ id: user.id, role: user.role }, user);
+    let rbChat;
+    if (user.chatId) {
+      rbChat = await this.userModel.findById(user.chatId);
+    }
+
+    const token = this.createToken(
+      {
+        id: user.id,
+        role: user.role,
+        chatId: rbChat._id,
+      },
+      user,
+    );
 
     return {
       action: 'Login',

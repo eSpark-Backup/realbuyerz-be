@@ -8,13 +8,26 @@ import { PropertyService } from 'src/Property/property.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BackblazeService } from 'src/utils/function/backblaze';
 import { JwtService } from '@nestjs/jwt';
+import { chatSchema } from 'src/models/chat';
+import { MongooseModule } from '@nestjs/mongoose';
+import { notificationSchema } from 'src/models/notifications';
 
 @Module({
-  imports: [PrismaModule], 
+  imports: [
+    PrismaModule,
+    MongooseModule.forFeature([
+      { name: 'Chat', schema: chatSchema },
+      { name: 'Notification', schema: notificationSchema },
+    ]),
+  ],
   controllers: [BiddingController],
-  providers: [BiddingService,PrismaService,BackblazeService,PropertyService,JwtService],
+  providers: [
+    BiddingService,
+    PrismaService,
+    BackblazeService,
+    PropertyService,
+    JwtService,
+  ],
   exports: [PropertyService],
 })
 export class BiddingModule {}
-
-

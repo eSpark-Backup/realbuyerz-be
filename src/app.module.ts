@@ -16,9 +16,11 @@ import { GlobalExceptionFilter } from './utils/global-exception-handler/global-e
 import { SuccessResponseInterceptor } from './utils/interceptor/success-response.interceptor';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { AdminModule } from './admin/admin.module';
+import { MongoModule } from './mongo/mongo.module';
 
 @Module({
   imports: [
+    MongoModule,
     PrismaModule,
     UserModule,
     PropertyModule,

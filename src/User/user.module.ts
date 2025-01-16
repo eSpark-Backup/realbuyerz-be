@@ -10,9 +10,12 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { BackblazeService } from 'src/utils/function/backblaze';
+import { MongooseModule } from '@nestjs/mongoose';
+import { userSchema } from '../models/user';
 
 @Module({
   imports: [
+    MongooseModule.forFeature([{ name: 'User', schema: userSchema }]),
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

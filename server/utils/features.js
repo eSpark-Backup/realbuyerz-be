@@ -42,10 +42,7 @@ const sendToken = (res, user, code, message) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: '1d',
   });
-  return res
-    .status(code)
-    .cookie('badami', token, cookieOptions)
-    .json({ success: true, message });
+  return res.status(code).json({ token: token, success: true, message });
 };
 
 const emitEvent = (req, event, users, data) => {

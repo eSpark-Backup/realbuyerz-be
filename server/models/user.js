@@ -1,12 +1,16 @@
-import mongoose, { Schema, model } from "mongoose";
-import bcryptjs from "bcryptjs";
+/* eslint-disable prettier/prettier */
+import mongoose, { Schema, model } from 'mongoose';
 const userSchema = new Schema(
   {
-    name:{
+    name: {
       type: String,
       required: true,
       trim: true,
       minlength: 3,
+    },
+    mainAccountId: {
+      type: String,
+      required: true,
     },
     username: {
       type: String,
@@ -14,7 +18,7 @@ const userSchema = new Schema(
       trim: true,
       minlength: 3,
     },
-    bio:{
+    bio: {
       type: String,
       trim: true,
       maxlength: 200,
@@ -26,35 +30,22 @@ const userSchema = new Schema(
       trim: true,
       minlength: 3,
     },
-    password: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 3,
-      select: false,
-    },
+
     avatar: {
       public_id: {
         type: String,
-        required: true,
+        required: false,
       },
       url: {
         type: String,
-        required: true,
+        required: false,
       },
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
-  this.password = await bcryptjs.hash(this.password, 12);
-});
 
-const  User = mongoose.models.User  ||  model("User", userSchema) ;
+const User = mongoose.models.User || model('User', userSchema);
 export default User;

@@ -10,6 +10,10 @@ import { PropertyModule } from 'src/Property/property.module';
 import { getBidDTO } from './dto/getBid.dto';
 import { response } from 'express';
 import { updateProposalDTO } from './dto/update.proposal.dto';
+import { Chat } from 'src/models/chat';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Notification } from 'src/models/notifications';
 
 @Injectable()
 export class BiddingService {
@@ -17,6 +21,10 @@ export class BiddingService {
 
   constructor(
     private readonly prismaService: PrismaService,
+    @InjectModel('Chat') private readonly chatModel: Model<typeof Chat>,
+    @InjectModel('Notification')
+    private readonly notificationModel: Model<typeof Notification>,
+
     propertyService: PropertyService,
   ) {
     this.propertyService = propertyService;
@@ -66,6 +74,20 @@ export class BiddingService {
     const property = await this.prismaService.property.findUnique({
       where: {
         id: createProperty.userPropertyId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            address: true,
+            profileImage: true,
+            socialId: true,
+            bio: true,
+            chatId: true,
+          },
+        },
       },
     });
 
@@ -117,6 +139,25 @@ export class BiddingService {
           data: {
             proposalCount: rowCount,
           },
+        });
+        const user = await this.prismaService.user.findUnique({
+          where: {
+            id: user_id,
+          },
+        });
+        const members = [user.chatId, property.user.chatId];
+        await this.chatModel.create({
+          members,
+          name: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
+          creator: user.chatId,
+          biddingId: result.id,
+        });
+        await this.notificationModel.create({
+          message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
+          user: property.user.chatId,
+          type: 'bid',
+          title: 'New Bid',
+          propertyId: propertyId,
         });
 
         return {

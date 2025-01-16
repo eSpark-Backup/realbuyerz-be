@@ -79,6 +79,7 @@ model User {
     city               String?
     address            String?
     password           String?
+    chatId             String?
     isVerified         Boolean         @default(false)
     socialId           String?
     socialLogin        Boolean         @default(false)
