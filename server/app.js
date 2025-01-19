@@ -58,8 +58,9 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 //seeders
+// createSingleChats(1);
 // createMessage(10);
-//  createMessagesInChat("66433c40348963b325b0be74",10)
+// createMessagesInChat('678d2c29c145529efa23b892', 10);
 
 app.get('/', (req, res) => {
   res.send(`Server is running on port ${req.body}`);
@@ -68,13 +69,8 @@ app.get('/', (req, res) => {
 app.use('/user', userRoute);
 app.use('/chat', chatRoute);
 app.use('/admin', adminRoute);
-
-const pubClient = new Redis();
-const subClient = new Redis();
-
-io.adapter(redisAdapter({ pubClient, subClient }));
-
-io.use((socket, next) => {
+const nsp = io.of('/socket');
+nsp.use((socket, next) => {
   const req = socket.request;
   cookieParser()(
     req,
@@ -83,7 +79,7 @@ io.use((socket, next) => {
   );
 });
 
-io.on('connection', (socket) => {
+nsp.on('connection', (socket) => {
   const user = socket.user;
   userSocketIds.set(user._id.toString(), socket.id);
   console.log(userSocketIds);
@@ -105,11 +101,11 @@ io.on('connection', (socket) => {
       chat: chatId,
     };
     const membersSocket = getSockets(members);
-    io.to(membersSocket).emit(NEW_MESSAGE, {
+    io.of('/socket').to(membersSocket).emit(NEW_MESSAGE, {
       message: messageForRealTime,
       chatId,
     });
-    io.to(membersSocket).emit(NEW_MESSAGE_ALERT, {
+    io.of('/socket').to(membersSocket).emit(NEW_MESSAGE_ALERT, {
       chatId,
     });
     try {

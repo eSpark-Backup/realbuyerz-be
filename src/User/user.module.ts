@@ -12,10 +12,12 @@ import { JwtStrategy } from './jwt.strategy';
 import { BackblazeService } from 'src/utils/function/backblaze';
 import { MongooseModule } from '@nestjs/mongoose';
 import { userSchema } from '../models/user';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'User', schema: userSchema }]),
+    ChatModule,
     PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({

@@ -17,6 +17,7 @@ import { SuccessResponseInterceptor } from './utils/interceptor/success-response
 import { SubscriptionModule } from './subscription/subscription.module';
 import { AdminModule } from './admin/admin.module';
 import { MongoModule } from './mongo/mongo.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MongoModule } from './mongo/mongo.module';
     BiddingModule,
     SubscriptionModule,
     AdminModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

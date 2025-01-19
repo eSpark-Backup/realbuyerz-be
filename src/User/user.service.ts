@@ -42,6 +42,7 @@ import { emailTemplate } from 'src/utils/Static html/resetPassword';
 import { InjectModel } from '@nestjs/mongoose';
 import { ChatUser } from 'src/models/user';
 import { Model } from 'mongoose';
+import { ChatGateway } from 'src/chat/chat.gateway';
 const TTL = process.env.OTP_TTL;
 const OTP_KEY = process.env.OTP_KEY;
 const TOKEN_KEY = process.env.TOKEN_KEY;
@@ -58,6 +59,7 @@ export class UserService {
   private twilioClient: Twilio.Twilio;
 
   constructor(
+    private chatGateway: ChatGateway,
     private jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly backblazeService: BackblazeService,
@@ -589,6 +591,7 @@ export class UserService {
           mobileNumber: true,
           city: true,
           bio: true,
+          chatId: true,
           socialLogin: true,
           whatsapp: true,
           country: true,
@@ -608,8 +611,13 @@ export class UserService {
           },
         },
       });
+      this.chatGateway.emitEvent('NEW_LOGIN', [user.chatId], user); // Call emitEvent
 
-      if (user.profileImage && (!user.socialId || user.socialId == 'string')) {
+      if (
+        user.profileImage &&
+        user.profileImage.includes(process.env.BUCKET_NAME) &&
+        (!user.socialId || user.socialId == 'string')
+      ) {
         const fileName = user.profileImage.split(
           `${process.env.BUCKET_NAME}/`,
         )[1];

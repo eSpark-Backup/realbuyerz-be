@@ -14,12 +14,14 @@ import { Chat } from 'src/models/chat';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Notification } from 'src/models/notifications';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class BiddingService {
   private readonly propertyService: PropertyService;
 
   constructor(
+    private chatGateway: ChatGateway,
     private readonly prismaService: PrismaService,
     @InjectModel('Chat') private readonly chatModel: Model<typeof Chat>,
     @InjectModel('Notification')
@@ -159,6 +161,13 @@ export class BiddingService {
           title: 'New Bid',
           propertyId: propertyId,
         });
+        this.chatGateway.emitEvent('NEW_BIDDING', [user.chatId], {
+          message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
+          title: 'New Bid',
+          type: 'bid',
+          propertyId: propertyId,
+        });
+        this.chatGateway.emitEvent('REFETCH_CHATS', members, {});
 
         return {
           success: true,

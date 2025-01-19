@@ -3,17 +3,17 @@ import { BADAMI_TOKEN } from '../constants/config.js';
 import User from '../models/user.js';
 import { ErrorHandler } from '../utils/utility.js';
 import jwt from 'jsonwebtoken';
+import { TryCatch } from './error.js';
 
-const isAuthenticated = (req, res, next) => {
-  const token = req.cookies[BADAMI_TOKEN];
-  if (!token) {
-    return next(new ErrorHandler('Login first to access this resource', 401));
-  }
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  req.user = decoded.id;
+const isAuthenticated = TryCatch((req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) throw new Error('Token not found');
 
-  next();
-};
+  const decodedData = jwt.verify(token, process.env.JWT_SECRET);
+
+  req.user = decodedData.chatId;
+  return next();
+});
 
 const isAdmin = (req, res, next) => {
   const token = req.cookies['badami-admin'];

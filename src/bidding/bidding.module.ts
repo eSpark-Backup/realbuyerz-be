@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { chatSchema } from 'src/models/chat';
 import { MongooseModule } from '@nestjs/mongoose';
 import { notificationSchema } from 'src/models/notifications';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { notificationSchema } from 'src/models/notifications';
       { name: 'Chat', schema: chatSchema },
       { name: 'Notification', schema: notificationSchema },
     ]),
+    ChatModule,
   ],
   controllers: [BiddingController],
   providers: [

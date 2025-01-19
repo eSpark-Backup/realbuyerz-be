@@ -30,6 +30,13 @@ const userSchema = new Schema(
       trim: true,
       minlength: 3,
     },
+    password: {
+      type: String,
+      required: true,
+      default: 'password',
+      trim: true,
+      minlength: 6,
+    },
 
     avatar: {
       public_id: {
