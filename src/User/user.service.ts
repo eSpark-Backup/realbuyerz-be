@@ -451,7 +451,6 @@ export class UserService {
           mainAccountId: newUser.id,
           name: `${newUser.firstName} ${newUser.lastName}`,
           username: newUser.email,
-          password: 'newUser.password',
           email: newUser.email,
           avatar: {
             public_id: 'string',
@@ -542,7 +541,6 @@ export class UserService {
           mainAccountId: newUser.id,
           name: `${newUser.firstName} ${newUser.lastName}`,
           username: newUser.email,
-          password: newUser.password,
           email: newUser.email,
         });
         const newChatUser = await rbChat.save();
