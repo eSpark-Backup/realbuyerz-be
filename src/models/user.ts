@@ -33,9 +33,8 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: false,
-      default: Date.now(),
-      trim: true,
-      minlength: 6,
+      default: () => Date.now().toString(), // Use a function to ensure unique values
+      unique: false,
     },
 
     avatar: {

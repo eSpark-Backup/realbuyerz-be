@@ -550,7 +550,7 @@ export class UserService {
           data: { chatId: newChatUser._id.toString() },
         });
 
-        const token = this.createToken(
+        const token = await this.createToken(
           { id: newUser.id, role: newUser.role, chatId: newChatUser._id },
           newUser,
         );
