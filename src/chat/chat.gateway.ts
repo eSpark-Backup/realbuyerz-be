@@ -15,7 +15,12 @@ import { socketAuthenticator } from 'src/utils/guard/socket.authenticator'; // I
 @WebSocketGateway({
   namespace: '/socket',
   cors: {
-    origin: ['http://localhost:8080', 'http://localhost'],
+    origin: [
+      'http://localhost:8080',
+      'http://localhost',
+      'http://localhost:3001',
+      'http://localhost:3000',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
