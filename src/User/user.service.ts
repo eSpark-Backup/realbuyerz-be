@@ -528,6 +528,20 @@ export class UserService {
           };
         }
 
+        if (
+          !createUserDto.city &&
+          !createUserDto.estateName &&
+          !createUserDto.bio &&
+          !createUserDto.state &&
+          !createUserDto.whatsapp &&
+          createUserDto.role == 'agent'
+        ) {
+          return {
+            success: false,
+            message:
+              'City, Estate Name, Bio, State, Whatsapp is required For Agent',
+          };
+        }
         const hashedPassword = await this.hashPassword(createUserDto.password);
         const userData = { ...createUserDto, password: hashedPassword };
 
@@ -592,9 +606,12 @@ export class UserService {
           city: true,
           bio: true,
           chatId: true,
+          state: true,
+          role: true,
           socialLogin: true,
           whatsapp: true,
           country: true,
+          estateName: true,
           address: true,
           isVerified: true,
           socialId: true,

@@ -4,7 +4,13 @@
 // src/user/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 enum UserRole {
   User = 'user',
   Agent = 'agent',
@@ -12,54 +18,89 @@ enum UserRole {
 }
 
 export class CreateUserDto {
-
-  
-  @ApiProperty({ type: String ,default:'Ahsan'})
+  @ApiProperty({ type: String, default: 'Ahsan' })
   @IsString({ message: 'First name must be a string' })
   @IsNotEmpty({ message: 'First name cannot be empty' })
   readonly firstName: string;
 
-  @ApiProperty({ type: String,default:'Badami' })
+  @ApiProperty({ type: String, default: 'Badami' })
   @IsString({ message: 'Last name must be a string' })
   @IsNotEmpty({ message: 'Last name cannot be empty' })
   readonly lastName: string;
 
-  @ApiProperty({ type: String,default:'ahsan@mail.com'})
+  @ApiProperty({ type: String, default: 'ahsan@mail.com' })
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty({ message: 'Email cannot be empty' })
   readonly email: string;
 
-  @ApiProperty({ type: String,required:false })
+  @ApiProperty({ type: String, required: false })
   @IsString({ message: 'Mobile number must be a string' })
   @IsOptional()
   readonly mobileNumber: string;
 
- 
-  @ApiProperty({ type: String ,required:false })
+  @ApiProperty({ type: String, required: false })
   @IsString({ message: 'Password must be a string' })
   @IsOptional()
   readonly password?: string;
 
-  @ApiProperty({ type: String  ,required:false})
+  @ApiProperty({ type: String, required: false })
   @IsString({ message: 'Profile Image must be a string' })
   @IsOptional()
   readonly profileImage?: string;
- 
+
   @ApiProperty({ enum: UserRole, default: UserRole.User })
-  @IsEnum(UserRole, { message: 'Invalid role. Must be either "user" "admin" or "agent".' })
+  @IsEnum(UserRole, {
+    message: 'Invalid role. Must be either "user" "admin" or "agent".',
+  })
   @IsOptional()
   readonly role: string;
 
-  readonly socialLogin?:boolean;
+  @ApiProperty({ type: String, required: false })
+  @IsString({
+    message: 'Name of the estate must be a string',
+  })
+  @IsOptional()
+  readonly estateName: string;
 
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'Bio of Agent must be a string' })
+  @IsOptional()
+  readonly bio: string;
 
-  @ApiProperty({ type: String ,required:false })
+  //country
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'Country must be a string' })
+  @IsOptional()
+  readonly country: string;
+
+  //state
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'State must be a string' })
+  @IsOptional()
+  readonly state: string;
+
+  //city
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'City must be a string' })
+  @IsOptional()
+  readonly city: string;
+
+  //whatsapp
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'Whatsapp must be a string' })
+  @IsOptional()
+  readonly whatsapp: string;
+
+  //landlineNumber
+  @ApiProperty({ type: String, required: false })
+  @IsString({ message: 'Landline number must be a string' })
+  @IsOptional()
+  readonly landlineNumber: string;
+
+  readonly socialLogin?: boolean;
+
+  @ApiProperty({ type: String, required: false })
   @IsString({ message: 'Social id must be a string' })
   @IsOptional()
   readonly socialId: string;
-
-
-
-
-
 }
