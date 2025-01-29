@@ -159,8 +159,8 @@ jobs:
       
       run: |
         docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        docker stop dev_rb-dev-express || true
-        docker rm dev_rb-dev-express || true
+        docker stop dev_rb-be-express || true
+        docker rm dev_rb-be-express || true
         docker run -d \
-          --name dev_rb-dev-express \
+          --name dev_rb-be-express \
           -p ${{ secrets.DEV_DOCKER_EXPOSED_PORT }}:${{ secrets.DOCKER_APPLICATION_PORT }} "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
