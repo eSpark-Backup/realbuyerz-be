@@ -115,7 +115,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: realbuyerz-backend
+    runs-on: rb-backend
 
     permissions:
       id-token: write
