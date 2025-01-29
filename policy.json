@@ -5,6 +5,7 @@
       "description": "Keep last 5 images",
       "selection": {
         "tagStatus": "tagged",
+        "tagPrefixList": ["prod"],
         "countType": "imageCountMoreThan",
         "countNumber": 5
       },
