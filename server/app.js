@@ -28,6 +28,7 @@ import {
 import redisAdapter from 'socket.io-redis';
 import Redis from 'ioredis'; // Import the default export
 
+console.log(process.env.URI);
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -125,6 +126,8 @@ server.listen(port, () => {
   console.log(
     `Server is running on port ${port} in ${process.env.NODE_ENV} mode`,
   );
+console.log(process.env.URI);
+
 });
 
 export { userSocketIds };
