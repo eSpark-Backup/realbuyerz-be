@@ -125,6 +125,7 @@ server.listen(port, () => {
   console.log(
     `Server is running on port ${port} in ${process.env.NODE_ENV} mode`,
   );
+  console.log(process.env.URI);
 });
 
 export { userSocketIds };
