@@ -1,6 +1,11 @@
 /* eslint-disable prettier/prettier */
 const corsOptions = {
-  origin: '*',
+  origin: [
+    'http://localhost:8080',
+    'http://localhost',
+    'http://localhost:3001',
+    'http://localhost:3000',
+  ],
   Credential: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
