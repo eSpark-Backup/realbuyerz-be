@@ -8,6 +8,7 @@ const corsOptions = {
   ],
   credential: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 const BADAMI_TOKEN = 'badami';
