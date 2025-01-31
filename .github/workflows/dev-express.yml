@@ -12,7 +12,7 @@ concurrency: ci-${{ github.repository }}-docker-pipeline
 env:
   path_to_dockerfile: "Dockerfile"
   docker_build_dir: "."
-  image_tag: "dev-latest"
+  image_tag: "dev-express-latest"
   lifecycle_policy_file: "policy.json"
   backend_s3_bucket: "talent-terraform-bucket"
   backend_iam_role: "terraform-role"
@@ -163,4 +163,4 @@ jobs:
         docker rm dev_rb-be-express || true
         docker run -d \
           --name dev_rb-be-express \
-          -p ${{ secrets.DEV_DOCKER_EXPOSED_PORT }}:${{ secrets.DOCKER_APPLICATION_PORT }} "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          -p ${{ secrets.DEV_DOCKER_EXPOSED_PORT_EXPRESS }}:${{ secrets.DOCKER_APPLICATION_PORT_EXPRESS }} "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
