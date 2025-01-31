@@ -67,6 +67,7 @@ export class ChatGateway
     } catch (error) {
       // Handle authentication error (e.g., 401 Unauthorized)
       this.logger.error('Authentication failed:', error.message);
+      console.error(error);
       socket.disconnect(true); // Disconnect the socket
     }
   }
