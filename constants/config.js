@@ -6,7 +6,7 @@ const corsOptions = {
     'http://localhost:3001',
     'http://localhost:3000',
   ],
-  Credential: true,
+  credential: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
 
