@@ -35,6 +35,7 @@ const socketAuthenticator = async (err, socket, next) => {
   try {
     if (err) return next(err);
     const authToken = socket.request.headers.authorization?.split(' ')[1];
+    console.log("Socket: ", socket.request.headers);
     console.log("Token: ", authToken);
     console.log(authToken);
 
