@@ -8,18 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors({
-    origin: [
-      'http://localhost:8080',
-      'http://localhost',
-      'http://localhost:3001',
-      'http://localhost:3000',
-      'https://dev-realbuyerz.esparkconsultants.com'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  });
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('RealBuyers Backend API')
