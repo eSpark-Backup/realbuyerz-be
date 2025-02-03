@@ -12,6 +12,7 @@ import { chatSchema } from 'src/models/chat';
 import { MongooseModule } from '@nestjs/mongoose';
 import { notificationSchema } from 'src/models/notifications';
 import { ChatModule } from 'src/chat/chat.module';
+import { messageSChema } from 'src/models/message';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ChatModule } from 'src/chat/chat.module';
     MongooseModule.forFeature([
       { name: 'Chat', schema: chatSchema },
       { name: 'Notification', schema: notificationSchema },
+      { name: 'Message', schema: messageSChema },
     ]),
     ChatModule,
   ],

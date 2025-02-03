@@ -543,7 +543,7 @@ export class UserService {
           };
         }
         const hashedPassword = await this.hashPassword(createUserDto.password);
-        const userData = { ...createUserDto, password: hashedPassword };
+        const userData = { ...createUserDto, password: hashedPassword,profileImage:"https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_1280.png" };
 
         const newUser = await this.prismaService.user.create({
           data: userData,
@@ -556,6 +556,10 @@ export class UserService {
           name: `${newUser.firstName} ${newUser.lastName}`,
           username: newUser.email,
           email: newUser.email,
+          avatar: {
+            public_id: 'string',
+            url: newUser.profileImage,
+          }
         });
         const newChatUser = await rbChat.save();
         newUser.chatId = newChatUser._id.toString();

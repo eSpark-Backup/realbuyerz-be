@@ -15,6 +15,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Notification } from 'src/models/notifications';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { Message } from 'src/models/message';
 
 @Injectable()
 export class BiddingService {
@@ -26,6 +27,8 @@ export class BiddingService {
     @InjectModel('Chat') private readonly chatModel: Model<typeof Chat>,
     @InjectModel('Notification')
     private readonly notificationModel: Model<typeof Notification>,
+    @InjectModel('Message')
+    private readonly messageModel: Model<typeof Message>,
 
     propertyService: PropertyService,
   ) {
@@ -148,7 +151,7 @@ export class BiddingService {
           },
         });
         const members = [user.chatId, property.user.chatId];
-        await this.chatModel.create({
+     const chat=   await this.chatModel.create({
           members,
           name: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           creator: user.chatId,
@@ -161,12 +164,20 @@ export class BiddingService {
           title: 'New Bid',
           propertyId: propertyId,
         });
+
+        await this.messageModel.create({
+          message: `Hi ${property.user.firstName}, please check review my bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
+          chatId: chat.id.toString(),
+          senderId: user.chatId,
+        });
         this.chatGateway.emitEvent('NEW_BIDDING', [property.user.chatId], {
           message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           title: 'New Bid',
           type: 'info',
           propertyId: propertyId,
         });
+
+
         this.chatGateway.emitEvent('REFETCH_CHATS', members, {});
 
         return {
