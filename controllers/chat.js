@@ -29,8 +29,14 @@ const getMyChats = TryCatch(async (req, res) => {
     'name avatar',
   );
 
+
+
   const Chats = chats.map((chat) => {
-    const members = getOtherMember(chat.members, req.user);
+    let members = getOtherMember(chat.members, req.user);
+    // add a avatar property to each member
+      members.avatar.url = "https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_1280.png";
+
+   
 
     return { ...chat._doc, members };
   });
