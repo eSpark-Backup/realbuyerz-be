@@ -15,17 +15,17 @@ const messageSChema = new Schema(
     },
     content: {
       type: String,
-      required: true,
+      required: false,
     },
     attachments: [
       {
         public_id: {
           type: String,
-          required: true,
+          required: false,
         },
         url: {
           type: String,
-          required: true,
+          required: false,
         },
       },
     ],

@@ -167,8 +167,8 @@ export class BiddingService {
 
         await this.messageModel.create({
           message: `Hi ${property.user.firstName}, please check review my bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
-          chatId: chat.id.toString(),
-          senderId: user.chatId,
+          chat: chat.id.toString(),
+          sender: user.chatId,
         });
         this.chatGateway.emitEvent('NEW_BIDDING', [property.user.chatId], {
           message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
