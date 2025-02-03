@@ -20,6 +20,8 @@ import { socketAuthenticator } from 'src/utils/guard/socket.authenticator'; // I
       'http://localhost',
       'http://localhost:3001',
       'http://localhost:3000',
+      'https://dev-realbuyerz.esparkconsultants.com'
+      
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
