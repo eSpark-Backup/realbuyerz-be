@@ -157,14 +157,14 @@ export class BiddingService {
         await this.notificationModel.create({
           message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           user: property.user.chatId,
-          type: 'bid',
+          type: 'info',
           title: 'New Bid',
           propertyId: propertyId,
         });
         this.chatGateway.emitEvent('NEW_BIDDING', [user.chatId], {
           message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           title: 'New Bid',
-          type: 'bid',
+          type: 'info',
           propertyId: propertyId,
         });
         this.chatGateway.emitEvent('REFETCH_CHATS', members, {});
