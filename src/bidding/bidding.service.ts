@@ -166,7 +166,7 @@ export class BiddingService {
         });
 
         await this.messageModel.create({
-          message: `Hi ${property.user.firstName}, please check review my bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
+          content: `Hi ${property.user.firstName}, please check review my bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           chat: chat.id.toString(),
           sender: user.chatId,
         });
