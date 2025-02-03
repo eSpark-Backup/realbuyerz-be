@@ -161,7 +161,7 @@ export class BiddingService {
           title: 'New Bid',
           propertyId: propertyId,
         });
-        this.chatGateway.emitEvent('NEW_BIDDING', [user.chatId], {
+        this.chatGateway.emitEvent('NEW_BIDDING', [property.user.chatId], {
           message: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           title: 'New Bid',
           type: 'info',
