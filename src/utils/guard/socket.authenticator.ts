@@ -17,7 +17,7 @@ export const socketAuthenticator = async (err, socket, next) => {
     // Extract token from Authorization header or query parameters
     const authToken =
       socket.request.headers.authorization?.split(' ')[1] ||
-      socket.handshake.query.token;
+      socket.handshake.auth.token;
 
     if (!authToken) {
       throw new UnauthorizedException('Please login to access this resource');
