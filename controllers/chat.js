@@ -12,6 +12,7 @@ import User from '../models/user.js';
 import Message from '../models/message.js';
 import { emitEvent } from '../utils/features.js';
 import { ErrorHandler } from '../utils/utility.js';
+import { uploadFilesToCloudinary } from '../utils/features.js';
 const newChat = TryCatch(async (req, res) => {
   const { name, members } = req.body;
 
@@ -68,9 +69,9 @@ const sendAttachments = TryCatch(async (req, res, next) => {
   const { chatId } = req.body;
 
   const files = req.files || [];
-  if (!files.length < 1) return next(new ErrorHandler('No files found', 404));
+  if (!files.length>0 ) return next(new ErrorHandler('No files found', 404));
   if(files.length > 5) return next(new ErrorHandler('You can only upload 5 files at a time', 400));
-
+  
 
   const [chat, me] = await Promise.all([
     Chat.findById(chatId),
@@ -81,7 +82,7 @@ const sendAttachments = TryCatch(async (req, res, next) => {
     return next(new ErrorHandler('Chat not found', 404));
   }
   
-  const attachments = [];
+  const attachments = await uploadFilesToCloudinary(files);
   const messageForDB = {
     content: ' ',
     attachments,

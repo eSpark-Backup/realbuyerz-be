@@ -9,7 +9,7 @@ const fileFilter = (req, file, callback) => {
 
     }
     const fileSize = parseInt(req.headers["content-length"]);
-    if (fileSize > 1048576) {
+    if (fileSize > 5048576) {
         return callback(new Error("File Size Big"));
     }
 
@@ -22,7 +22,7 @@ const attachmentFilter = (req, file, callback) => {
     }
 
     const fileSize = parseInt(req.headers["content-length"]);
-    if (fileSize > 1048576) {
+    if (fileSize > 5048576) {
         return callback(new Error("File Size Big"));
     }
 

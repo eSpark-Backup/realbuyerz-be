@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { v2 as cloudinary } from 'cloudinary';
 import { v4 as uuid } from 'uuid';
 import { getBase64 } from '../lib/helper.js';
+import {userSocketIds} from '../app.js'
 const cookieOptions = {
   maxAge: 24 * 3600 * 1000,
   sameSite: 'none',
@@ -51,12 +52,14 @@ const emitEvent = (req, event, users, data) => {
   const usersSocket = getSockets(users);
   io.of('/socket').to(usersSocket).emit(event, data);
 };
-export const getSockets = (users) => {
-  if (!users.length) return [];
-  const sockets = users.map((user) => userSocketIDs.get(user.toString()));
-
+export const getSockets = (users = []) => {
+  const sockets = users.map((user) => {
+    const socketId = userSocketIds.get(user.toString());
+    return socketId;
+  });
   return sockets;
 };
+
 
 const uploadFilesToCloudinary = async (files = []) => {
   if (files.length === 0) {
@@ -70,6 +73,8 @@ const uploadFilesToCloudinary = async (files = []) => {
         {
           resource_type: 'auto',
           public_id: uuid(),
+          folder: 'RB', 
+
         },
         (err, result) => {
           if (err) {
