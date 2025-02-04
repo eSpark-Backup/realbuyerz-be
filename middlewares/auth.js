@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { TryCatch } from './error.js';
 
 const isAuthenticated = TryCatch((req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1] || socket.handshake.auth.token;
+  const token = req.headers.authorization?.split(' ')[1];
   if (!token) throw new Error('Token not found');
 
   const decodedData = jwt.verify(token, process.env.JWT_SECRET);
@@ -34,7 +34,7 @@ const isAdmin = (req, res, next) => {
 const socketAuthenticator = async (err, socket, next) => {
   try {
     if (err) return next(err);
-    const authToken = socket.request.headers.authorization?.split(' ')[1];
+    const authToken = socket.request.headers.authorization?.split(' ')[1] || socket.handshake.auth.token;
     console.log("Socket: ", socket.request.headers);
     console.log("Token: ", authToken);
     console.log(authToken);
