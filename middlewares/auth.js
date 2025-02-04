@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { TryCatch } from './error.js';
 
 const isAuthenticated = TryCatch((req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization?.split(' ')[1] || socket.handshake.auth.token;
   if (!token) throw new Error('Token not found');
 
   const decodedData = jwt.verify(token, process.env.JWT_SECRET);
