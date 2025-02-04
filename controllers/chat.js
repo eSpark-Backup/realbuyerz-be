@@ -31,15 +31,17 @@ const getMyChats = TryCatch(async (req, res) => {
 
 
 
-  const Chats = chats.map((chat) => {
-    let members = getOtherMember(chat.members, req.user);
-    // add a avatar property to each member
-    
-
-   
-
-    return { ...chat._doc, members };
-  });
+  const Chats = await Promise.all(
+    chats.map(async (chat) => {
+      let members = getOtherMember(chat.members, req.user);
+  
+      const lastMessage = await Message.findOne({ chat: chat._id.toString() })
+        .sort({ createdAt: -1 }) 
+        .populate('sender', 'name avatar');
+  
+      return { ...chat._doc, members, lastMessage };
+    })
+  );
 
   return res.status(200).json({ Chats, message: 'Get All chat' });
 });
