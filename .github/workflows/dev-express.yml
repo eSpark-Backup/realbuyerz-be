@@ -101,6 +101,10 @@ jobs:
         echo "JWT_SECRET=${{ secrets.DEV_JWT_SECRET }}" >> .env
         echo "ADMIN_SECRET=${{ secrets.DEV_ADMIN_SECRET }}" >> .env
         echo "NODE_ENV=${{ secrets.DEV_NODE_ENV }}" >> .env
+        echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
+        echo "CLOUD_API_SECRET=${{ secrets.CLOUD_API_SECRET }}" >> .env
+        echo "CLOUD_API_KEY=${{ secrets.CLOUD_API_KEY }}" >> .env
+
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-publish
