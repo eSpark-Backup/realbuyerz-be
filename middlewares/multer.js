@@ -2,6 +2,7 @@
 import multer from "multer";
 import Path from "path";
 
+const storage = multer.memoryStorage(); // Important for React Native
 
 const fileFilter = (req, file, callback) => {
     const acceptableExt = [".png", ".jpg", ".jpeg"];
@@ -36,9 +37,10 @@ let upload = multer({
     fileFilter: fileFilter,
     fileSize: 1048576,
 });
-let fileUpload = multer({
+const fileUpload = multer({
+    storage: storage,
     fileFilter: attachmentFilter,
-    fileSize: 1048576,
+    limits: { fileSize: 5 * 1024 * 1024 }, 
 });
 
 const singleAvatar = upload.single("avatar");
