@@ -17,6 +17,9 @@ const fileFilter = (req, file, callback) => {
 };
 const attachmentFilter = (req, file, callback) => {
     const acceptableExt = [".png", ".jpg", ".jpeg",".pdf", ".docx", ".xlsx"];
+    console.log("File Name");
+    console.log(Path.extname(file.originalname).toLowerCase());
+    console.log(file)
     if (!acceptableExt.includes(Path.extname(file.originalname).toLowerCase())) {
         return callback(new Error("Invalid file type"));
     }
