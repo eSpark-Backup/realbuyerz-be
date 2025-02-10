@@ -177,6 +177,7 @@ const getMessages = TryCatch(async (req, res, next) => {
     totalPages: totalPages,
     itemsOnPage: itemsOnPage,
     currentPage: page,
+    totalItems: totalMessagesCount,
   });
 });
 
