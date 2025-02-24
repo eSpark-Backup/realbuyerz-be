@@ -295,9 +295,11 @@ export class UserPropertyService {
           const fileName = property.user.profileImage.split(
             `${process.env.BUCKET_NAME}/`,
           )[1];
+          if(fileName){
           const signedUrl =
             await this.backblazeService.generateSignedUrl(fileName);
           property.user.profileImage = signedUrl;
+          }
         }
         await Promise.all(
           property.PropertyData.map(async (data) => {
