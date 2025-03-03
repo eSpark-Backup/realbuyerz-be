@@ -151,7 +151,7 @@ export class BiddingService {
           },
         });
         const members = [user.chatId, property.user.chatId];
-     const chat=   await this.chatModel.create({
+        const chat = await this.chatModel.create({
           members,
           name: `Bid For ${property.propertyName} at Price ${createProperty.propertyPrice}`,
           creator: user.chatId,
@@ -177,7 +177,6 @@ export class BiddingService {
           propertyId: propertyId,
         });
 
-
         this.chatGateway.emitEvent('REFETCH_CHATS', members, {});
 
         return {
@@ -199,7 +198,7 @@ export class BiddingService {
     }
   }
 
-  async getBidding(user_property_id: string) {
+  async getBidding(user_property_id: string, page = 1, pageSize = 50) {
     const userProperty = await this.prismaService.property.findUnique({
       where: { id: user_property_id },
       include: {
@@ -207,39 +206,60 @@ export class BiddingService {
         propertyType: true,
       },
     });
-    const items = await this.prismaService.bidding.findMany({
-      where: {
-        userPropertyId: user_property_id,
-      },
-      include: {
-        agentProperty: {
-          include: {
-            PropertyData: true,
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                address: true,
-                profileImage: true,
-                socialId: true,
-                bio: true,
+    const skip = (page - 1) * pageSize;
+
+    const [items, totalCount] = await Promise.all([
+      this.prismaService.bidding.findMany({
+        skip,
+        take: pageSize,
+        where: {
+          userPropertyId: user_property_id,
+        },
+
+        include: {
+          agentProperty: {
+            include: {
+              PropertyData: true,
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  address: true,
+                  profileImage: true,
+                  socialId: true,
+                  bio: true,
+                },
               },
+              amenities: true,
+              propertyType: true,
             },
-            amenities: true,
-            propertyType: true,
           },
         },
-      },
-    });
+      }),
+      this.prismaService.bidding.count({
+        where: {
+          userPropertyId: user_property_id,
+        },
+      }),
+    ]);
     return {
       success: true,
       message: 'Bidding retrieved successfully',
-      data: { items, userProperty },
+      data: {
+        items,
+        userProperty,
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
+      },
     };
   }
 
-  async getAgentBidding(agent_property_id: string) {
+  async getAgentBidding(agent_property_id: string, page = 1, pageSize = 50) {
+    const skip = (page - 1) * pageSize;
+
     const agentProperty = await this.prismaService.property.findUnique({
       where: { id: agent_property_id },
       include: {
@@ -249,30 +269,39 @@ export class BiddingService {
       },
     });
 
-    const userBiddings = await this.prismaService.bidding.findMany({
-      where: {
-        agentPropertyId: agent_property_id,
-      },
-      include: {
-        userProperty: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                address: true,
-                profileImage: true,
-                socialId: true,
-                bio: true,
+    const [userBiddings, totalCount] = await Promise.all([
+      this.prismaService.bidding.findMany({
+        skip,
+        take: pageSize,
+        where: {
+          agentPropertyId: agent_property_id,
+        },
+        include: {
+          userProperty: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  address: true,
+                  profileImage: true,
+                  socialId: true,
+                  bio: true,
+                },
               },
+              amenities: true,
+              propertyType: true,
             },
-            amenities: true,
-            propertyType: true,
           },
         },
-      },
-    });
+      }),
+      this.prismaService.bidding.count({
+        where: {
+          agentPropertyId: agent_property_id,
+        },
+      }),
+    ]);
 
     return {
       success: true,
@@ -282,6 +311,10 @@ export class BiddingService {
         ...bidding,
         agentProperty,
       })),
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      itemsPerPage: pageSize,
     };
   }
 

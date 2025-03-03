@@ -2,9 +2,12 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseIntPipe,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -72,8 +75,13 @@ export class BiddingController {
   @Roles('user')
   @ApiTags('User/Customer Bidding')
   @Get('viewProposal/:user_property_id')
-  async getBidding(@Param('user_property_id') user_property_id: string) {
-    return await this.biddingService.getBidding(user_property_id);
+  async getBidding(@Param('user_property_id') user_property_id: string,
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ) {
+    return await this.biddingService.getBidding(user_property_id,
+      page, pageSize
+    );
   }
 
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -90,8 +98,13 @@ export class BiddingController {
     badresponse: { status: 400, description: 'Properties Not Found' },
   })
   @Get('viewAgentProposal/:agent_property_id')
-  async getAgentBidding(@Param('agent_property_id') agent_property_id: string) {
-    return await this.biddingService.getAgentBidding(agent_property_id);
+  async getAgentBidding(@Param('agent_property_id') agent_property_id: string,
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+  ) {
+    return await this.biddingService.getAgentBidding(agent_property_id,
+      page, pageSize
+    );
   }
 
   @UseGuards(JwtAuthGuard, UserRoleGuard)

@@ -129,39 +129,50 @@ export class PropertyService {
       };
     }
   }
-  async getAllSavedProperties(userId: string) {
-    const savedProperties = await this.prismaService.savedProperty.findMany({
-      where: {
-        userId: userId,
-      },
-      include: {
-        property: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                address: true,
-                profileImage: true,
-                socialId: true,
-                bio: true,
+  async getAllSavedProperties(userId: string, page = 1, pageSize = 50) {
+    const skip = (page - 1) * pageSize;
+
+    const [savedProperties, totalCount] = await Promise.all([
+      this.prismaService.savedProperty.findMany({
+        skip,
+        take: pageSize,
+        where: {
+          userId: userId,
+        },
+        include: {
+          property: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  address: true,
+                  profileImage: true,
+                  socialId: true,
+                  bio: true,
+                },
               },
-            },
-            amenities: {
-              select: {
-                amenity: true,
+              amenities: {
+                select: {
+                  amenity: true,
+                },
               },
-            },
-            propertyType: {
-              select: {
-                propertyType: true,
+              propertyType: {
+                select: {
+                  propertyType: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      }),
+      this.prismaService.savedProperty.count({
+        where: {
+          userId: userId,
+        },
+      }),
+    ]);
 
     if (!savedProperties.length) {
       return {
@@ -193,11 +204,18 @@ export class PropertyService {
         },
       };
     });
+    const items={
+      modifiedProperties,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      itemsPerPage: pageSize,
+    }
 
     return {
       success: true,
       message: 'Saved properties retrieved successfully',
-      data: modifiedProperties,
+      data: items,
     };
   }
 
