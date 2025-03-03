@@ -912,6 +912,10 @@ export class UserPropertyService {
         success: false,
         message: 'No saved properties found for this user',
         data: [],
+        totalCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / pageSize),
+        itemsPerPage: pageSize,
       };
     }
 
