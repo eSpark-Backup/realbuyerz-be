@@ -165,8 +165,11 @@ export class UserPropertyController {
     badresponse: { status: 400, description: 'Property Not Added' },
   })
   @Get('request')
-  async findPropertyRequest(@UserId() userId: string) {
-    return this.userPropertyService.getAllSavedProperties(userId);
+  async findPropertyRequest(@UserId() userId: string,
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+ ) {
+    return this.userPropertyService.getAllSavedProperties(userId,page, pageSize);
   }
 
   @ApiBearerAuth('jwt')

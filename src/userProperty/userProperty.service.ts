@@ -295,10 +295,10 @@ export class UserPropertyService {
           const fileName = property.user.profileImage.split(
             `${process.env.BUCKET_NAME}/`,
           )[1];
-          if(fileName){
-          const signedUrl =
-            await this.backblazeService.generateSignedUrl(fileName);
-          property.user.profileImage = signedUrl;
+          if (fileName) {
+            const signedUrl =
+              await this.backblazeService.generateSignedUrl(fileName);
+            property.user.profileImage = signedUrl;
           }
         }
         await Promise.all(
@@ -859,8 +859,13 @@ export class UserPropertyService {
       data: newSavedProperty,
     };
   }
-  async getAllSavedProperties(userId: string) {
-    const savedProperties = await this.prismaService.savedProperty.findMany({
+  async getAllSavedProperties(userId: string,  page = 1,
+    pageSize = 50,) {
+
+      const skip = (page - 1) * pageSize;
+    const [savedProperties,totalCount] = await Promise.all([ this.prismaService.savedProperty.findMany({
+      skip,
+      take: pageSize,
       where: {
         userId: userId,
       },
@@ -892,7 +897,15 @@ export class UserPropertyService {
           },
         },
       },
-    });
+    })
+    ,
+    this.prismaService.savedProperty.count({
+      where: {
+        userId: userId,
+      },
+    }),
+    ]);
+
 
     if (!savedProperties.length) {
       return {
@@ -962,11 +975,18 @@ export class UserPropertyService {
         },
       };
     });
+    const items={
+    modifiedProperties,
+    totalCount,
+    currentPage: page,
+    totalPages: Math.ceil(totalCount / pageSize),
+    itemsPerPage: pageSize,
+    }
 
     return {
       success: true,
       message: 'Saved properties retrieved successfully',
-      data: modifiedProperties,
+      data: items,
     };
   }
 
