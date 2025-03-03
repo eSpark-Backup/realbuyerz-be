@@ -25,26 +25,39 @@ const newChat = TryCatch(async (req, res) => {
 });
 
 const getMyChats = TryCatch(async (req, res) => {
-  const chats = await Chat.find({ members: req.user }).populate(
-    'members',
-    'name avatar',
-  );
+  const { page = 1, pageSize = 10 } = req.query;
 
+  const pageNumber = parseInt(page, 10);
+  const limit = parseInt(pageSize, 10);
+  const skip = (pageNumber - 1) * limit;
 
+  const totalItems = await Chat.countDocuments({ members: req.user });
+
+  const chats = await Chat.find({ members: req.user })
+    .populate('members', 'name avatar')
+    .skip(skip)
+    .limit(limit);
 
   const Chats = await Promise.all(
     chats.map(async (chat) => {
       let members = getOtherMember(chat.members, req.user);
-  
+
       const lastMessage = await Message.findOne({ chat: chat._id.toString() })
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .populate('sender', 'name avatar');
-  
+
       return { ...chat._doc, members, lastMessage };
     })
   );
 
-  return res.status(200).json({ Chats, message: 'Get All chat' });
+  return res.status(200).json({
+    Chats,
+    totalItems,
+    currentPage: pageNumber,
+    pageSize: limit,
+    totalItemsOnPage: Chats.length,
+    message: 'Get All Chats',
+  });
 });
 
 const leaveChat = TryCatch(async (req, res, next) => {
